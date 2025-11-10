@@ -23,7 +23,7 @@ function Sidebar() {
       }
   return (
     <aside
-      className="hidden md:flex flex-col w-[230px] h-screen sticky  left-0 
+      className="hidden md:flex flex-col w-[230px] h-fit sticky  left-0 
       bg-white border-r border-gray-200 p-5 overflow-y-auto"
     >
       <nav className="flex flex-col gap-5 mt-5 text-[15px]">
@@ -39,7 +39,7 @@ function Sidebar() {
           <FiTag /> Brand Profile
         </Link>
 
-        <Link href="/product-catalog" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link href="/product-upload" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
           <FiGrid /> Product Catalog
         </Link>
 
