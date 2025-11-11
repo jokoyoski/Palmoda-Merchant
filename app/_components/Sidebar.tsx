@@ -43,7 +43,7 @@ function Sidebar() {
           <FiGrid /> Product Catalog
         </Link>
 
-        <Link href="/dashboard" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link href="/" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
           <BsGraphUp /> Dashboard
         </Link>
 
