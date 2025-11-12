@@ -1,7 +1,8 @@
+// app/layout.tsx
 import "../styles/globals.css";
 import type { Metadata } from "next";
 import Header from "./_components/Header";
-import Sidebar from "./_components/Sidebar"; 
+import Sidebar from "./_components/Sidebar";
 
 export const metadata: Metadata = {
   title: {
@@ -22,15 +23,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <body className="min-h-screen bg-white text-black">
+      <body className="min-h-screen  text-black">
         {/* Fixed Header */}
         <Header />
 
-        {/* Main Layout: Sidebar + Content */}
-        <div className="flex pt-[50px]"> {/* Adjust top padding to header height */}
+        <div className="flex pt-[50px] h-[calc(100vh-50px)]">
+          {/* Sidebar - fixed height with independent scroll */}
           <Sidebar />
 
-          <main className="flex-1">{children}</main>
+          {/* Main Content - scrollable separately */}
+          <main className="flex-1 min-h-screen overflow-y-auto">
+            {children}
+          </main>
         </div>
       </body>
     </html>

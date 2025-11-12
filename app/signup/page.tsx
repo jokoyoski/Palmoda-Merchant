@@ -4,7 +4,7 @@ import React from "react";
 function Page() {
   return (
     <div className="bg-white text-black w-full
-     md:w-[500px] px-6 py-3 mx-auto my-10 mt-[-60px] ">
+     md:w-[500px] px-6 py-3 mx-auto my-10 mt-[-10px] ">
       {/* Header */}
       <h1 className="uppercase text-center text-[16px] font-bold tracking-wide">
         PALMODA
