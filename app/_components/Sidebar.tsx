@@ -15,51 +15,75 @@ import { BsGraphUp } from "react-icons/bs";
 import { usePathname } from "next/navigation";
 
 function Sidebar() {
-    const pathname = usePathname();
-    
-      // Hide header on sign-up page
-      if (pathname.includes("signup")) {
-        return null;
-      }
+  const pathname = usePathname();
+
+  // Hide sidebar on both sign-up and login pages
+  if (pathname.includes("signup") || pathname.includes("login")) {
+    return null;
+  }
+
   return (
     <aside
-      className="hidden md:flex flex-col w-[230px] h-fit sticky  left-0 
+      className="hidden md:flex flex-col w-[230px] h-fit sticky left-0 
       bg-white border-r border-gray-200 p-5 overflow-y-auto"
     >
       <nav className="flex flex-col gap-5 mt-5 text-[15px]">
-        <Link href="/signup" className="flex   hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link
+          href="/signup"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
           <FiUserPlus /> Sign Up
         </Link>
 
-        <Link href="/kyc-compliance" className="flex  hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link
+          href="/kyc-compliance"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
           <FiFileText /> KYC Compliance
         </Link>
 
-        <Link href="/brand-profile" className="flex  hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link
+          href="/brand-profile"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
           <FiTag /> Brand Profile
         </Link>
 
-        <Link href="/product-upload" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link
+          href="/product-upload"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
           <FiGrid /> Product Catalog
         </Link>
 
-        <Link href="/" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link
+          href="/"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
           <BsGraphUp /> Dashboard
         </Link>
 
-        <Link href="/orders" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link
+          href="/orders"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
           <FiShoppingCart /> Orders
         </Link>
 
-        <Link href="/payouts" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link
+          href="/payouts"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
           <FiDollarSign /> Payouts
         </Link>
 
-        <Link href="/settings" className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black">
+        <Link
+          href="/settings"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
           <FiSettings /> Settings
         </Link>
 
-        {/* Divider */}
         <hr className="my-3 border-gray-200" />
 
         <div className="flex flex-col gap-4 mt-auto">
@@ -70,7 +94,10 @@ function Sidebar() {
             </p>
           </div>
 
-          <Link href="/logout" className="flex items-center gap-3 text-red-500 hover:text-red-700">
+          <Link
+            href="/login"
+            className="flex items-center gap-3 text-red-500 hover:text-red-700"
+          >
             <FiLogOut /> Logout
           </Link>
         </div>

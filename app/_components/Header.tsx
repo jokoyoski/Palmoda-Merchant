@@ -20,7 +20,9 @@ function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  if (pathname.includes("signup")) return null;
+  if (pathname.includes("signup") || pathname.includes("login")) {
+    return null;
+  }
 
   const navItems = [
     { href: "/signup", label: "Sign Up" , icon: <FiUserPlus />},
@@ -105,7 +107,7 @@ function Header() {
             <hr className="my-3 border-gray-200" />
 
             <Link
-              href="/logout"
+              href="/login"
               className="flex items-center gap-3 text-red-500 hover:text-red-700 mt-auto"
               onClick={() => setMobileMenuOpen(false)}
             >
