@@ -10,40 +10,57 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true); // 🔥 NEW
 
-  // Load user from localStorage on app start
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      return JSON.parse(atob(base64));
+    } catch (e) {
+      return null;
+    }
+  };
+
   useEffect(() => {
-    const savedData = localStorage.getItem("vendor_auth");
+    const savedAuth = localStorage.getItem("vendor_auth");
+    const savedToken = localStorage.getItem("token");
 
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
+    if (savedAuth && savedToken) {
+      const parsed = JSON.parse(savedAuth);
+      const decoded = decodeToken(savedToken);
+
+      if (decoded?.exp && decoded.exp * 1000 < Date.now()) {
+        logout();
+        setLoading(false);
+        return;
+      }
+
       setUser(parsed);
-      setToken(parsed.token);
+      setToken(savedToken);
       setIsAuthenticated(true);
     }
+
+    setLoading(false); // 🔥 STOP LOADING AFTER RESTORE
   }, []);
 
-  // Login function (call this after API login)
   const login = (authData) => {
-  if (!authData || !authData.data) return;
+    if (!authData || !authData.data) return;
 
-  // Save entire vendor info
-  localStorage.setItem("vendor_auth", JSON.stringify(authData.data));
+    localStorage.setItem("vendor_auth", JSON.stringify(authData.data));
+    localStorage.setItem("token", authData.data.token);
 
-  // Save token separately for easy access
-  localStorage.setItem("token", authData.data.token);
+    setUser(authData.data);
+    setToken(authData.data.token);
+    setIsAuthenticated(true);
 
-  setUser(authData.data);
-  setToken(authData.data.token);
-  setIsAuthenticated(true);
+    router.push("/");
+  };
 
-  router.push("/");
-};
-
-
-  // Logout function
   const logout = () => {
     localStorage.removeItem("vendor_auth");
+    localStorage.removeItem("token");
+
     setUser(null);
     setToken("");
     setIsAuthenticated(false);
@@ -59,6 +76,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         login,
         logout,
+        loading, // 🔥 expose loading
       }}
     >
       {children}

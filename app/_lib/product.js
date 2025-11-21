@@ -7,7 +7,7 @@ export const createProduct = async (productData) => {
     if (!token) return { success: false, message: "No token found" };
 
     const res = await axios.post(
-      `${backendUrl}/vendor/create-product`,
+      `${backendUrl}/vendor/add-products`,
       {
         name: productData.name,
         images: productData.images,
@@ -115,4 +115,3 @@ return res.data;
    
 }
 
-e

@@ -1,7 +1,73 @@
+"use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { vendorSignUp, validateVendorCode } from "../_lib/vendor";
+import VerifyVendorCode from "../_components/ValidateVendorCode";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+
 
 function Page() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [contactPersonName, setContactPersonName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const router = useRouter();
+
+  // check localStorage on mount
+  useEffect(() => {
+    const pending = localStorage.getItem("vendorPendingVerification");
+    if (pending) {
+      const data = JSON.parse(pending);
+      setEmail(data.email);
+      setPendingVerification(true);
+    }
+  }, []);
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!businessName || !contactPersonName || !email || !phoneNumber || !password || !confirmPassword) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+    const res = await vendorSignUp(businessName, contactPersonName, email, phoneNumber, password, confirmPassword);
+    setLoading(false);
+
+    if (res.success) {
+      toast.success("Signup successful! Verify your email.");
+      // save pending verification in localStorage
+      localStorage.setItem("vendorPendingVerification", JSON.stringify({ email }));
+      setPendingVerification(true);
+    } else {
+      toast.error(res.message || "Signup failed");
+    }
+  };
+
+  // after verification is done
+  const handleVerified = () => {
+    setPendingVerification(false);
+    toast.success("You can now log in!");
+    router.push("/login")
+  };
+
+  // If user is pending verification, show code component
+  if (pendingVerification) {
+    return <VerifyVendorCode email={email} onVerified={handleVerified} />;
+  }
+
   return (
     <div className="bg-white text-black w-full
      md:w-[500px] px-6 py-3 mx-auto my-10 mt-[-10px] ">
@@ -17,11 +83,15 @@ function Page() {
       </p>
 
       {/* Form */}
-      <form className="space-y-4 shadow-lg rounded-lg border border-gray-200 px-6 py-8">
+      <form 
+      onSubmit={handleSignUp}
+      className="space-y-4 shadow-lg rounded-lg border border-gray-200 px-6 py-8">
         <div>
           <label className="block text-sm  mb-1 font-semibold">Business Name</label>
           <input
             type="text"
+            value={businessName}
+          onChange={(e) => setBusinessName(e.target.value)}
             placeholder="Your business name"
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           />
@@ -32,6 +102,8 @@ function Page() {
           <input
             type="text"
             placeholder="Full name"
+            value={contactPersonName}
+          onChange={(e) => setContactPersonName(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
@@ -41,6 +113,8 @@ function Page() {
           <input
             type="email"
             placeholder="your@email.com"
+            value={email}
+          onChange={(e) => setEmail(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
@@ -50,6 +124,8 @@ function Page() {
           <input
             type="tel"
             placeholder="+1 (XXX) XXX-XXXX"
+            value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
@@ -59,6 +135,8 @@ function Page() {
           <input
             type="password"
             placeholder="Minimum 8 characters"
+            value={password}
+          onChange={(e) => setPassword(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           />
           <p className="text-xs text-gray-500 mt-1">
@@ -70,6 +148,8 @@ function Page() {
           <label className="block text-sm font-semibold mb-1">Confirm Password</label>
           <input
             type="password"
+            value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Re-enter password"
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           />
@@ -90,13 +170,15 @@ function Page() {
         </div>
 
         <button
-          type="submit"
-          className="w-full bg-black text-white
-          text-[15px]
-           font-medium py-2 rounded-md hover:bg-gray-800 transition"
-        >
-          CREATE ACCOUNT
-        </button>
+  type="submit"
+  disabled={loading} // Disable while loading
+  className={`w-full text-[15px] font-medium py-2 rounded-md transition ${
+    loading ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800 text-white"
+  }`}
+>
+  {loading ? "Creating Account..." : "CREATE ACCOUNT"}
+</button>
+
 
         <p className="text-center text-sm text-gray-600 mt-2">
           Already have a vendor account?{" "}

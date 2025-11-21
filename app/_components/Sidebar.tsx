@@ -13,9 +13,11 @@ import {
 } from "react-icons/fi";
 import { BsGraphUp } from "react-icons/bs";
 import { usePathname } from "next/navigation";
+import { useAuth } from "../_lib/AuthContext";
 
 function Sidebar() {
   const pathname = usePathname();
+  const {logout} = useAuth();
 
   // Hide sidebar on both sign-up and login pages
   if (pathname.includes("signup") || pathname.includes("login")) {
@@ -94,12 +96,12 @@ function Sidebar() {
             </p>
           </div>
 
-          <Link
-            href="/login"
-            className="flex items-center gap-3 text-red-500 hover:text-red-700"
+          <p
+            onClick={logout}
+            className="flex items-center cursor-pointer gap-3 text-red-500 hover:text-red-700"
           >
             <FiLogOut /> Logout
-          </Link>
+          </p>
         </div>
       </nav>
     </aside>

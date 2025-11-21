@@ -1,5 +1,5 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiSearch, FiMenu, FiX } from "react-icons/fi";
 import { CiUser } from "react-icons/ci";
@@ -12,20 +12,19 @@ import {
   FiShoppingCart,
   FiDollarSign,
   FiSettings,
-  FiLogOut,
 } from "react-icons/fi";
 import { BsGraphUp } from "react-icons/bs";
+import { useAuth } from "../_lib/AuthContext";
 
 function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  if (pathname.includes("signup") || pathname.includes("login")) {
-    return null;
-  }
+  const [username, setUserName] = useState("");
+  const router = useRouter();
+  const { user, logout } = useAuth();
 
   const navItems = [
-    { href: "/signup", label: "Sign Up" , icon: <FiUserPlus />},
+    { href: "/signup", label: "Sign Up", icon: <FiUserPlus /> },
     { href: "/kyc-compliance", label: "KYC Compliance", icon: <FiFileText /> },
     { href: "/brand-profile", label: "Brand Profile", icon: <FiTag /> },
     { href: "/product-catalog", label: "Product Catalog", icon: <FiGrid /> },
@@ -35,13 +34,19 @@ function Header() {
     { href: "/settings", label: "Settings", icon: <FiSettings /> },
   ];
 
-  
+  useEffect(() => {
+    setUserName(user?.contact_person_name || "");
+  }, [user]);
+
+  // ❗ RETURN AFTER ALL HOOKS
+  if (pathname.includes("signup") || pathname.includes("login")) {
+    return null;
+  }
 
   return (
     <>
       <header className="flex fixed top-0 left-0 w-full items-center justify-between px-4 py-3 border-b border-b-gray-200 bg-white z-50">
         <div className="flex items-center gap-3">
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -49,15 +54,11 @@ function Header() {
             {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
 
-          <Link
-            href="/"
-            className="uppercase text-black text-[15px] font-semibold"
-          >
+          <Link href="/" className="uppercase text-black text-[15px] font-semibold">
             Palmoda
           </Link>
         </div>
 
-        {/* Desktop Search */}
         <div className="hidden md:flex items-center bg-gray-100 rounded-full px-3 py-1 w-fit md:w-[400px] focus-within:ring-2 focus-within:ring-gray-300 transition">
           <FiSearch className="text-gray-500 text-[18px]" />
           <input
@@ -68,19 +69,14 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* <button className="bg-black hidden md:block text-white text-[13px] uppercase font-medium py-2 px-[8px]">
-            Become a vendor
-          </button> */}
           <div className="flex items-center gap-2">
             <CiUser size={25} color="black" />
-            <h2 className="font-semibold text-black text-[15px]">
-              Sophia Laurent
-            </h2>
+            <h2 className="font-semibold text-black text-[15px]">{username}</h2>
           </div>
         </div>
       </header>
 
-      {/* Mobile Navigation Menu */}
+      {/* MOBILE MENU */}
       <div
         className={`fixed top-10 left-0 w-full h-screen bg-black/50 z-40 transition-opacity duration-300 ${
           mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -91,7 +87,7 @@ function Header() {
           className={`bg-gray-50 w-64 h-full p-5 overflow-y-auto fixed top-0 left-0 transform transition-transform duration-300 ${
             mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
-          onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside menu
+          onClick={(e) => e.stopPropagation()}
         >
           <nav className="flex flex-col gap-5 mt-20 text-[15px]">
             {navItems.map((item) => (
@@ -108,13 +104,12 @@ function Header() {
 
             <hr className="my-3 border-gray-200" />
 
-            <Link
-              href="/login"
+            <button
+              onClick={logout}
               className="flex items-center gap-3 text-red-500 hover:text-red-700 mt-auto"
-              onClick={() => setMobileMenuOpen(false)}
             >
               Logout
-            </Link>
+            </button>
           </nav>
         </aside>
       </div>

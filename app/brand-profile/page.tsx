@@ -1,214 +1,325 @@
-import React from 'react'
-import { FaFacebook, FaFileUpload, FaInstagram, FaPinterest, FaTiktok, FaTwitter } from 'react-icons/fa'
+"use client";
+import React, { useRef, useState, ChangeEvent, useEffect } from 'react';
+import { FaFacebook, FaFileUpload, FaInstagram, FaPinterest, FaTiktok, FaTwitter } from 'react-icons/fa';
 import { RiPlanetFill } from "react-icons/ri";
 import { BiSolidInfoCircle } from "react-icons/bi";
+import BrandUploadBox from './BrandUploadBox';
+import { toast } from "react-toastify";
+import axios from 'axios';
+import {setUpBrandProfile, getBrandDetails, updateBrandDetails} from "../_lib/brand"
 
-function page() {
+const cloudName = "jokoyoski"; 
+const uploadPreset = "jokoyoski";
+
+const uploadToCloudinary = async (file: File): Promise<string | null> => {
+  try {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size exceeds 5MB limit");
+      return null;
+    }
+
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("upload_preset", uploadPreset);
+
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
+    const res = await axios.post(uploadUrl, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return res.data?.secure_url ?? null;
+  } catch (e: any) {
+    console.error("Cloudinary upload error:", e);
+    toast.error(e.response?.data?.error?.message || "Upload failed. Please try again.");
+    return null;
+  }
+};
+
+const BrandProfilePage = () => {
+  const [logoBlackUrl, setLogoBlackUrl] = useState("");
+  const [logoWhiteUrl, setLogoWhiteUrl] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ Loading state
+  const [brandName, setBrandName] = useState("");
+  const [brandDescription, setBrandDescription] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [facebook, setFacebook] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [pinterest, setPinterest] = useState("");
+  const [brandExists, setBrandExists] = useState(false);
+  const [tiktok, setTiktok] = useState("");
+  const [website, setWebsite] = useState("");
+
+  const logoBlackRef = useRef<HTMLInputElement | null>(null);
+  const logoWhiteRef = useRef<HTMLInputElement | null>(null);
+  const bannerRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+  const fetchBrand = async () => {
+    setLoading(true);
+    try {
+      const res = await getBrandDetails();
+      console.log(res);
+
+      if (res.success === false || !res.data) {
+        setBrandExists(false); // No brand exists
+      } else {
+        const data = res.data;
+        setBrandName(data.brand_name || "");
+        setBrandDescription(data.brand_description || "");
+        setLogoBlackUrl(data.brand_logo_black || "");
+        setLogoWhiteUrl(data.brand_logo_white || "");
+        setBannerUrl(data.brand_banner || "");
+        setInstagram(data.instagram_handle || "");
+        setFacebook(data.facebook_handle || "");
+        setTwitter(data.twitter_handle || "");
+        setPinterest(data.pinterest_handle || "");
+        setTiktok(data.tiktok_handle || "");
+        setWebsite(data.website_url || "");
+
+        setBrandExists(true); // Brand exists
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to fetch brand details");
+      setBrandExists(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchBrand();
+}, []);
+
+
+
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>, type: "logoBlack" | "logoWhite" | "banner") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = await uploadToCloudinary(file);
+    if (!url) return;
+
+    if (type === "logoBlack") setLogoBlackUrl(url);
+    if (type === "logoWhite") setLogoWhiteUrl(url);
+    if (type === "banner") setBannerUrl(url);
+
+    toast.success("Upload successful");
+  };
+
+  const handleCreate = async () => {
+  if (!brandName || !brandDescription || !logoBlackUrl || !logoWhiteUrl || !bannerUrl) {
+    toast.error("Please fill in all required fields and upload images.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await setUpBrandProfile(
+      brandName,
+      brandDescription,
+      logoBlackUrl,
+      logoWhiteUrl,
+      bannerUrl,
+      instagram,
+      facebook,
+      twitter,
+      website,
+      tiktok,
+      pinterest
+    );
+
+    if (!res.success) {
+      toast.error(res.message || "Failed to create brand profile");
+      return;
+    }
+
+    toast.success("Brand profile created successfully!");
+    setBrandExists(true); // After creation, show update button next time
+  } catch (err: any) {
+    toast.error(err?.message || "An error occurred");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleUpdate = async () => {
+  if (!brandName || !brandDescription || !logoBlackUrl || !logoWhiteUrl || !bannerUrl) {
+    toast.error("Please fill in all required fields and upload images.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await updateBrandDetails(
+      brandName,
+      brandDescription,
+      logoBlackUrl,
+      logoWhiteUrl,
+      bannerUrl,
+      instagram,
+      facebook,
+      twitter,
+      website,
+      tiktok,
+      pinterest
+    );
+
+    if (!res.success) {
+      toast.error(res.message || "Failed to update brand profile");
+      return;
+    }
+
+    toast.success("Brand profile updated successfully!");
+  } catch (err: any) {
+    toast.error(err?.message || "An error occurred");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   return (
-    <section className='bg-white min-h-screen px-4  md:px-8 py-6 w-full'>
-      <div className='w-full md:w-[600px] lg:w-[750px] '>
+    <section className='bg-white min-h-screen px-4 md:px-8 py-6 w-full'>
+      <div className='w-full md:w-[600px] lg:w-[750px]'>
         <h1 className='text-black font-semibold text-xl'>Brand Profile Setup</h1>
         <p className='text-gray-500 text-[13px] mt-2 mb-5'>
-            Create your brand's presence on PALMODA. This information will be visible to customers.
+          Create your brand's presence on PALMODA. This information will be visible to customers.
         </p>
 
         <hr className='text-gray-200 mb-3.5' />
 
-        <div className='flex w-full my-2 flex-col gap-1.5'>
-         <label htmlFor="brand name" className='text-black font-semibold text-xs'>Brand Name*</label>
-         <input type="text" name="" id="" className='p-[5px] text-black border border-gray-200 text-xs' placeholder='Enter brand name' />
+        {/* Brand Name */}
+        <div className='flex flex-col gap-1.5 mb-4'>
+          <label className='text-black font-semibold text-xs'>Brand Name*</label>
+          <input
+            type="text"
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
+            placeholder='Enter brand name'
+            className='p-[5px] text-black border border-gray-200 text-xs'
+          />
         </div>
-        <div className='flex w-full my-2 flex-col gap-1.5'>
-  <label htmlFor="brand-description" className='text-black font-semibold text-xs'>
-    Brand Description/Bio*
-  </label>
-  <textarea
-    id="brand-description"
-    name="brand-description"
-    placeholder='Tell us about your brand, philosophy, and what makes you unique'
-    className='w-full p-3 text-sm text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none h-32'
-  />
-  <p className='text-xs text-gray-500 mb-5'>
-    Minimum 100 characters, maximum 500 characters
-  </p>
-</div>
 
- <hr className='text-gray-200 my-5' />
+        {/* Brand Description */}
+        <div className='flex flex-col gap-1.5 mb-5'>
+          <label className='text-black font-semibold text-xs'>Brand Description/Bio*</label>
+          <textarea
+            value={brandDescription}
+            onChange={(e) => setBrandDescription(e.target.value)}
+            placeholder='Tell us about your brand, philosophy, and what makes you unique'
+            className='w-full p-3 text-sm text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none h-32'
+          />
+          <p className='text-xs text-gray-500'>Minimum 100 characters, maximum 500 characters</p>
+        </div>
 
-{/* Brand Logos & Banner Section */}
-<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-  {/* Brand Logo Black Version */}
-  <div className='flex flex-col gap-2'>
-    <label className='text-black font-semibold text-xs'>Brand Logo (Black Version)*</label>
-    <div className='border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center h-32 cursor-pointer hover:bg-gray-50 transition'>
-      <FaFileUpload className='text-gray-300 mb-2' />
-      <p className='text-gray-500 text-xs mb-1'>Drag & drop your logo here</p>
-      <button className='bg-black text-white text-xs px-3 py-1 rounded-sm'>
-        Upload File
-      </button>
-      <p className='text-gray-400 text-[10px] mt-1'>JPG or PNG, 500x500 minimum</p>
-    </div>
-  </div>
+        <hr className='text-gray-200 my-5' />
 
-  {/* Brand Logo White Version */}
-  <div className='flex flex-col gap-2'>
-    <label className='text-black font-semibold text-xs'>Brand Logo (White Version)*</label>
-    <div className='border-2 border-dashed border-gray-300
-     bg-gray-900 rounded-md flex flex-col items-center justify-center
-      h-32 cursor-pointer transition'>
-        <FaFileUpload className='text-gray-300 mb-2' />
-      <p className='text-white text-xs mb-1'>Drag & drop your logo here</p>
-      <button className='bg-white text-black text-xs px-3 py-1 rounded-sm'>
-        Upload File
-      </button>
-      <p className='text-gray-400 text-[10px] mt-1'>JPG or PNG, 500x500 minimum</p>
-    </div>
-  </div>
-</div>
+        {/* Upload Boxes */}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <BrandUploadBox
+            title="Brand Logo (Black Version)*"
+            fileUrl={logoBlackUrl}
+            onUploadClick={() => logoBlackRef.current?.click()}
+            inputRef={logoBlackRef}
+            onFileChange={(e) => handleFileChange(e, "logoBlack")}
+            minSize="JPG or PNG, 500x500 minimum"
+          />
 
-{/* Brand Banner / Hero Image */}
-<div className='mt-4 flex flex-col gap-2'>
-  <label className='text-black font-semibold text-xs'>Brand Banner (Hero Image)*</label>
-  <div className='border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center h-40 cursor-pointer hover:bg-gray-50 transition'>
-    <FaFileUpload className='text-gray-300 mb-2' />
-    <p className='text-gray-500 text-xs mb-1'>Drag & drop your banner image here</p>
-    <button className='bg-black text-white text-xs px-3 py-1 rounded-sm'>
-      Upload File
+          <BrandUploadBox
+            title="Brand Logo (White Version)*"
+            fileUrl={logoWhiteUrl}
+            onUploadClick={() => logoWhiteRef.current?.click()}
+            inputRef={logoWhiteRef}
+            onFileChange={(e) => handleFileChange(e, "logoWhite")}
+            minSize="JPG or PNG, 500x500 minimum"
+            bgColor="bg-gray-900"
+            textColor="text-white"
+          />
+
+          <BrandUploadBox
+            title="Brand Banner (Hero Image)*"
+            fileUrl={bannerUrl}
+            onUploadClick={() => bannerRef.current?.click()}
+            inputRef={bannerRef}
+            onFileChange={(e) => handleFileChange(e, "banner")}
+            minSize="JPG or PNG, 1140x480 recommended"
+            height="h-40"
+          />
+        </div>
+
+        <hr className='text-gray-200 my-5' />
+
+        {/* Social Media Inputs */}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {[
+            { label: 'Instagram', icon: <FaInstagram />, value: instagram, setter: setInstagram, placeholder: '@yourbrandname' },
+            { label: 'Facebook', icon: <FaFacebook />, value: facebook, setter: setFacebook, placeholder: 'facebook.com/yourbrandname' },
+            { label: 'Twitter', icon: <FaTwitter />, value: twitter, setter: setTwitter, placeholder: '@yourbrandname' },
+            { label: 'Pinterest', icon: <FaPinterest />, value: pinterest, setter: setPinterest, placeholder: 'pinterest.com/yourbrandname' },
+            { label: 'Tiktok', icon: <FaTiktok />, value: tiktok, setter: setTiktok, placeholder: '@yourbrandname' },
+            { label: 'Website', icon: <RiPlanetFill />, value: website, setter: setWebsite, placeholder: 'https://yourbrand.com' },
+          ].map((input, idx) => (
+            <div className='flex flex-col gap-1.5 w-full' key={idx}>
+              <label className='text-black font-semibold text-xs'>{input.label}</label>
+              <div className="relative w-full">
+                <div className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">{input.icon}</div>
+                <input
+                  type="text"
+                  value={input.value}
+                  onChange={(e) => input.setter(e.target.value)}
+                  placeholder={input.placeholder}
+                  className='pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full'
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <hr className='text-gray-200 my-5' />
+
+        {/* Actions */}
+        <div className='flex justify-between items-center my-3'>
+          <button className='bg-inherit border border-black text-black p-[5px] w-[120px] text-sm'>Save as Draft</button>
+          <div className='flex gap-2'>
+  <button className='bg-inherit border border-black text-black p-[5px] w-[120px] text-sm'>Back</button>
+
+  {!brandExists && (
+    <button
+      onClick={handleCreate}
+      className='bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center'
+      disabled={loading}
+    >
+      {loading ? "Loading..." : "Create"}
     </button>
-    <p className='text-gray-400 text-[10px] mt-1 text-center'>
-      JPG or PNG, 1140x480 recommended
-    </p>
-  </div>
-  <p className='text-xs text-gray-500'>
-    This image will appear at the top of your brand page and should represent your brand’s aesthetic.
-  </p>
+  )}
+
+  {brandExists && (
+    <button
+      onClick={handleUpdate}
+      className='bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center'
+      disabled={loading}
+    >
+      {loading ? "Loading..." : "Update"}
+    </button>
+  )}
 </div>
 
-<hr className='text-gray-200 my-5' />
+        </div>
 
+        <hr className='text-gray-200 my-5' />
 
-          <hr className='text-gray-200 mb-3.5' />
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-           <div className='flex flex-col gap-1.5 w-full'>
-  <label htmlFor="instagram" className='text-black font-semibold text-xs'>
-    Instagram
-  </label>
-  <div className="relative w-full">
-    <FaInstagram className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      id="instagram"
-      placeholder='@yourbrandname'
-      className='pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full'
-    />
-  </div>
-</div>
-
-<div className='flex flex-col gap-1.5 w-full'>
-  <label htmlFor="facebook" className='text-black font-semibold text-xs'>
-    Facebook
-  </label>
-  <div className="relative w-full">
-    <FaFacebook className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      id="facebook"
-      placeholder='facebook.com/yourbrandname'
-      className='pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full'
-    />
-  </div>
-</div>
-
-<div className='flex flex-col gap-1.5 w-full'>
-  <label htmlFor="Twitter" className='text-black font-semibold text-xs'>
-    Twitter
-  </label>
-  <div className="relative w-full">
-    <FaTwitter className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      id="twitter"
-      placeholder='@yourbrandname'
-      className='pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full'
-    />
-  </div>
-</div>
-
-<div className='flex flex-col gap-1.5 w-full'>
-  <label htmlFor="pintrest" className='text-black font-semibold text-xs'>
-    Pintrest
-  </label>
-  <div className="relative w-full">
-    <FaPinterest className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      id="pintrest"
-      placeholder='pintrest.com/yourbrandname'
-      className='pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full'
-    />
-  </div>
-</div>
-
-<div className='flex flex-col gap-1.5 w-full'>
-  <label htmlFor="tiktok" className='text-black font-semibold text-xs'>
-    Tiktok
-  </label>
-  <div className="relative w-full">
-    <FaTiktok className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      id="Tiktok"
-      placeholder='@yourbrandname'
-      className='pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full'
-    />
-  </div>
-</div>
-
-<div className='flex flex-col gap-1.5 w-full'>
-  <label htmlFor="website" className='text-black font-semibold text-xs'>
-    Website
-  </label>
-  <div className="relative w-full">
-    <RiPlanetFill className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-    <input
-      type="text"
-      id="Website"
-      placeholder='https://yourbrand.com'
-      className='pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full'
-    />
-  </div>
-</div>
-
+        {/* Info */}
+        <div className='flex justify-between items-start my-3'>
+          <div className='flex items-start gap-1 text-xs text-gray-500'>
+            <BiSolidInfoCircle />
+            <p>Need help setting up your brand profile? View our guide</p>
           </div>
-          <hr className='text-gray-200 my-5'/>
-          <div className='flex my-3 justify-between items-center'>
-        <button
-        className='bg-inherit border border-black text-black p-[5px] w-[120px] text-sm'
-        >Save as Draft</button>
-        <div className='flex items-center gap-2'>
-             <button
-        className='bg-inherit border border-black text-black p-[5px] w-[120px] text-sm'
-        >Back</button>
-        <button
-        className='bg-black  text-white p-[5px] w-[120px] text-sm'
-        >Continue</button>
+          <p className='text-black font-semibold text-sm'>Skip for now</p>
         </div>
-        </div>
-         
-         <hr className='text-gray-200 my-5'/>
-          
-        <div className='flex my-3 justify-between items-center'>
-           <div className='flex items-start gap-1 text-xs text-gray-500'>
-           <BiSolidInfoCircle />
-           <p>Need help setting up your brand profile?  View our guide</p>
-           </div>
-
-           <p className='text-black font-semibold text-sm'>Skip for now</p>
-        </div>
-
-        </div>
+      </div>
     </section>
-  )
-}
+  );
+};
 
-export default page
+export default BrandProfilePage;
