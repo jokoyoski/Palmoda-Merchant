@@ -252,8 +252,8 @@ useEffect(() => {
   setDescription(foundProduct.description);
   setCareInstructions(foundProduct.look_after_me);
   setMaterials(foundProduct.fabrics || []);
-  setPrice(foundProduct.discounted_price);
-  setComparePrice(foundProduct.cost_price);
+  setPrice(foundProduct.cost_price);
+  setComparePrice(foundProduct.discounted_price);
   setInventory(foundProduct.quantity);
   setImages(foundProduct.images || []);
   setSelectedCategory(foundProduct.categories?.[0] || "");
@@ -569,7 +569,7 @@ useEffect(() => {
                   htmlFor="compare-price"
                   className="text-black font-semibold text-xs"
                 >
-                  Compare at Price (NGN)
+                  Discount Price (NGN)
                 </label>
                 <input
                   type="number"
