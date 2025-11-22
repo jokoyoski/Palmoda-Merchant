@@ -3,12 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const token = localStorage.getItem("token");
-
-export const fetchCategories = async (
-  queryParamsObj: CategoryQueryParams
-) => {
+export const fetchCategories = async (queryParamsObj: CategoryQueryParams) => {
   // 1. Convert the JS object into a JSON string
+  const token = localStorage.getItem("token");
+
   const jsonString = JSON.stringify(queryParamsObj);
   const encodedQuery = encodeURIComponent(jsonString);
 
@@ -23,6 +21,8 @@ export const fetchCategories = async (
 };
 
 export const useCategories = (queryParams: CategoryQueryParams) => {
+  const token = localStorage.getItem("token");
+
   return useQuery({
     // The queryKey includes the params so the query refetches if filters/sort/pagination change.
     queryKey: ["categories", queryParams],

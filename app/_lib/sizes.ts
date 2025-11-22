@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const token = localStorage.getItem("token");
-
 const fetchSizes = async () => {
+  const token = localStorage.getItem("token");
+
   const response = await axios.get<SizeResponse>(`${backendUrl}/size/`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -15,6 +15,8 @@ const fetchSizes = async () => {
 };
 
 export const useFetchSizes = () => {
+  const token = localStorage.getItem("token");
+
   return useQuery({
     queryKey: ["sizes"],
     queryFn: () => fetchSizes(),

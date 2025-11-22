@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const token = localStorage.getItem("token");
-
 const fetchSubCategories = async () => {
+  const token = localStorage.getItem("token");
+
   const response = await axios.get<SubCategoryResponse>(
     `${backendUrl}/sub_category/`,
     {
@@ -18,6 +18,8 @@ const fetchSubCategories = async () => {
 };
 
 export const useSubCategories = () => {
+  const token = localStorage.getItem("token");
+
   return useQuery({
     queryKey: ["subCategories"],
     queryFn: () => fetchSubCategories(),
