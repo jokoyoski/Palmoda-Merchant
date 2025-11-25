@@ -10,7 +10,6 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Page() {
   const [holdBtn, setHoldBtn] = useState(true);
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [contactPersonName, setContactPersonName] = useState("");
@@ -23,17 +22,38 @@ function Page() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [pendingVerification, setPendingVerification] = useState(false);
+  const [step, setStep] = useState(1);
+const [signupSuccess, setSignupSuccess] = useState(false);
+const [email, setEmail] = useState("");
+
+const verificationBtnRef = React.useRef<HTMLButtonElement | null>(null);
+
+
+
   const router = useRouter();
 
   // check localStorage on mount
   useEffect(() => {
-    const pending = localStorage.getItem("vendorPendingVerification");
-    if (pending) {
-      const data = JSON.parse(pending);
-      setEmail(data.email);
-      setPendingVerification(true);
+  const saved = localStorage.getItem("vendorSignupState");
+  if (saved) {
+    const data = JSON.parse(saved);
+    if (data.signupSuccess) {
+      setSignupSuccess(true);
+      setEmail(data.emailRegistered); // keep email for verification step
     }
-  }, []);
+  }
+}, []);
+
+  useEffect(() => {
+  if (signupSuccess && verificationBtnRef.current) {
+    verificationBtnRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+}, [signupSuccess]);
+
+
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,16 +87,23 @@ function Page() {
     setLoading(false);
 
     if (res.success) {
-      toast.success("Signup successful! Verify your email.");
-      // save pending verification in localStorage
-      localStorage.setItem(
-        "vendorPendingVerification",
-        JSON.stringify({ email })
-      );
-      setPendingVerification(true);
-    } else {
-      toast.error(res.message || "Signup failed");
-    }
+  toast.success("Signup successful! Proceed to verification.");
+
+  setSignupSuccess(true);
+
+  localStorage.setItem(
+    "vendorSignupState",
+    JSON.stringify({
+      emailRegistered: email,
+      signupSuccess: true,
+    })
+  );
+} else {
+  toast.error(res.message || "Signup failed");
+  setSignupSuccess(false);
+  localStorage.removeItem("vendorSignupState"); 
+}
+
   };
 
   useEffect(() => {
@@ -109,17 +136,16 @@ function Page() {
   };
 
   // If user is pending verification, show code component
-  if (pendingVerification) {
-    return <VerifyVendorCode email={email} onVerified={handleVerified} />;
-  }
+  
 
   return (
     <div
       className="bg-white text-black w-full
      md:w-[500px] px-6 py-3 mx-auto my-10 mt-[-10px] "
     >
-      {/* Header */}
-      <h1 className="uppercase text-center text-[16px] font-bold tracking-wide">
+      {step === 1 && (
+        <div>
+          <h1 className="uppercase text-center text-[16px] font-bold tracking-wide">
         PALMODA
       </h1>
       <h2 className="capitalize text-center text-[18px] mt-2 mb-1 font-semibold">
@@ -128,6 +154,8 @@ function Page() {
       <p className="text-gray-500 text-center text-[14px] mb-5">
         Join our marketplace and start selling your fashion products
       </p>
+
+      
 
       {/* Form */}
       <form
@@ -265,7 +293,21 @@ function Page() {
             Sign In
           </a>
         </p>
+
+
       </form>
+     
+      {signupSuccess && (
+  <button
+    ref={verificationBtnRef}
+    onClick={() => setStep(2)}
+    disabled={!signupSuccess}
+    className="text-right mt-4 text-xs"
+  >
+    Go to Verification →
+  </button>
+)}
+
 
       {/* Footer note */}
       <p className="text-center text-xs text-gray-500 mt-6">
@@ -275,7 +317,23 @@ function Page() {
           Vendor Support Team
         </a>
       </p>
+        </div>
+      )}
+      {/* Header */}
+      
+
+      {step === 2 && (
+  <VerifyVendorCode
+    email={email}
+    onVerified={handleVerified}
+  >
+    <button onClick={() => setStep(1)} className= "text-right mt-4 text-xs">← Back to Signup</button>
+  </VerifyVendorCode>
+)}
+
     </div>
+
+    
   );
 }
 

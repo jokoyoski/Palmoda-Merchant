@@ -60,8 +60,8 @@ function page() {
   const [description, setDescription] = useState("");
   const [careInstructions, setCareInstructions] = useState("");
   const [materials, setMaterials] = useState("");
-  const [price, setPrice] = useState("0.00");
-const [comparePrice, setComparePrice] = useState("0.00");
+  const [price, setPrice] = useState("");
+const [comparePrice, setComparePrice] = useState("");
   const [inventory, setInventory] = useState<number>(0);
   const [images, setImages] = useState<string[]>([]);
   const [colors, setColors] = useState<string[]>([]);

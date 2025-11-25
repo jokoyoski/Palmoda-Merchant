@@ -68,7 +68,7 @@ function DashboardGrid({ products }: ProductsProps) {
   const array = [
     {
       text: "Total Products",
-      keyword: analytics.products,
+      keyword: products.length,
       icon: <MdInventory2 color="black" size={22} />,
     },
     {

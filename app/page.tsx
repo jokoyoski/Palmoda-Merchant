@@ -18,6 +18,7 @@ interface ProductType {
   quantity: number;
   images: string[];
   sku: string;
+  
 }
 
 // Then type your state properly:
@@ -32,6 +33,7 @@ function page() {
 
   useEffect(() => {
      setBusinessName(user?.business_name || "");
+     console.log(user?.business_name);
     }, [user]);
 
      useEffect(() => {
@@ -57,9 +59,13 @@ function page() {
       fetchBrand();
     }, []);
 
-    const basicInfoComplete = businessName.trim() !== "";
-const brandStoryComplete = brand?.description?.trim() !== "";
-const brandMediaComplete = brand?.brand_banner?.trim() !== "";
+    const basicInfoComplete =  !!businessName && businessName.trim() !== "";
+const brandStoryComplete =
+  !!brand?.description && brand.description.trim() !== "";
+
+const brandMediaComplete =
+  !!brand?.brand_banner && brand.brand_banner.trim() !== "";
+
 
 // Count completed steps
 const stepsCompleted = [
@@ -78,9 +84,9 @@ const completionPercent = Math.round((stepsCompleted / totalSteps) * 100);
 
   useEffect(() => {
     const getProducts = async () => {
-      const res = await fetchProducts(1, 20);
+      const res = await fetchProducts(1, 100);
       console.log(res);
-      setProducts(res?.data?.data || []); // <---- Save into state
+      setProducts(res?.data?.data || []); 
     };
     getProducts();
   }, []);
