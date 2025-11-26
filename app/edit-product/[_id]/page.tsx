@@ -12,7 +12,7 @@ import { useFetchGenders } from "../../_lib/gender";
 import { useFetchSizes } from "../../_lib/sizes";
 import { useFetchColors, addColor } from "../../_lib/colors";
 import { Button } from "@heroui/button";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 interface ProductType {
   _id: string;
@@ -103,6 +103,7 @@ function page() {
 const [newColorName, setNewColorName] = useState("");
 const [newColorCode, setNewColorCode] = useState("");
 const [addingColor, setAddingColor] = useState(false);
+const router = useRouter();
 
 
   const {_id} = useParams();
@@ -227,9 +228,7 @@ const [addingColor, setAddingColor] = useState(false);
       setShowColorModal(false);
   
       // refresh colors list
-      setTimeout(() => {
-        window.location.reload(); // simplest method
-      }, 800);
+     router.push("/");
   
     } else {
       toast.error(res?.message || "Failed to add color");

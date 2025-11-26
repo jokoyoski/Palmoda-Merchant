@@ -6,9 +6,10 @@ import { toast } from "react-toastify";
 interface VerifyVendorCodeProps {
   email: string;
   onVerified: () => void;
+  children?: React.ReactNode; 
 }
 
-const VerifyVendorCode: React.FC<VerifyVendorCodeProps> = ({ email, onVerified }) => {
+const VerifyVendorCode: React.FC<VerifyVendorCodeProps> = ({ email, onVerified, children }) => {
   const CODE_LENGTH = 6; // Number of boxes
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
@@ -45,7 +46,7 @@ const VerifyVendorCode: React.FC<VerifyVendorCodeProps> = ({ email, onVerified }
 
     if (res.success) {
       toast.success("Email verified successfully!");
-      localStorage.removeItem("vendorPendingVerification");
+       localStorage.removeItem("vendorSignupState");
       onVerified();
     } else {
       toast.error(res.message || "Verification failed");
@@ -82,6 +83,9 @@ const VerifyVendorCode: React.FC<VerifyVendorCodeProps> = ({ email, onVerified }
 >
   {loading ? "Verifying..." : "Verify"}
 </button>
+
+<div className="mt-4">{children}</div>
+
 
     </div>
   );

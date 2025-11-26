@@ -3,13 +3,19 @@ import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import ProtectedRoute from '../_components/ProtectedRoute'
 import { toast } from 'react-toastify';
-import { getKycDetails } from '../_lib/vendor';
+import { getKycDetails, activateWallet } from '../_lib/vendor';
+import { useAuth } from '../_lib/AuthContext';
 
 function page() {
+   const {user} = useAuth();
  const [bankName, setBankName] = useState("");
    const [accountHolder, setAccountHolder] = useState("");
    const [accountNumber, setAccountNumber] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showBvnModal, setShowBvnModal] = useState(false);
+const [bvn, setBvn] = useState("");
+ const [activating, setActivating] = useState(false);
+
 
    useEffect(() => {
        const fetchKyc = async () => {
@@ -35,6 +41,41 @@ function page() {
        fetchKyc();
      }, []);
 
+     const handleActivate = async () => {
+  if (bvn.length !== 11) {
+    toast.error("BVN must be 11 digits.");
+    return;
+  }
+
+  try {
+    setActivating(true);
+
+    const res = await activateWallet(bvn);
+
+    if (!res.success) {
+      toast.error(res.message || "Failed to activate wallet");
+      return;
+    }
+
+    toast.success("Wallet activated successfully!");
+    setShowBvnModal(false);
+
+    // Refresh KYC details so UI updates
+    const refreshed = await getKycDetails();
+    if (refreshed.success) {
+      setBankName(refreshed.data.bank_name || "");
+      setAccountHolder(refreshed.data.account_holder_name || "");
+      setAccountNumber(refreshed.data.account_number || "");
+    }
+
+  } catch (error: any) {
+    toast.error(error?.message || "Something went wrong");
+  } finally {
+    setActivating(false);
+  }
+};
+
+
      const last4Digits = accountNumber.slice(-4);
    
 
@@ -50,9 +91,20 @@ function page() {
         <p className='text-xs text-gray-500'>Available Balance</p>
         <h1 className='text-black font-semibold text-lg'>$6,842.00</h1>
         <p className='text-xs text-gray-500'>Next settlement: Today    Minimum withdrawal: $50</p>
+        
+        {user?.is_wallet_activated ? <h3 className='text-xs text-black my-3'>Wallet activated</h3>  : <button
+  onClick={() => setShowBvnModal(true)}
+  className="bg-purple-600 text-white text-xs px-3 py-1 mb-2 rounded-md mt-2"
+>
+  Add BVN
+</button>}
+        
+        
+
        </div>
       </div>
-
+    
+    
 
 
       <div className='flex gap-3 items-start mt-6 '>
@@ -145,7 +197,52 @@ function page() {
 
 
       </div>
+
+      {showBvnModal && (
+  <div className="fixed inset-0 bg-white/20 backdrop-blur-sm flex justify-center items-center z-50">
+    <div className="bg-white rounded-md p-6 w-[90%] max-w-sm shadow-lg">
+
+      <h1 className="text-black font-semibold text-lg mb-2 text-center">
+        Activate Wallet
+      </h1>
+      <p className="text-gray-500 text-xs text-center mb-4">
+        Enter your BVN to activate your withdrawal wallet.
+      </p>
+
+      <input
+        type="number"
+        maxLength={11}
+        value={bvn}
+        onChange={(e) => {
+          if (e.target.value.length <= 11) setBvn(e.target.value);
+        }}
+        className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm outline-none"
+        placeholder="Enter 11-digit BVN"
+      />
+
+      <div className="flex justify-end gap-3 mt-5">
+  <button
+    onClick={() => setShowBvnModal(false)}
+    className="text-gray-600 text-xs"
+  >
+    Cancel
+  </button>
+
+  <button
+    onClick={handleActivate}
+    className="bg-black text-white text-xs px-4 py-2 rounded-md"
+  >
+    {activating ? "Activating..." : "Submit"}
+  </button>
+</div>
+
+    </div>
+  </div>
+)}
+
     </section>
+
+
     </ProtectedRoute>
   )
 }

@@ -32,6 +32,9 @@ function page() {
     setBusinessName(user?.business_name || "");
   }, [user]);
 
+  setBusinessName(user?.business_name || "");
+  console.log(user?.business_name);
+
   useEffect(() => {
     const fetchBrand = async () => {
       try {
@@ -51,10 +54,12 @@ function page() {
 
     fetchBrand();
   }, []);
+  const basicInfoComplete = !!businessName && businessName.trim() !== "";
+  const brandStoryComplete =
+    !!brand?.brand_description && brand.brand_description.trim() !== "";
 
-  const basicInfoComplete = businessName.trim() !== "";
-  const brandStoryComplete = brand?.description?.trim() !== "";
-  const brandMediaComplete = brand?.brand_banner?.trim() !== "";
+  const brandMediaComplete =
+    !!brand?.brand_banner && brand.brand_banner.trim() !== "";
 
   // Count completed steps
   const stepsCompleted = [
@@ -71,9 +76,9 @@ function page() {
 
   useEffect(() => {
     const getProducts = async () => {
-      const res = await fetchProducts(1, 20);
+      const res = await fetchProducts(1, 100);
       console.log(res);
-      setProducts(res?.data?.data || []); // <---- Save into state
+      setProducts(res?.data?.data || []);
     };
     getProducts();
   }, []);

@@ -12,6 +12,7 @@ import { useFetchGenders } from "../_lib/gender";
 import { useFetchSizes } from "../_lib/sizes";
 import { useFetchColors, addColor } from "../_lib/colors";
 import { Button } from "@heroui/button";
+import { useRouter } from "next/navigation";
 
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
@@ -60,8 +61,8 @@ function page() {
   const [description, setDescription] = useState("");
   const [careInstructions, setCareInstructions] = useState("");
   const [materials, setMaterials] = useState("");
-  const [price, setPrice] = useState("0.00");
-  const [comparePrice, setComparePrice] = useState("0.00");
+  const [price, setPrice] = useState("");
+const [comparePrice, setComparePrice] = useState("");
   const [inventory, setInventory] = useState<number>(0);
   const [images, setImages] = useState<string[]>([]);
   const [colors, setColors] = useState<string[]>([]);
@@ -75,6 +76,7 @@ function page() {
   const [newColorName, setNewColorName] = useState("");
   const [newColorCode, setNewColorCode] = useState("");
   const [addingColor, setAddingColor] = useState(false);
+  const router = useRouter();
 
   // Category and subcategory data
   const categories: Record<string, string[]> = {
@@ -201,9 +203,7 @@ function page() {
       setShowColorModal(false);
 
       // refresh colors list
-      setTimeout(() => {
-        window.location.reload(); // simplest method
-      }, 800);
+      router.push("/");
     } else {
       toast.error(res?.message || "Failed to add color");
     }

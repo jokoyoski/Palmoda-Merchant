@@ -170,11 +170,27 @@ const goToPage = (page: number) => {
                 <td className="p-3">
         <div className="flex gap-2">
           <Link
-            href={`/edit-product/${product._id}`}
-            className="px-3 py-1 text-xs bg-inherit text-black border border-black uppercase"
-          >
-            Edit
-          </Link>
+  href={
+    formatStatus(product.status) !== "PENDING"
+      ? `/edit-product/${product._id}`
+      : "/"
+  }
+  onClick={(e) => {
+    if (formatStatus(product.status) === "PENDING") {
+      e.preventDefault(); // stop routing
+      e.stopPropagation(); // stop row click
+      toast.info("You cannot edit a product that is pending review.");
+    }
+  }}
+  className={`px-3 py-1 text-xs border uppercase ${
+    formatStatus(product.status) === "PENDING"
+      ? "bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed"
+      : "bg-inherit text-black border-black"
+  }`}
+>
+  Edit
+</Link>
+
 
           <button
             onClick={(e) => {
