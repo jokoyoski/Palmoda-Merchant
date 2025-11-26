@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FiUserPlus,
   FiFileText,
@@ -18,6 +18,13 @@ import { useAuth } from "../_lib/AuthContext";
 function Sidebar() {
   const pathname = usePathname();
   const {logout} = useAuth();
+const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setToken(localStorage.getItem("token"));
+    }
+  }, []);
 
   // Hide sidebar on both sign-up and login pages
   if (pathname.includes("signup") || pathname.includes("login")) {
@@ -30,12 +37,12 @@ function Sidebar() {
       bg-white border-r border-gray-200 p-5 overflow-y-auto"
     >
       <nav className="flex flex-col gap-5 mt-5 text-[15px]">
-        <Link
+        {!token && <Link
           href="/signup"
           className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
         >
           <FiUserPlus /> Sign Up
-        </Link>
+        </Link>}
 
         <Link
           href="/kyc-compliance"

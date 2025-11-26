@@ -31,6 +31,8 @@ function page() {
    const [products, setProducts] = useState<ProductType[]>([]);
    const [brand, setBrand] = useState<any>(null);
 
+   console.log(user);
+
   useEffect(() => {
      setBusinessName(user?.business_name || "");
      console.log(user?.business_name);
@@ -61,7 +63,7 @@ function page() {
 
     const basicInfoComplete =  !!businessName && businessName.trim() !== "";
 const brandStoryComplete =
-  !!brand?.description && brand.description.trim() !== "";
+  !!brand?.brand_description && brand.brand_description.trim() !== "";
 
 const brandMediaComplete =
   !!brand?.brand_banner && brand.brand_banner.trim() !== "";
