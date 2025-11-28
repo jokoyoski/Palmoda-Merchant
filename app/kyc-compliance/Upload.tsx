@@ -9,11 +9,13 @@ function UploadBox({
   onUploadClick,
   inputRef,
   onFileChange,
+  isUploading,
 }: {
   title: string;
   fileUrl: string;
   onUploadClick: () => void;
   inputRef: any;
+  isUploading: boolean
   onFileChange: (e: any) => void;
 }) {
   const isPdf = fileUrl?.endsWith(".pdf");
@@ -38,6 +40,7 @@ function UploadBox({
           <button
             className="bg-black text-white mt-2 p-[5px] text-xs"
             onClick={onUploadClick}
+            disabled={isUploading}
             type="button"
           >
             Change File
@@ -54,6 +57,7 @@ function UploadBox({
           <button
             className="bg-black text-white p-[5px] text-xs"
             onClick={onUploadClick}
+            disabled={isUploading}
             type="button"
           >
             Upload Document

@@ -146,6 +146,7 @@ function Page() {
         isLoading: false,
         autoClose: 2000,
       });
+       setImageUploading(false);      
   };
 
   // Continue button handler — sends the URLs + fields to completeKyc
@@ -212,6 +213,7 @@ function Page() {
             <section className="flex flex-wrap items-center gap-5">
               {/* begining of business reg doc */}
             <UploadBox
+            isUploading={imageUploading}
   title="Business Registration Document"
   fileUrl={businessDocUrl}
   onUploadClick={() => businessInputRef.current?.click()}
@@ -224,6 +226,8 @@ function Page() {
               {/* ending of owner id */}
               {/* begining of bank statement */}
               <UploadBox
+            isUploading={imageUploading}
+
   title="Valid Owner ID (Passport/National ID/Driver’s License)"
   fileUrl={ownerIdUrl}
   onUploadClick={() => ownerInputRef.current?.click()}
@@ -233,6 +237,8 @@ function Page() {
 
 <UploadBox
   title="Bank Statement"
+            isUploading={imageUploading}
+
   fileUrl={bankStatementUrl}
   onUploadClick={() => bankInputRef.current?.click()}
   inputRef={bankInputRef}
