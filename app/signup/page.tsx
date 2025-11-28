@@ -137,9 +137,9 @@ const verificationBtnRef = React.useRef<HTMLButtonElement | null>(null);
 
   // If user is pending verification, show code component
   // Check message on Backend to show this instead
-  // if (pendingVerification) {
-  //   return <VerifyVendorCode email={email} onVerified={handleVerified} />;
-  // }
+  if (pendingVerification) {
+    return <VerifyVendorCode email={email} onVerified={handleVerified} />;
+  }
 
   return (
     <div

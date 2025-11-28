@@ -64,7 +64,7 @@ function page() {
   const [careInstructions, setCareInstructions] = useState("");
   const [materials, setMaterials] = useState("");
   const [price, setPrice] = useState("");
-const [comparePrice, setComparePrice] = useState("");
+  const [comparePrice, setComparePrice] = useState("");
   const [inventory, setInventory] = useState<number>(0);
   const [images, setImages] = useState<string[]>([]);
   const [colors, setColors] = useState<string[]>([]);
@@ -552,13 +552,13 @@ if (!allDocsVerified) {
                   ></button>
                 ))}
                 {/* Hide Color Add Button */}
-                {/* <button
+                <button
                   onClick={() => setShowColorModal(true)}
                   className="w-7 h-7 rounded-full border border-gray-400 flex items-center 
                  justify-center text-black text-lg font-semibold hover:bg-gray-200"
                 >
                   +
-                </button> */}
+                </button>
               </div>
             </div>
 
