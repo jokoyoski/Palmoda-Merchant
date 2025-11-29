@@ -8,6 +8,9 @@ import ProtectedRoute from "./_components/ProtectedRoute";
 import { fetchProducts } from "./_lib/product";
 import { useAuth } from "./_lib/AuthContext";
 import { getBrandDetails } from "./_lib/brand";
+import type { Notification as MyNotification } from "./_lib/type";
+import {getNotifications} from "./_lib/notifications"
+import { toast } from "react-toastify";
 
 // Add this at the top of your file
 interface ProductType {
@@ -27,6 +30,9 @@ function page() {
   const [businessName, setBusinessName] = useState("");
   const [products, setProducts] = useState<ProductType[]>([]);
   const [brand, setBrand] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [notifications, setNotifications] = useState<MyNotification[]>([]);
+
 
   useEffect(() => {
     setBusinessName(user?.business_name || "");
@@ -52,6 +58,27 @@ function page() {
 
     fetchBrand();
   }, []);
+
+ useEffect(() => {
+  const fetchNotifications = async () => {
+    setLoading(true);
+    try {
+      const res = await getNotifications();
+      console.log(res);
+      const notifs: MyNotification[] = res.data?.notifications || [];
+      setNotifications(notifs);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to fetch notifications");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchNotifications();
+}, []);
+
+
+
   const basicInfoComplete = !!businessName && businessName.trim() !== "";
   const brandStoryComplete =
     !!brand?.brand_description && brand.brand_description.trim() !== "";
@@ -109,7 +136,7 @@ function page() {
 
           {/* Details – takes 1 column */}
           <div className="col-span-1 lg:col-span-1">
-            <ProductsDetails />
+            <ProductsDetails notifications={notifications} loading={loading} />
           </div>
         </div>
 

@@ -5,7 +5,8 @@ import ProtectedRoute from '../_components/ProtectedRoute'
 import { toast } from 'react-toastify';
 import { getKycDetails, activateWallet, getWallet } from '../_lib/vendor';
 import { useAuth } from '../_lib/AuthContext';
-import { requestPayout } from '../_lib/transactions';
+import { getTransactions, requestPayout } from '../_lib/transactions';
+import { TransactionType } from '../_lib/type';
 
 function page() {
    const {user} = useAuth();
@@ -22,7 +23,8 @@ const [bvn, setBvn] = useState("");
 const [fee] = useState(0); // fixed fee for now
 const [narration, setNarration] = useState("");
 const [requesting, setRequesting] = useState(false);
-
+const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  const [fetching, setFetching] = useState(false);
 
 
    useEffect(() => {
@@ -49,6 +51,23 @@ const [requesting, setRequesting] = useState(false);
    
        fetchWallet();
      }, []);
+
+     useEffect(() => {
+         const fetchTransacs = async () => {
+           setFetching(true);
+           try {
+             const res = await getTransactions();
+             const trans: TransactionType[] = res?.data?.data?.transactions ?? [];
+             setTransactions(trans);
+           } catch (error: any) {
+             toast.error(error?.message || "Failed to fetch transactions");
+           } finally {
+             setFetching(false);
+           }
+         };
+         fetchTransacs();
+       }, []);
+     
 
      const handleActivate = async () => {
   if (bvn.length !== 11) {
@@ -146,7 +165,7 @@ const [requesting, setRequesting] = useState(false);
        </div>
        <div className='bg-white px-3 py-1 rounded-[6px]'>
         <p className='text-xs text-gray-500'>Available Balance</p>
-        <h1 className='text-black font-semibold text-lg'> ₦{accountBalance}</h1>
+        <h1 className='text-black font-semibold text-lg'> ₦{accountBalance.toLocaleString()}</h1>
         <p className='text-xs text-gray-500'>Next settlement: Today    Minimum withdrawal:  ₦5000</p>
         
         {user?.is_wallet_activated ? <h3 className='text-xs text-black my-3'>Wallet activated</h3>  : <button
@@ -311,34 +330,50 @@ const [requesting, setRequesting] = useState(false);
        </div>
 
       <div className='w-[30%] bg-white px-4 my-4 rounded-[6px] py-2 h-fit'>
-       <h1 className='text-black font-semibold'>Recent Payouts</h1>
-       <div className='my-2 border-b border-gray-200 px-3 flex justify-between py-1'>
-         <div>
-          <h1 className='text-black text-sm font-semibold'>$3,500.00</h1>
-          <p className='text-gray-500 text-xs'>October 15, 2023</p>
-          <p className='text-gray-500 text-xs'>Ref: PAY-78952</p>
-         </div>
-         <p className='text-green-500 text-xs'>Completed</p>
-       </div>
-       <div className='my-2 border-b border-gray-200 px-3 flex justify-between py-1'>
-         <div>
-          <h1 className='text-black text-sm font-semibold'>$3,500.00</h1>
-          <p className='text-gray-500 text-xs'>October 15, 2023</p>
-          <p className='text-gray-500 text-xs'>Ref: PAY-78952</p>
-         </div>
-         <p className='text-green-500 text-xs'>Completed</p>
-       </div>
-       <div className='my-2 border-b border-gray-200 px-3 flex justify-between py-1'>
-         <div>
-          <h1 className='text-black text-sm font-semibold'>$3,500.00</h1>
-          <p className='text-gray-500 text-xs'>October 15, 2023</p>
-          <p className='text-gray-500 text-xs'>Ref: PAY-78952</p>
-         </div>
-         <p className='text-green-500 text-xs'>Completed</p>
-       </div>
+  <h1 className='text-black font-semibold'>Recent Payouts</h1>
 
-      <Link href="/payouts/history" className='text-blue-400 text-xs underline text-center my-2'>History</Link>
-      </div>
+  {fetching ? (
+    // Skeleton loader while fetching
+    <>
+      {[1,2,3].map((i) => (
+        <div key={i} className='my-2 border-b border-gray-200 px-3 flex justify-between py-1 animate-pulse'>
+          <div>
+            <h1 className='text-black text-sm font-semibold bg-gray-200 h-4 w-20 mb-1'></h1>
+            <p className='text-gray-500 text-xs bg-gray-200 h-3 w-16 mb-1'></p>
+            <p className='text-gray-500 text-xs bg-gray-200 h-3 w-20'></p>
+          </div>
+          <p className='text-green-500 text-xs bg-gray-200 h-3 w-10'></p>
+        </div>
+      ))}
+    </>
+  ) : (
+    <>
+      {transactions.slice(0, 3).map((txn) => (
+        <div key={txn._id} className='my-2 border-b border-gray-200 px-3 flex justify-between py-1'>
+          <div>
+            <h1 className='text-black text-sm font-semibold'>₦{txn.amount.toLocaleString()}</h1>
+            <p className='text-gray-500 text-xs'>{new Date(txn.created_at).toLocaleDateString()}</p>
+            <p className='text-gray-500 text-xs'>Ref: {txn.transaction_reference}</p>
+          </div>
+          <p className={`text-xs ${
+            txn.status.toLowerCase() === "successful"
+              ? "text-green-500"
+              : txn.status.toLowerCase() === "pending"
+              ? "text-yellow-500"
+              : "text-red-500"
+          }`}>
+            {txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
+          </p>
+        </div>
+      ))}
+    </>
+  )}
+
+  <Link href="/payouts/history" className='text-blue-400 text-xs underline  my-2 block'>
+   View History
+  </Link>
+</div>
+
 
 
       </div>

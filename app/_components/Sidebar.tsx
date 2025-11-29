@@ -14,6 +14,7 @@ import {
 import { BsGraphUp } from "react-icons/bs";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
+import { FaBell } from "react-icons/fa";
 
 function Sidebar() {
   const pathname = usePathname();
@@ -61,6 +62,13 @@ const [token, setToken] = useState<string | null>(null);
         </Link>
 
         <Link
+          href="/notifications"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
+          <FaBell /> Notifications
+        </Link>
+
+        <Link
           href="/"
           className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
         >
@@ -91,12 +99,12 @@ const [token, setToken] = useState<string | null>(null);
         <hr className="my-3 border-gray-200" />
 
         <div className="flex flex-col gap-4 mt-auto">
-          <div className="bg-gray-100 text-gray-800 rounded-lg p-3 text-sm">
+          {/* <div className="bg-gray-100 text-gray-800 rounded-lg p-3 text-sm">
             <p className="font-medium">New Feature Available</p>
             <p className="text-xs text-gray-600 mt-1">
               Enhanced analytics dashboard is now available for all vendors.
             </p>
-          </div>
+          </div> */}
 
           <p
             onClick={logout}

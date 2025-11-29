@@ -112,3 +112,26 @@ export interface TransactionType {
   updated_at: string;
   vendor: Vendor;
 }
+
+export interface NotificationDetails {
+  _id: string;
+  vendor_id: string;
+  amount: number;
+  transaction_reference: string;
+  status: string; // "failed", "successful", etc.
+  narration: string;
+  transaction_type: string; // "debit" | "credit"
+  created_at: string; // e.g. "2025-11-28 19:39:55"
+  updated_at: string;
+  rejection_reason?: string; // optional, may not exist
+}
+
+export interface Notification {
+  _id: string;
+  title: string;
+  content: string;
+  type: string; // e.g. "payout"
+  vendor_id: string;
+  created_at: string; // e.g. "2025-11-29 00:48:47"
+  details: NotificationDetails;
+}

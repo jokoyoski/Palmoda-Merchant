@@ -179,10 +179,10 @@ const goToPage = (page: number) => {
       : "/"
   }
   onClick={(e) => {
-    if (formatStatus(product.status) === "PENDING") {
+    if (formatStatus(product.status) === "PENDING" || formatStatus(product.status) === "REJECTED") {
       e.preventDefault(); // stop routing
       e.stopPropagation(); // stop row click
-      toast.info("You cannot edit a product that is pending review.");
+      toast.info("You cannot edit a product that is pending review or rejected");
     }
   }}
   className={`px-3 py-1 text-xs border uppercase ${
