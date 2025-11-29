@@ -1,7 +1,11 @@
 "use client";
 import Link from "next/link";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { FaWallet } from "react-icons/fa6";
+import {TransactionType} from "../../_lib/type"
+import { getTransactions } from "@/app/_lib/transactions";
+import { toast } from "react-toastify";
+import ProtectedRoute from "@/app/_components/ProtectedRoute";
 
 const payoutsData = [
   {
@@ -84,33 +88,57 @@ function Page() {
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [reference, setReference] = useState("");
+  const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  const [fetching, setFetching] = useState(false);
+
+  useEffect(() => {
+     const fetchTransacs = async () => {
+       try {
+        setFetching(true)
+         const res = await getTransactions();
+         console.log(res.data.data.transactions);
+         setTransactions(res.data.data.transactions);
+         setFetching(false);
+       } catch (error: any) {
+          toast.error(error?.message)
+       }finally{
+        setFetching(false);
+       }
+     }
+     fetchTransacs();
+  }, [])
 
   // PAGINATION
   const [page, setPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 5;
 
   // APPLY FILTERS
   const filteredData = useMemo(() => {
-    return payoutsData.filter((item) => {
-      const itemDate = new Date(item.date);
+  return transactions.filter((item) => {
+    const itemDate = new Date(item.created_at);
 
-      // Date filter
-      if (dateFrom && new Date(dateFrom) > itemDate) return false;
-      if (dateTo && new Date(dateTo) < itemDate) return false;
+    // Date filter
+    if (dateFrom && new Date(dateFrom) > itemDate) return false;
+    if (dateTo && new Date(dateTo) < itemDate) return false;
 
-      // Status filter
-      if (status && item.status !== status) return false;
+    // Status filter
+    if (status && item.status.toLowerCase() !== status.toLowerCase()) return false;
 
-      // Amount filter
-      if (minAmount && item.amount < Number(minAmount)) return false;
-      if (maxAmount && item.amount > Number(maxAmount)) return false;
+    // Amount filter
+    if (minAmount && item.amount < Number(minAmount)) return false;
+    if (maxAmount && item.amount > Number(maxAmount)) return false;
 
-      // Reference filter
-      if (reference && !item.reference.toLowerCase().includes(reference.toLowerCase())) return false;
+    // Reference filter
+    if (
+      reference &&
+      !item.transaction_reference.toLowerCase().includes(reference.toLowerCase())
+    )
+      return false;
 
-      return true;
-    });
-  }, [dateFrom, dateTo, status, minAmount, maxAmount, reference]);
+    return true;
+  });
+}, [transactions, dateFrom, dateTo, status, minAmount, maxAmount, reference]);
+
 
   // PAGINATION LOGIC
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -119,8 +147,27 @@ function Page() {
     page * itemsPerPage
   );
 
+  if(fetching){
+   return (
+  <>
+    {[1, 2, 3, 4, 5].map((i) => (
+      <tr key={i} className="border-b border-gray-200 animate-pulse text-center">
+        <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+        <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+        <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+        <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+        <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+        <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+      </tr>
+    ))}
+  </>
+   )
+
+  }
+
   return (
-    <section className="bg-white min-h-screen px-4 md:px-8 py-6 w-full">
+    <ProtectedRoute>
+      <section className="bg-white min-h-screen px-4 md:px-8 py-6 w-full">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-black font-semibold text-lg">Payouts History</h1>
@@ -212,25 +259,60 @@ function Page() {
         </thead>
 
         <tbody>
-          {paginatedData.map((row) => (
-            <tr key={row.id} className="border-b text-center border-gray-200">
-                <td className="p-2 text-xs text-gray-500">{row.date}</td>
-              <td className="p-2 text-xs text-gray-500">{row.reference}</td>
-              <td className="p-2 text-xs text-gray-500">${row.amount.toLocaleString()}</td>
-              <td className="p-2 text-xs text-gray-500">$6</td>
-              <td className="p-2 text-xs text-gray-500">Laurent Fashion House · First National Bank · **** 4587</td>
-              <td className="p-2 text-xs text-gray-500">{row.status}</td>
-            </tr>
-          ))}
+  {/* Skeleton Loader */}
+  {fetching && (
+    <>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <tr key={i} className="border-b border-gray-200 animate-pulse text-center">
+          <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+          <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+          <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+          <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+          <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+          <td className="p-2"><div className="h-3 bg-gray-200 rounded"></div></td>
+        </tr>
+      ))}
+    </>
+  )}
 
-          {paginatedData.length === 0 && (
-            <tr>
-              <td colSpan={4} className="text-center p-3 text-gray-500">
-                No records found.
-              </td>
-            </tr>
-          )}
-        </tbody>
+  {/* Real table rows */}
+  {!fetching &&
+   paginatedData.map((row) => (
+  <tr key={row._id} className="border-b text-center border-gray-200">
+    <td className="p-2 text-xs text-gray-500">
+      {new Date(row.created_at).toISOString().split("T")[0]}
+    </td>
+
+    <td className="p-2 text-xs text-gray-500">
+      {row.transaction_reference}
+    </td>
+
+    <td className="p-2 text-xs text-gray-500">
+      ${row.amount.toLocaleString()}
+    </td>
+
+    <td className="p-2 text-xs text-gray-500">$6</td>
+
+    <td className="p-2 text-xs text-gray-500">
+      {row.vendor?.business_name ?? "Unknown Vendor"}
+    </td>
+
+    <td className="p-2 text-xs text-gray-500">
+      {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+    </td>
+  </tr>
+))
+}
+
+  {!fetching && paginatedData.length === 0 && (
+    <tr>
+      <td colSpan={4} className="text-center p-3 text-gray-500">
+        No records found.
+      </td>
+    </tr>
+  )}
+</tbody>
+
       </table>
 
       {/* PAGINATION */}
@@ -256,6 +338,7 @@ function Page() {
         </button>
       </div>
     </section>
+    </ProtectedRoute>
   );
 }
 

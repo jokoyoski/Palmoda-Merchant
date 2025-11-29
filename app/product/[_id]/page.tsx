@@ -70,8 +70,8 @@ function page() {
         <section className='bg-gray-100 min-h-screen px-4  md:px-8 py-6 w-full'>
         <div className='flex items-center justify-between'>
                  <div>
-                  <h1 className='text-black font-bold text-xl'>Product Submission Review</h1>
-                  <p className='text-gray-500 text-xs'>Review and approve product submissions from vendors</p>
+                  <h1 className='text-black font-bold text-xl'>Product Review</h1>
+                 
                  </div>
                  <div className='flex gap-3 items-center'>
                 {/* <button

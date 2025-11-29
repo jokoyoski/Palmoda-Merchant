@@ -2,13 +2,106 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { CiBank } from 'react-icons/ci';
-import { FaCheckCircle, FaClock, FaHourglassHalf } from "react-icons/fa";
+import { FaCheckCircle, FaClock, FaHourglassHalf, FaTimesCircle } from "react-icons/fa";
 import { LuWarehouse } from "react-icons/lu";
 import PayoutFailed from '../PayoutFailed';
 import WithdrawalSubmitted from '../WithDrawalSubmitted';
 import { useParams } from 'next/navigation';
 import {PayoutType} from "../../_lib/type"
 import {getTransactionById} from "../../_lib/transactions"
+import { getWallet } from '@/app/_lib/vendor';
+import { toast } from 'react-toastify';
+
+
+const Skeleton = () => (
+  <div className="w-[500px] mx-auto bg-white rounded-[6px] px-4 py-3 animate-pulse">
+    
+    <div className="h-4 w-40 bg-gray-200 rounded mb-6"></div>
+
+    <div className="flex flex-col justify-center text-center my-4">
+      <div className="h-3 w-24 bg-gray-200 rounded mx-auto mb-2"></div>
+      <div className="h-6 w-32 bg-gray-300 rounded mx-auto"></div>
+    </div>
+
+    {/* Amount breakdown */}
+    <div className="my-4 flex flex-col gap-3">
+      <div className="flex justify-between">
+        <div className="h-3 w-24 bg-gray-200 rounded"></div>
+        <div className="h-3 w-10 bg-gray-200 rounded"></div>
+      </div>
+      <div className="flex justify-between">
+        <div className="h-3 w-24 bg-gray-200 rounded"></div>
+        <div className="h-3 w-10 bg-gray-200 rounded"></div>
+      </div>
+      <div className="flex justify-between">
+        <div className="h-3 w-28 bg-gray-200 rounded"></div>
+        <div className="h-3 w-24 bg-gray-200 rounded"></div>
+      </div>
+      <div className="flex justify-between">
+        <div className="h-3 w-32 bg-gray-200 rounded"></div>
+        <div className="h-3 w-24 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+
+    <hr className="text-gray-200 my-4" />
+
+    {/* Status timeline */}
+    <div className="my-4 flex flex-col gap-3">
+      <div className="h-4 w-32 bg-gray-200 rounded"></div>
+
+      <div className="flex flex-col gap-6 border-l-2 border-gray-200 pl-4">
+        <div className="flex items-start gap-3 relative">
+          <div className="h-5 w-5 bg-gray-300 rounded-full absolute -left-6"></div>
+          <div>
+            <div className="h-3 w-24 bg-gray-200 rounded mb-1"></div>
+            <div className="h-3 w-40 bg-gray-100 rounded"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Payout account */}
+    <div className="bg-gray-100 px-3 py-1.5 rounded-[6px]">
+      <div className="h-4 w-28 bg-gray-200 rounded mb-2"></div>
+
+      <div className="flex items-center gap-1.5">
+        <div className="bg-gray-300 rounded-[5px] p-3"></div>
+        <div>
+          <div className="h-3 w-40 bg-gray-200 rounded mb-1"></div>
+          <div className="h-3 w-28 bg-gray-100 rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    {/* Tips */}
+    <div className="bg-gray-300 px-3 my-4 py-1.5 rounded-[6px]">
+      <div className="h-4 w-24 bg-gray-200 rounded mb-3"></div>
+
+      <div className="flex gap-1.5 my-3">
+        <div className="h-5 w-5 bg-gray-400 rounded"></div>
+        <div>
+          <div className="h-3 w-32 bg-gray-200 rounded mb-1"></div>
+          <div className="h-3 w-48 bg-gray-100 rounded"></div>
+        </div>
+      </div>
+
+      <div className="flex gap-1.5 my-3">
+        <div className="h-5 w-5 bg-gray-400 rounded"></div>
+        <div>
+          <div className="h-3 w-32 bg-gray-200 rounded mb-1"></div>
+          <div className="h-3 w-48 bg-gray-100 rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    <div className="flex justify-between my-3">
+      <div className="h-8 w-28 bg-gray-300 rounded"></div>
+      <div className="h-8 w-32 bg-gray-300 rounded"></div>
+    </div>
+
+  </div>
+);
+
 
 // Map status → icon, color, message
 const getStatusDisplay = (status: string) => {
@@ -55,6 +148,10 @@ function page() {
      const [loading, setLoading] = useState(false);
      const [transaction, setTransaction] = useState<PayoutType | null>(null);
      const [error, setError] = useState("");
+     const [bankName, setBankName] = useState("");
+        const [accountHolder, setAccountHolder] = useState("");
+        const [amountError, setAmountError] = useState("");
+        const [accountNumber, setAccountNumber] = useState("");
 
     useEffect(() => {
     const fetchTransaction = async () => {
@@ -64,8 +161,8 @@ function page() {
         const res = await getTransactionById(_id);
         console.log(res);
 
-        if (res?.data?.data) {
-          setTransaction(res.data.data);
+        if (res?.data) {
+          setTransaction(res.data);
         } else {
           setError("No transaction found");
         }
@@ -78,6 +175,45 @@ function page() {
 
     fetchTransaction();
   }, [_id]);
+
+  useEffect(() => {
+         const fetchWallet = async () => {
+           setLoading(true);
+           try {
+             const res = await getWallet();
+             console.log(res);
+             if (res.success === false) {
+               toast.error(res.message);
+             } else {
+               // Populate form fields
+               setBankName(res.data.bank_name || "");
+               setAccountHolder(res.data.account_holder_name || "");
+               setAccountNumber(res.data.account_number || "");
+             }
+           } catch (err: any) {
+             toast.error(err?.message || "Failed to fetch KYC details");
+           } finally {
+             setLoading(false);
+           }
+         };
+     
+         fetchWallet();
+       }, []);
+
+       
+      const last4Digits = accountNumber.slice(-4);
+
+
+
+
+      if (loading) {
+  return (
+    <section className="bg-gray-200 min-h-screen px-4 md:px-8 py-6 w-full">
+      <Skeleton />
+    </section>
+  );
+}
+
 
 
   
@@ -93,7 +229,7 @@ function page() {
            <div className='my-4 flex flex-col gap-3'>
              <div className='flex justify-between'>
                <p className='text-gray-500 text-xs'>Transaction fee</p>
-               <h3 className='text-black text-xs'>₦6</h3>
+               <h3 className='text-black text-xs'>₦0</h3>
              </div>
                <div className='flex justify-between'>
                <p className='text-gray-500 text-xs'>You will receive</p>
@@ -115,31 +251,36 @@ function page() {
       <div className="flex flex-col gap-6 border-l-2 border-gray-200 pl-4">
 
         {/* Request Received */}
-        <div className="flex items-start gap-3 relative">
-          <FaCheckCircle className="text-green-500 text-lg absolute -left-6" />
-          <div>
-            <p className="font-semibold text-black text-sm">Request Received</p>
-            <p className="text-xs text-gray-500">Your payout request has been submitted.</p>
-          </div>
-        </div>
+        {transaction?.status === "successful" && (
+    <div className="flex items-start gap-3 relative">
+      <FaCheckCircle className="text-green-500 text-lg absolute -left-6" />
+      <div>
+        <p className="font-semibold text-black text-sm">Payout Successful</p>
+        <p className="text-xs text-gray-500">Your payout has been completed successfully.</p>
+      </div>
+    </div>
+  )}
 
-        {/* Processing by Bank */}
-        <div className="flex items-start gap-3 relative">
-          <FaClock className="text-blue-500 text-lg absolute -left-6" />
-          <div>
-            <p className="font-semibold text-black text-sm">Processing by Bank</p>
-            <p className="text-xs text-gray-500">The bank is currently reviewing your transaction.</p>
-          </div>
-        </div>
+        {transaction?.status === "pending" && (
+    <div className="flex items-start gap-3 relative">
+      <FaHourglassHalf className="text-yellow-500 text-lg absolute -left-6" />
+      <div>
+        <p className="font-semibold text-black text-sm">Pending</p>
+        <p className="text-xs text-gray-500">Your payout is awaiting confirmation from the bank.</p>
+      </div>
+    </div>
+  )}
 
         {/* Pending */}
-        <div className="flex items-start gap-3 relative">
-          <FaHourglassHalf className="text-yellow-500 text-lg absolute -left-6" />
-          <div>
-            <p className="font-semibold text-black text-sm">Pending</p>
-            <p className="text-xs text-gray-500">Awaiting confirmation from the bank.</p>
-          </div>
-        </div>
+        {transaction?.status === "failed" && (
+    <div className="flex items-start gap-3 relative">
+      <FaTimesCircle className="text-red-500 text-lg absolute -left-6" />
+      <div>
+        <p className="font-semibold text-black text-sm">Payout Failed</p>
+        <p className="text-xs text-gray-500">This payout attempt was not completed.</p>
+      </div>
+    </div>
+  )}
 
       </div>
     </div>
@@ -151,7 +292,8 @@ function page() {
                   <CiBank className='text-black font-semibold text-[23px]'/>
                </div>
                <div>
-                <h3 className='text-xs text-black font-semibold'>Laurent Fashion House · First National Bank · **** 4587</h3>
+                <h3 className='text-xs text-black font-semibold'>
+                  {accountHolder} · {bankName} · **** {last4Digits}</h3>
                 <p className='text-xs text-gray-500'>Primary · Not editable</p>
                </div>
             </div>

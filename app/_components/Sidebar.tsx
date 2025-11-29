@@ -37,12 +37,7 @@ const [token, setToken] = useState<string | null>(null);
       bg-white border-r border-gray-200 p-5 overflow-y-auto"
     >
       <nav className="flex flex-col gap-5 mt-5 text-[15px]">
-        {!token && <Link
-          href="/signup"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
-        >
-          <FiUserPlus /> Sign Up
-        </Link>}
+        
 
         <Link
           href="/kyc-compliance"

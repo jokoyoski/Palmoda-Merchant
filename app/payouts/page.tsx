@@ -5,6 +5,7 @@ import ProtectedRoute from '../_components/ProtectedRoute'
 import { toast } from 'react-toastify';
 import { getKycDetails, activateWallet, getWallet } from '../_lib/vendor';
 import { useAuth } from '../_lib/AuthContext';
+import { requestPayout } from '../_lib/transactions';
 
 function page() {
    const {user} = useAuth();
@@ -17,8 +18,10 @@ function page() {
     const [showBvnModal, setShowBvnModal] = useState(false);
 const [bvn, setBvn] = useState("");
  const [activating, setActivating] = useState(false);
- const [amount, setAmount] = useState("");
-const [fee] = useState(6); // fixed fee for now
+ const [amount, setAmount] = useState(0);
+const [fee] = useState(0); // fixed fee for now
+const [narration, setNarration] = useState("");
+const [requesting, setRequesting] = useState(false);
 
 
 
@@ -83,6 +86,54 @@ const [fee] = useState(6); // fixed fee for now
 
 
      const last4Digits = accountNumber.slice(-4);
+
+
+    const handlePayout = async () => {
+  if (!amount || Number(amount) <= 0) {
+    toast.error("Enter a valid amount");
+    return;
+  }
+
+  if (Number(amount) > accountBalance) {
+    toast.error("Withdrawal amount exceeds available balance");
+    return;
+  }
+
+  if (!user?.is_wallet_activated) {
+    toast.error("Activate your wallet before requesting payout");
+    return;
+  }
+
+  setRequesting(true);
+
+  try {
+    const res = await requestPayout(Number(amount), narration);
+
+
+    if (!res.success) {
+      toast.error(res.message);
+      return;
+    }
+
+    toast.success(res.message || "Payout requested successfully!");
+
+    // Clear form
+    setAmount(0);
+    setNarration("");
+
+    // Refresh balance
+    const wallet = await getWallet();
+    if (wallet?.success) {
+      setAccountBalance(wallet.data.available_balance);
+    }
+
+  } catch (error: any) {
+    toast.error(error.message || "Something went wrong");
+  } finally {
+    setRequesting(false);
+  }
+};
+
    
 
   return (
@@ -141,32 +192,30 @@ const [fee] = useState(6); // fixed fee for now
   type="number"
   value={amount}
   onChange={(e) => {
-    let val = e.target.value;
+  let val = e.target.value;
 
-    if (val === "") {
-      setAmount("");
-      setAmountError("");
-      return;
-    }
-
-    let num = Number(val);
-
-    // negative
-    if (num < 0) {
-      setAmountError("Amount cannot be negative.");
-      return;
-    }
-
-    // more than balance
-    if (num > accountBalance) {
-      setAmountError("You cannot withdraw more than your account balance.");
-      return;
-    }
-
-    // clear error when valid
+  if (val === "") {
+    setAmount(0);
     setAmountError("");
-    setAmount(val);
-  }}
+    return;
+  }
+
+  let num = Number(val);
+
+  if (num < 0) {
+    setAmountError("Amount cannot be negative.");
+    return;
+  }
+
+  if (num > accountBalance) {
+    setAmountError("You cannot withdraw more than your account balance.");
+    return;
+  }
+
+  setAmountError("");
+  setAmount(num);   // ← ALWAYS SET AS NUMBER
+}}
+
   className='text-gray-500 border border-gray-600 p-2 rounded-[5px] text-xs'
 />
 
@@ -179,22 +228,30 @@ const [fee] = useState(6); // fixed fee for now
 
               <div className='flex gap-3 my-2.5'>
   <button
-    className='text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs'
-    onClick={() => setAmount(accountBalance.toString())}
-  >
-    Withdraw Full Balance
-  </button>
+  onClick={() => setAmount(accountBalance)}
+  className='text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs'
+>
+  Withdraw Full Balance
+</button>
+
+<button
+  onClick={() => setAmount(accountBalance * 0.5)}
+  className='text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs'
+>
+  Withdraw 50% of Balance
+</button>
+
+<button
+  onClick={() => setAmount(0)}
+  className='text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs'
+>
+  Custom
+</button>
+
 
   <button
     className='text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs'
-    onClick={() => setAmount((accountBalance * 0.5).toFixed(2))}
-  >
-    Withdraw 50% of Balance
-  </button>
-
-  <button
-    className='text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs'
-    onClick={() => setAmount("")}
+    onClick={() => setAmount(0)}
   >
     Custom
   </button>
@@ -219,9 +276,7 @@ const [fee] = useState(6); // fixed fee for now
     <p className='text-black text-xs'>You will receive:</p>
     <h1 className=' text-black text-sm font-semibold'>
       ₦{
-        amount === "" 
-          ? "0.00" 
-          : Math.max(Number(amount) - fee, 0).toLocaleString()
+        Math.max(amount - fee, 0).toLocaleString()
       }
     </h1>
   </div>
@@ -230,15 +285,26 @@ const [fee] = useState(6); // fixed fee for now
           </div>
           <div className='bg-white mb-4 px-4 my-4 rounded-[6px] py-2'>
             <h1 className='text-black font-semibold'>Notes (optional)</h1>
-            <textarea name="" id="" className='px-4 py-2 text-gray-500 border w-full my-4 border-gray-200'></textarea>
+            <textarea name="" id="" 
+            value={narration}
+            onChange={(e) => setNarration(e.target.value)}
+            className='px-4 py-2 text-gray-500 border w-full my-4 border-gray-200'></textarea>
           </div>
           <div className='flex items-center justify-end gap-3'>
            <button className='bg-inherit text-black text-xs'>Cancel</button>
           <button
-  disabled={!amount || Number(amount) > accountBalance}
+  disabled={
+  requesting ||
+  !amount ||
+  Number(amount) <= 0 ||
+  Number(amount) > accountBalance ||
+  !user?.is_wallet_activated
+}
+
+  onClick={handlePayout}
   className='bg-gray-300 text-gray-900 p-2 text-xs rounded-[5px]'
 >
-  Confirm Withdrawal
+  {requesting ? "Requesting" : "Confirm Withdrawal"}
 </button>
 
           </div>

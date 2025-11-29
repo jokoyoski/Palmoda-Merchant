@@ -99,3 +99,16 @@ export interface PayoutType {
   rejection_reason?: string;
   vendor: Vendor;
 }
+
+export interface TransactionType {
+  _id: string;
+  vendor_id: string;
+  amount: number;
+  transaction_reference: string;
+  status: "pending" | "failed" | "successful"; 
+  narration: string;
+  transaction_type: "credit" | "debit";
+  created_at: string;
+  updated_at: string;
+  vendor: Vendor;
+}
