@@ -64,12 +64,26 @@ function Page() {
     } else {
       setHoldBtn(true);
     }
-  }, [businessName, contactPersonName, email, phoneNumber, password, confirmPassword]);
+  }, [
+    businessName,
+    contactPersonName,
+    email,
+    phoneNumber,
+    password,
+    confirmPassword,
+  ]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!businessName || !contactPersonName || !email || !phoneNumber || !password || !confirmPassword) {
+    if (
+      !businessName ||
+      !contactPersonName ||
+      !email ||
+      !phoneNumber ||
+      !password ||
+      !confirmPassword
+    ) {
       toast.error("Please fill all fields");
       return;
     }
@@ -102,6 +116,7 @@ function Page() {
           signupSuccess: true,
         })
       );
+      setStep(2);
     } else {
       toast.error(res.message || "Signup failed");
       setSignupSuccess(false);
@@ -121,16 +136,25 @@ function Page() {
       {step === 1 && (
         <div>
           {/* Header */}
-          <h1 className="uppercase text-center text-[16px] font-bold tracking-wide">PALMODA</h1>
-          <h2 className="capitalize text-center text-[18px] mt-2 mb-1 font-semibold">Vendor Registration</h2>
+          <h1 className="uppercase text-center text-[16px] font-bold tracking-wide">
+            PALMODA
+          </h1>
+          <h2 className="capitalize text-center text-[18px] mt-2 mb-1 font-semibold">
+            Vendor Registration
+          </h2>
           <p className="text-gray-500 text-center text-[14px] mb-5">
             Join our marketplace and start selling your fashion products
           </p>
 
           {/* Form */}
-          <form onSubmit={handleSignUp} className="space-y-4 shadow-lg rounded-lg border border-gray-200 px-6 py-8">
+          <form
+            onSubmit={handleSignUp}
+            className="space-y-4 shadow-lg rounded-lg border border-gray-200 px-6 py-8"
+          >
             <div>
-              <label className="block text-sm mb-1 font-semibold">Business Name</label>
+              <label className="block text-sm mb-1 font-semibold">
+                Business Name
+              </label>
               <input
                 type="text"
                 value={businessName}
@@ -141,7 +165,9 @@ function Page() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-1">Contact Person Name</label>
+              <label className="block text-sm font-semibold mb-1">
+                Contact Person Name
+              </label>
               <input
                 type="text"
                 placeholder="Full name"
@@ -152,7 +178,9 @@ function Page() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-1">Email Address</label>
+              <label className="block text-sm font-semibold mb-1">
+                Email Address
+              </label>
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -163,7 +191,9 @@ function Page() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-1">Phone Number</label>
+              <label className="block text-sm font-semibold mb-1">
+                Phone Number
+              </label>
               <input
                 type="tel"
                 placeholder="+1 (XXX) XXX-XXXX"
@@ -174,7 +204,9 @@ function Page() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-1">Password</label>
+              <label className="block text-sm font-semibold mb-1">
+                Password
+              </label>
               <div className="relative w-full">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -192,12 +224,15 @@ function Page() {
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Must contain at least 8 characters, including uppercase, lowercase, and a number.
+                Must contain at least 8 characters, including uppercase,
+                lowercase, and a number.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-1">Confirm Password</label>
+              <label className="block text-sm font-semibold mb-1">
+                Confirm Password
+              </label>
               <div className="w-full relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
@@ -210,7 +245,9 @@ function Page() {
                   <Button
                     onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                     isIconOnly
-                    startContent={showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
+                    startContent={
+                      showConfirmPassword ? <FaEye /> : <FaEyeSlash />
+                    }
                   />
                 </div>
               </div>
@@ -220,8 +257,13 @@ function Page() {
               <input type="checkbox" id="terms" className="h-4 w-4" />
               <label htmlFor="terms" className="text-sm text-gray-600">
                 I agree to the{" "}
-                <Link href="#" className="text-black underline">Terms of Service</Link> and{" "}
-                <Link href="#" className="text-black underline">Privacy Policy</Link>
+                <Link href="#" className="text-black underline">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="#" className="text-black underline">
+                  Privacy Policy
+                </Link>
               </label>
             </div>
 
@@ -245,7 +287,7 @@ function Page() {
             </p>
           </form>
 
-          {signupSuccess && (
+          {/* {signupSuccess && (
             <button
               ref={verificationBtnRef}
               onClick={() => setStep(2)}
@@ -254,26 +296,26 @@ function Page() {
             >
               Go to Verification →
             </button>
-          )}
+          )} */}
 
           {/* Footer note */}
           <p className="text-center text-xs text-gray-500 mt-6">
-            By joining PALMODA as a vendor, you'll reach fashion-forward customers worldwide.{" "}
-            <Link href="#" className="text-black underline">Vendor Support Team</Link>
+            By joining PALMODA as a vendor, you'll reach fashion-forward
+            customers worldwide.{" "}
+            <Link href="#" className="text-black underline">
+              Vendor Support Team
+            </Link>
           </p>
         </div>
       )}
 
       {step === 2 && (
-        <VerifyVendorCode
-          email={email}
-          onVerified={handleVerified}
-        >
+        <VerifyVendorCode email={email} onVerified={handleVerified}>
           {/* Back to Signup Button */}
-          <button
+          {/* <button
             onClick={() => {
-              localStorage.removeItem("vendorSignupState"); 
-      window.location.href = "/signup"; 
+              localStorage.removeItem("vendorSignupState");
+              window.location.href = "/signup";
               setStep(1);
               setSignupSuccess(false);
               setPassword("");
@@ -286,7 +328,7 @@ function Page() {
             className="text-right mt-4 text-xs"
           >
             ← Back to Signup
-          </button>
+          </button> */}
         </VerifyVendorCode>
       )}
     </div>
