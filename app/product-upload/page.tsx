@@ -267,7 +267,7 @@ function page() {
     const res = await createProduct(productData);
 
     if (res.success) {
-      toast.success("Product created successfully!");
+      toast.success("Product has been uploaded for review!");
       // Reset form or redirect
     } else {
       toast.error(res.message);
