@@ -178,7 +178,7 @@ function Page() {
       );
 
       if (res?.success) {
-        toast.success("KYC completed successfully");
+        toast.success("KYC has been submitted for review");
       } else {
         // backend may return { success: false, message }
         toast.error(res?.message || "KYC failed");

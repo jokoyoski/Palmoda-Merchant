@@ -99,3 +99,26 @@ export interface CategoryQueryParams {
   sort_field: string;
   sort_direction: number;
 }
+
+export interface Wallet {
+  _id: string;
+  vendor_id: string;
+  account_name: string;
+  account_number: string;
+  bank_name: string;
+  account_reference: string;
+  available_balance: number;
+  ledger_balance: number;
+  is_deleted: false;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Response {
+  success: boolean;
+  message: string;
+}
+
+export interface WalletResponse extends Response {
+  data: Wallet;
+}

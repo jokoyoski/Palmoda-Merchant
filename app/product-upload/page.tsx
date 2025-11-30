@@ -57,7 +57,7 @@ const uploadToCloudinary = async (file: File): Promise<string | null> => {
 };
 
 function page() {
-   const {user} = useAuth();
+  const { user } = useAuth();
   const [productName, setProductName] = useState("");
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
@@ -236,15 +236,14 @@ function page() {
     }
 
     const allDocsVerified =
-  user?.is_bank_information_verified === true &&
-  user?.is_business_verified === true &&
-  user?.is_identity_verified === true;
+      user?.is_bank_information_verified === true &&
+      user?.is_business_verified === true &&
+      user?.is_identity_verified === true;
 
-if (!allDocsVerified) {
-  toast.error("All vendor documents have to be verified");
-  return;
-}
-
+    if (!allDocsVerified) {
+      toast.error("All vendor documents have to be verified");
+      return;
+    }
 
     setLoading(true);
 
@@ -268,7 +267,7 @@ if (!allDocsVerified) {
     const res = await createProduct(productData);
 
     if (res.success) {
-      toast.success("Product created successfully!");
+      toast.success("Product has been uploaded for review!");
       // Reset form or redirect
     } else {
       toast.error(res.message);
@@ -628,11 +627,14 @@ if (!allDocsVerified) {
           </div>
 
           <div className="flex my-3 justify-between items-center">
-            <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
+            <button
+              disabled
+              className="bg-inherit border opacity-30 cursor-not-allowed border-black text-black p-[5px] w-[120px] text-sm"
+            >
               Save as Draft
             </button>
             <div className="flex items-center gap-2">
-              <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
+              <button disabled className="bg-inherit border opacity-30 cursor-not-allowed border-black text-black p-[5px] w-[120px] text-sm">
                 Preview Product
               </button>
               <button

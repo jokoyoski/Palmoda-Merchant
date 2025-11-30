@@ -24,7 +24,7 @@ function Header() {
   const { user, logout } = useAuth();
 
   const navItems = [
-    { href: "/signup", label: "Sign Up", icon: <FiUserPlus /> },
+    // { href: "/signup", label: "Sign Up", icon: <FiUserPlus /> },
     { href: "/kyc-compliance", label: "KYC Compliance", icon: <FiFileText /> },
     { href: "/brand-profile", label: "Brand Profile", icon: <FiTag /> },
     { href: "/product-catalog", label: "Product Catalog", icon: <FiGrid /> },
@@ -54,7 +54,10 @@ function Header() {
             {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
 
-          <Link href="/" className="uppercase text-black text-[15px] font-semibold">
+          <Link
+            href="/"
+            className="uppercase text-black text-[15px] font-semibold"
+          >
             Palmoda
           </Link>
         </div>

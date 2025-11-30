@@ -2,7 +2,6 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import {
-  FiUserPlus,
   FiFileText,
   FiTag,
   FiGrid,
@@ -15,58 +14,13 @@ import { BsGraphUp } from "react-icons/bs";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
 import { FaBell } from "react-icons/fa";
-import {MessageType, Product} from "../_lib/type"
+import path from "path/win32";
 import { FaMessage } from "react-icons/fa6";
-import { getNotifications } from "../_lib/notifications";
-import { getBrandDetails } from "../_lib/brand";
 
 function Sidebar() {
   const pathname = usePathname();
-const [token, setToken] = useState<string | null>(null);
-const [messages, setMessages] = useState<MessageType[]>([]);
-const { user, logout } = useAuth();
-  const [businessName, setBusinessName] = useState("");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [brand, setBrand] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-      setBusinessName(user?.business_name || "");
-      console.log(user?.business_name);
-    }, [user]);
-  
-    useEffect(() => {
-      const fetchBrand = async () => {
-        try {
-          const res = await getBrandDetails();
-          console.log(res);
-          setBrand(res.data);
-  
-          if (res.success === false || !res.data) {
-            // No brand exists
-          } else {
-            const data = res.data;
-          }
-        } catch (err: any) {
-        } finally {
-        }
-      };
-  
-      fetchBrand();
-    }, []);
-  
-  
-  
-  
-  
-    const basicInfoComplete = !!businessName && businessName.trim() !== "";
-    const brandStoryComplete =
-      !!brand?.brand_description && brand.brand_description.trim() !== "";
-  
-    const brandMediaComplete =
-      !!brand?.brand_banner && brand.brand_banner.trim() !== "";
-      const isBrandSetupComplete =
-  basicInfoComplete && brandStoryComplete && brandMediaComplete;
+  const { logout, user } = useAuth();
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -86,50 +40,58 @@ const { user, logout } = useAuth();
       className="hidden md:flex flex-col w-[230px] h-fit sticky left-0 
       bg-white border-r border-gray-200 p-5 overflow-y-auto"
     >
-      <nav className="flex flex-col gap-5 mt-5 text-[15px]">
-        
-
+      <nav className="flex flex-col mt-5 text-[15px]">
         <Link
           href="/kyc-compliance"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+          className={`flex ${pathname === "/kyc-compliance" ? "bg-gray-300" : ""} hover:bg-gray-100 p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
         >
           <FiFileText /> KYC Compliance
         </Link>
 
         <Link
           href="/brand-profile"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+          className={`flex ${pathname === "/brand-profile" ? "bg-gray-300" : ""} hover:bg-gray-100 p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
         >
           <FiTag /> Brand Profile
         </Link>
 
-        {isBrandSetupComplete && (
-  <Link
-    href="/product-upload"
-    className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
-  >
-    <FiGrid /> Product Catalog
-  </Link>
-)}
-
+        <Link
+          href="/product-upload"
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "Upload new products"
+              : "Complete KYC to upload products"
+          }
+          className={`flex hover:bg-gray-50 ${
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? ""
+              : "pointer-events-none cursor-not-allowed opacity-30"
+          } font-semibold items-center ${pathname === "/product-upload" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+        >
+          <FiGrid /> Product Catalog
+        </Link>
 
         <Link
           href="/notifications"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+          className={`flex hover:bg-gray-100 ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
         >
           <FaBell /> Notifications
         </Link>
 
         <Link
           href="/"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+          className={`flex hover:bg-gray-100 ${pathname === "/" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
         >
           <BsGraphUp /> Dashboard
         </Link>
 
         <Link
           href="/orders"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+          className={`flex hover:bg-gray-100 ${pathname === "/orders" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
         >
           <FiShoppingCart /> Orders
         </Link>
@@ -143,28 +105,21 @@ const { user, logout } = useAuth();
 
         <Link
           href="/payouts"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+          className={`flex hover:bg-gray-100 ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
         >
           <FiDollarSign /> Payouts
         </Link>
 
         <Link
           href="/settings"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+          className={`flex hover:bg-gray-100 ${pathname === "/settings" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
         >
           <FiSettings /> Settings
         </Link>
 
         <hr className="my-3 border-gray-200" />
 
-        <div className="flex flex-col gap-4 mt-auto">
-          {/* <div className="bg-gray-100 text-gray-800 rounded-lg p-3 text-sm">
-            <p className="font-medium">New Feature Available</p>
-            <p className="text-xs text-gray-600 mt-1">
-              Enhanced analytics dashboard is now available for all vendors.
-            </p>
-          </div> */}
-
+        <div className="flex hover:bg-red-100 p-3 ease-in-out transition-all duration-300 flex-col gap-4 mt-auto">
           <p
             onClick={logout}
             className="flex items-center cursor-pointer gap-3 text-red-500 hover:text-red-700"

@@ -1,5 +1,5 @@
-import axios from "axios"
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+import axios from "axios";
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const vendorSignUp = async (
   business_name,
@@ -16,7 +16,7 @@ export const vendorSignUp = async (
       email,
       phone_number,
       password,
-      confirm_password
+      confirm_password,
     });
     return res.data;
   } catch (error) {
@@ -37,28 +37,30 @@ export const vendorSignUp = async (
 };
 
 export const vendorLogin = async (email, password) => {
-    try {
-        const res = await axios.post(`${backendUrl}/user/login`, {email, password}, {
-            params: {
-                user_type: "vendor"
-            }
-        });
-        return res.data;
-    } catch (error) {
-      const msg =
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong";
+  try {
+    const res = await axios.post(
+      `${backendUrl}/user/login`,
+      { email, password },
+      {
+        params: {
+          user_type: "vendor",
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    const msg =
+      error.response?.data?.message || error.message || "Something went wrong";
 
     throw new Error(msg);
-    }
-}
+  }
+};
 
 export const validateVendorCode = async (email, code) => {
   try {
     const res = await axios.put(
       `${backendUrl}/user/validate_code/${email}`,
-      { code },        
+      { code },
       {
         params: {
           user_type: "vendor",
@@ -67,7 +69,6 @@ export const validateVendorCode = async (email, code) => {
     );
 
     return res.data;
-
   } catch (error) {
     if (error.response?.data?.message) {
       return {
@@ -150,17 +151,17 @@ export const completeKyc = async (
 };
 
 export const getKycDetails = async (params) => {
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
     if (!token) return console.log("No token found");
     const res = await axios.get(`${backendUrl}/vendor/get-kyc-information`, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
-    return res.data
-    } catch (error) {
-      if (error.response?.data?.message) {
+    return res.data;
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -173,21 +174,20 @@ export const getKycDetails = async (params) => {
       message: error.message || "Something went wrong",
     };
   }
-    } 
+};
 
-
-  export  const fetchAnalytics = async () => {
-         try {
-            const token = localStorage.getItem("token");
+export const fetchAnalytics = async () => {
+  try {
+    const token = localStorage.getItem("token");
     if (!token) return console.log("No token found");
     const res = await axios.get(`${backendUrl}/order/analytics`, {
-      headers:{
-        Authorization: `Bearer ${token}`
-      }
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return res.data;
-         } catch (error) {
-            if (error.response?.data?.message) {
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -200,47 +200,20 @@ export const getKycDetails = async (params) => {
       message: error.message || "Something went wrong",
     };
   }
-      }
+};
 
-
-      export const getOrders = async () => {
-        try {
-            const token = localStorage.getItem("token");
+export const getOrders = async () => {
+  try {
+    const token = localStorage.getItem("token");
     if (!token) return console.log("No token found");
     const res = await axios.get(`${backendUrl}/order/all`, {
-      headers:{
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return res.data;
-        } catch (error) {
-           if (error.response?.data?.message) {
-      return {
-        success: false,
-        message: error.response.data.message,
-      };
-    }
-
-    // fallback message
-    return {
-      success: false,
-      message: error.message || "Something went wrong",
-    }
-        }
-      }
-
- export const activateWallet = async (bvn) => {
-    try {
-       const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
-    const res = await axios.post(`${backendUrl}/vendor/activate-wallet`, {bvn}, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     return res.data;
-    } catch (error) {
-      if (error.response?.data?.message) {
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -251,23 +224,52 @@ export const getKycDetails = async (params) => {
     return {
       success: false,
       message: error.message || "Something went wrong",
-    }
-    }
- }   
+    };
+  }
+};
 
+export const activateWallet = async (bvn) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return console.log("No token found");
+    const res = await axios.post(
+      `${backendUrl}/vendor/activate-wallet`,
+      { bvn },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    if (error.response?.data?.message) {
+      return {
+        success: false,
+        message: error.response.data.message,
+      };
+    }
 
- export const getWallet = async () => {
-   try {
-       const token = localStorage.getItem("token");
+    // fallback message
+    return {
+      success: false,
+      message: error.message || "Something went wrong",
+    };
+  }
+};
+
+export const getWallet = async () => {
+  try {
+    const token = localStorage.getItem("token");
     if (!token) return console.log("No token found");
     const res = await axios.get(`${backendUrl}/vendor/wallet`, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     return res.data;
-   } catch (error) {
-     if (error.response?.data?.message) {
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -278,6 +280,6 @@ export const getKycDetails = async (params) => {
     return {
       success: false,
       message: error.message || "Something went wrong",
-    }
-   }
- }
+    };
+  }
+};
