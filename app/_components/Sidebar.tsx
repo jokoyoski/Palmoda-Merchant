@@ -15,17 +15,66 @@ import { BsGraphUp } from "react-icons/bs";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
 import { FaBell } from "react-icons/fa";
+import {MessageType, Product} from "../_lib/type"
+import { FaMessage } from "react-icons/fa6";
+import { getNotifications } from "../_lib/notifications";
+import { getBrandDetails } from "../_lib/brand";
 
 function Sidebar() {
   const pathname = usePathname();
-  const {logout} = useAuth();
 const [token, setToken] = useState<string | null>(null);
+const [messages, setMessages] = useState<MessageType[]>([]);
+const { user, logout } = useAuth();
+  const [businessName, setBusinessName] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [brand, setBrand] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+      setBusinessName(user?.business_name || "");
+      console.log(user?.business_name);
+    }, [user]);
+  
+    useEffect(() => {
+      const fetchBrand = async () => {
+        try {
+          const res = await getBrandDetails();
+          console.log(res);
+          setBrand(res.data);
+  
+          if (res.success === false || !res.data) {
+            // No brand exists
+          } else {
+            const data = res.data;
+          }
+        } catch (err: any) {
+        } finally {
+        }
+      };
+  
+      fetchBrand();
+    }, []);
+  
+  
+  
+  
+  
+    const basicInfoComplete = !!businessName && businessName.trim() !== "";
+    const brandStoryComplete =
+      !!brand?.brand_description && brand.brand_description.trim() !== "";
+  
+    const brandMediaComplete =
+      !!brand?.brand_banner && brand.brand_banner.trim() !== "";
+      const isBrandSetupComplete =
+  basicInfoComplete && brandStoryComplete && brandMediaComplete;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setToken(localStorage.getItem("token"));
     }
   }, []);
+
+  
 
   // Hide sidebar on both sign-up and login pages
   if (pathname.includes("signup") || pathname.includes("login")) {
@@ -54,12 +103,15 @@ const [token, setToken] = useState<string | null>(null);
           <FiTag /> Brand Profile
         </Link>
 
-        <Link
-          href="/product-upload"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
-        >
-          <FiGrid /> Product Catalog
-        </Link>
+        {isBrandSetupComplete && (
+  <Link
+    href="/product-upload"
+    className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+  >
+    <FiGrid /> Product Catalog
+  </Link>
+)}
+
 
         <Link
           href="/notifications"
@@ -80,6 +132,13 @@ const [token, setToken] = useState<string | null>(null);
           className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
         >
           <FiShoppingCart /> Orders
+        </Link>
+
+        <Link
+          href="/messages"
+          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+        >
+          <FaMessage /> Messages
         </Link>
 
         <Link

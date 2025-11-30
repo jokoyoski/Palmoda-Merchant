@@ -135,3 +135,13 @@ export interface Notification {
   created_at: string; // e.g. "2025-11-29 00:48:47"
   details: NotificationDetails;
 }
+
+export interface MessageType {
+  _id: string;
+  vendor_id: string;
+  title: string;
+  content: string;
+  message_type: "text" | "image" | "video" | string; // extendable
+  created_at: string; // ISO timestamp from backend
+  updated_at: string;
+}

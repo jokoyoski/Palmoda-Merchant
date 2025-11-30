@@ -135,7 +135,6 @@ const goToPage = (page: number) => {
           <tbody>
             {paginatedProducts.map((product) => (
               <tr key={product._id}
-              onClick={() => router.push(`/edit-product/${product._id}`)}
               className="hover:bg-gray-50 cursor-pointer transition-colors">
 
                 <td className="p-3 flex items-center gap-2">
@@ -171,7 +170,8 @@ const goToPage = (page: number) => {
         <div className="flex gap-2">
           <Link 
           className="px-3 py-1 text-xs border uppercase bg-inherit text-black border-black"
-          href={`/product/${product._id}`}>View</Link>
+          href={`/product/${product._id}`}>
+            View</Link>
           <Link
   href={
     formatStatus(product.status) !== "PENDING"
