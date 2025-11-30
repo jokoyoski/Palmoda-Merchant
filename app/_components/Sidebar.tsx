@@ -77,7 +77,21 @@ function Sidebar() {
 
         <Link
           href="/notifications"
-          className={`flex hover:bg-gray-100 ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "Upload new products"
+              : "Complete KYC to upload products"
+          }
+          className={`flex hover:bg-gray-50 ${
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? ""
+              : "pointer-events-none cursor-not-allowed opacity-30"
+          } font-semibold items-center ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+  
         >
           <FaBell /> Notifications
         </Link>
@@ -91,28 +105,81 @@ function Sidebar() {
 
         <Link
           href="/orders"
-          className={`flex hover:bg-gray-100 ${pathname === "/orders" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "Upload new products"
+              : "Complete KYC to upload products"
+          }
+          className={`flex hover:bg-gray-50 ${
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? ""
+              : "pointer-events-none cursor-not-allowed opacity-30"
+          } font-semibold items-center ${pathname === "/orders" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FiShoppingCart /> Orders
         </Link>
 
         <Link
           href="/messages"
-          className="flex hover:bg-gray-50 font-semibold items-center gap-3 text-black"
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "Upload new products"
+              : "Complete KYC to upload products"
+          }
+          className={`flex hover:bg-gray-50 ${
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? ""
+              : "pointer-events-none cursor-not-allowed opacity-30"
+          } font-semibold items-center ${pathname === "/messages" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FaMessage /> Messages
         </Link>
 
         <Link
           href="/payouts"
-          className={`flex hover:bg-gray-100 ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "Upload new products"
+              : "Complete KYC to upload products"
+          }
+          className={`flex hover:bg-gray-50 ${
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? ""
+              : "pointer-events-none cursor-not-allowed opacity-30"
+          } font-semibold items-center ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+          
         >
           <FiDollarSign /> Payouts
         </Link>
 
         <Link
           href="/settings"
-          className={`flex hover:bg-gray-100 ${pathname === "/settings" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "Upload new products"
+              : "Complete KYC to upload products"
+          }
+          className={`flex hover:bg-gray-50 ${
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? ""
+              : "pointer-events-none cursor-not-allowed opacity-30"
+          } font-semibold items-center ${pathname === "/settings" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FiSettings /> Settings
         </Link>
