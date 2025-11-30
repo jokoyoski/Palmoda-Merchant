@@ -13,6 +13,7 @@ import { useFetchSizes } from "../_lib/sizes";
 import { useFetchColors, addColor } from "../_lib/colors";
 import { Button } from "@heroui/button";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../_lib/AuthContext";
 
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
@@ -56,6 +57,7 @@ const uploadToCloudinary = async (file: File): Promise<string | null> => {
 };
 
 function page() {
+   const {user} = useAuth();
   const [productName, setProductName] = useState("");
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
@@ -77,6 +79,8 @@ function page() {
   const [newColorCode, setNewColorCode] = useState("");
   const [addingColor, setAddingColor] = useState(false);
   const router = useRouter();
+
+  console.log(user);
 
   // Category and subcategory data
   const categories: Record<string, string[]> = {
@@ -230,6 +234,17 @@ function page() {
       toast.error("Please fill all required fields");
       return;
     }
+
+    const allDocsVerified =
+  user?.is_bank_information_verified === true &&
+  user?.is_business_verified === true &&
+  user?.is_identity_verified === true;
+
+if (!allDocsVerified) {
+  toast.error("All vendor documents have to be verified");
+  return;
+}
+
 
     setLoading(true);
 
@@ -536,7 +551,6 @@ function page() {
                     style={{ backgroundColor: color.code }}
                   ></button>
                 ))}
-                {/* Hide Color Add Button */}
                 <button
                   onClick={() => setShowColorModal(true)}
                   className="w-7 h-7 rounded-full border border-gray-400 flex items-center 

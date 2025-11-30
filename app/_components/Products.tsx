@@ -169,6 +169,9 @@ const goToPage = (page: number) => {
                 </td>
                 <td className="p-3">
         <div className="flex gap-2">
+          <Link 
+          className="px-3 py-1 text-xs border uppercase bg-inherit text-black border-black"
+          href={`/product/${product._id}`}>View</Link>
           <Link
   href={
     formatStatus(product.status) !== "PENDING"
