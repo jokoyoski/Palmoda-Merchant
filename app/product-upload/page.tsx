@@ -268,6 +268,7 @@ function page() {
 
     if (res.success) {
       toast.success("Product has been uploaded for review!");
+       router.push("/");
       // Reset form or redirect
     } else {
       toast.error(res.message);

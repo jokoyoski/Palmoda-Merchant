@@ -98,7 +98,21 @@ function Sidebar() {
 
         <Link
           href="/"
-          className={`flex hover:bg-gray-100 ${pathname === "/" ? "bg-gray-300" : ""} p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "Upload new products"
+              : "Complete KYC to upload products"
+          }
+          className={`flex hover:bg-gray-50 ${
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? ""
+              : "pointer-events-none cursor-not-allowed opacity-30"
+          } font-semibold items-center ${pathname === "/" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+          
         >
           <BsGraphUp /> Dashboard
         </Link>

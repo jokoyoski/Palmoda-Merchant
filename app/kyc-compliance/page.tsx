@@ -6,6 +6,7 @@ import { completeKyc, getKycDetails  } from "../_lib/vendor";
 import axios from "axios";
 import { toast } from "react-toastify";
 import UploadBox from "./Upload";
+import { useAuth } from "../_lib/AuthContext";
 
 
 // Cloudinary config (same example cloud & preset you've used earlier)
@@ -84,6 +85,8 @@ function Page() {
   const [certified, setCertified] = useState(false);
    const [imageUploading, setImageUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+   const {user} = useAuth();
+    const isDisabled = user?.is_bank_information_verified || user?.is_business_verified || user?.is_identity_verified;
   
 
    useEffect(() => {
@@ -258,8 +261,11 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter Legal Business Name"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : ""}
+                    focus:ring-0`}
                   value={businessName}
+                  disabled={isDisabled}
                   onChange={(e) => setBusinessName(e.target.value)}
                 />
               </div>
@@ -287,7 +293,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter Business Registration Number"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={registrationNumber}
                   onChange={(e) => setRegistrationNumber(e.target.value)}
                 />
@@ -299,7 +307,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter tax identification number"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                 className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={taxId}
                   onChange={(e) => setTaxId(e.target.value)}
                 />
@@ -316,7 +326,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Street Address"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                 className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={address1}
                   onChange={(e) => setAddress1(e.target.value)}
                 />
@@ -328,7 +340,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Apt, suite, unit, etc (optional)"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={address2}
                   onChange={(e) => setAddress2(e.target.value)}
                 />
@@ -340,7 +354,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter city"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                 className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                 />
@@ -352,7 +368,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter state"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                 className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={stateName}
                   onChange={(e) => setStateName(e.target.value)}
                 />
@@ -364,7 +382,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter postal code"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                 className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
                 />
@@ -376,7 +396,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter Country"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                 className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                 />
@@ -388,7 +410,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter bank name"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={bankName}
                   onChange={(e) => setBankName(e.target.value)}
                 />
@@ -400,7 +424,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter account holder's name"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={accountHolder}
                   onChange={(e) => setAccountHolder(e.target.value)}
                 />
@@ -412,7 +438,9 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter bank account number"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                 className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : "" }`}
+                     disabled={isDisabled}
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value)}
                 />
@@ -437,10 +465,10 @@ function Page() {
               <button
   className={`p-[5px] w-[120px] text-sm text-white ${
     certified ? "bg-black" : "bg-gray-400 cursor-not-allowed"
-  }`}
+  }  ${isDisabled ? "cursor-not-allowed" : ""}`}
   onClick={handleContinue}
   type="button"
-  disabled={!certified || loading}
+  disabled={!certified || loading || isDisabled}
 >
   {loading ? "Submitting..." : "Continue"}
 </button>

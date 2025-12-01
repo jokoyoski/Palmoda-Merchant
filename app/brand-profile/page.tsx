@@ -9,6 +9,7 @@ import axios from 'axios';
 import {setUpBrandProfile, getBrandDetails, updateBrandDetails} from "../_lib/brand"
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../_lib/AuthContext';
 
 const cloudName = "jokoyoski"; 
 const uploadPreset = "jokoyoski";
@@ -53,6 +54,8 @@ const BrandProfilePage = () => {
   const [tiktok, setTiktok] = useState("");
   const [website, setWebsite] = useState("");
   const router = useRouter();
+   const {user} = useAuth();
+  const isDisabled = user?.is_bank_information_verified || user?.is_business_verified || user?.is_identity_verified;
 
 
   const logoBlackRef = useRef<HTMLInputElement | null>(null);
@@ -138,7 +141,8 @@ const BrandProfilePage = () => {
       return;
     }
 
-    toast.success("Brand profile created successfully!");
+    toast.success("Brand Profile has been submitted for review");
+    router.push("/");
     setBrandExists(true); // After creation, show update button next time
   } catch (err: any) {
     toast.error(err?.message || "An error occurred");
@@ -201,7 +205,8 @@ const handleUpdate = async () => {
             value={brandName}
             onChange={(e) => setBrandName(e.target.value)}
             placeholder='Enter brand name'
-            className='p-[5px] text-black border border-gray-200 text-xs'
+            disabled={isDisabled}
+            className={`p-[5px] text-black border border-gray-200 text-xs ${isDisabled ? "cursor-not-allowed" : ""}`}
           />
         </div>
 
@@ -212,7 +217,9 @@ const handleUpdate = async () => {
             value={brandDescription}
             onChange={(e) => setBrandDescription(e.target.value)}
             placeholder='Tell us about your brand, philosophy, and what makes you unique'
-            className='w-full p-3 text-sm text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none h-32'
+            disabled={isDisabled}
+            className={`w-full p-3 text-sm text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none h-32 
+              ${isDisabled ? "cursor-not-allowed" : ""}`}
           />
           <p className='text-xs text-gray-500'>Minimum 100 characters, maximum 500 characters</p>
         </div>
@@ -273,7 +280,10 @@ const handleUpdate = async () => {
                   value={input.value}
                   onChange={(e) => input.setter(e.target.value)}
                   placeholder={input.placeholder}
-                  className='pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full'
+                   disabled={isDisabled}
+                  className={`pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full
+                     ${isDisabled ? "cursor-not-allowed" : ""}
+                  `}
                 />
               </div>
             </div>
@@ -300,7 +310,7 @@ const handleUpdate = async () => {
     </button>
   )}
 
-  {brandExists && (
+  {/* {brandExists && (
     <button
       onClick={handleUpdate}
       className='bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center'
@@ -308,7 +318,7 @@ const handleUpdate = async () => {
     >
       {loading ? "Loading..." : "Update"}
     </button>
-  )}
+  )} */}
 </div>
 
         </div>

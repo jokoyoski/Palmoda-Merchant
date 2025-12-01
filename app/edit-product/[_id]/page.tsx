@@ -374,7 +374,7 @@ useEffect(() => {
                 onChange={(e) => setProductName(e.target.value)}
                 placeholder="Enter  Product Name"
                 className="
-             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+             text-gray-500 p-1 text-sm disabled:cursor-not-allowed border border-gray-300 focus:ring-0"
              disabled={true}
               />
             </div>
@@ -390,7 +390,7 @@ useEffect(() => {
                 id=""
                 placeholder="Enter Unique Product Code"
                 className="
-             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+             text-gray-500 p-1 text-sm border disabled:cursor-not-allowed border-gray-300 focus:ring-0"
              disabled={true}
               />
             </div>
@@ -412,7 +412,9 @@ useEffect(() => {
                   setSelectedSubCategory(""); // Reset subcategory on category change
                 }}
                 disabled={true}
-                className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                className="border
+                disabled:cursor-not-allowed
+                border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="">
                   {isLoading ? "Loading..." : "-- Select Category --"}
@@ -470,7 +472,9 @@ useEffect(() => {
     setGender(selected);
   }}
   disabled={true}
-                className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                className="border border-gray-300 
+                disabled:cursor-not-allowed
+                text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="">
                   {genderLoading ? "Loading..." : "-- Select Gender --"}
@@ -498,7 +502,8 @@ useEffect(() => {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe your product in detail including key features, benefits, and unique selling points.."
               className="w-full p-3 text-sm text-black border border-gray-300 rounded-md
-     focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none h-32"
+     focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:cursor-not-allowed focus:border-blue-400 resize-none h-32"
+            disabled={true}
             />
           </div>
 
@@ -515,7 +520,7 @@ useEffect(() => {
   value={materials.join(", ")}  // convert array to string
   onChange={(e) => setMaterials(e.target.value.split(",").map(m => m.trim()))} 
   placeholder="Cotton, Polyester, Silk etc."
-  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 disabled:cursor-not-allowed"
   disabled={true}
 />
 
@@ -535,7 +540,7 @@ useEffect(() => {
                 onChange={(e) => setCareInstructions(e.target.value)}
                 placeholder="Machine wash cold, Dry clean only"
                 className="
-             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 disabled:cursor-not-allowed"
              disabled={true}
               />
             </div>

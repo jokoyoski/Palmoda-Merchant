@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { FaFileUpload } from "react-icons/fa";
+import { useAuth } from "../_lib/AuthContext";
 
 
 function UploadBox({
@@ -18,6 +19,11 @@ function UploadBox({
   isUploading: boolean
   onFileChange: (e: any) => void;
 }) {
+  const {user} = useAuth();
+  
+
+  console.log(user);
+  const isDisabled = isUploading || user?.is_bank_information_verified || user?.is_business_verified || user?.is_identity_verified;
   const isPdf = fileUrl?.endsWith(".pdf");
 
   return (
@@ -38,9 +44,9 @@ function UploadBox({
           )}
 
           <button
-            className="bg-black text-white mt-2 p-[5px] text-xs"
+            className={`bg-black text-white mt-2 p-[5px] text-xs ${ isDisabled? "cursor-not-allowed" : ""} `}
             onClick={onUploadClick}
-            disabled={isUploading}
+            disabled={isDisabled}
             type="button"
           >
             Change File

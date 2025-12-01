@@ -1,5 +1,7 @@
+"use client";
 import React, { ChangeEvent } from "react";
 import { FaFileUpload } from "react-icons/fa";
+import { useAuth } from "../_lib/AuthContext";
 
 interface BrandUploadBoxProps {
   title: string;
@@ -26,14 +28,20 @@ const BrandUploadBox: React.FC<BrandUploadBoxProps> = ({
   textColor = "text-gray-500",
   height = "h-32",
 }) => {
+  const {user} = useAuth();
+    const isDisabled = user?.is_bank_information_verified || user?.is_business_verified || user?.is_identity_verified;
+  
+  
   return (
     <div className="flex flex-col gap-2">
       <label className="text-black font-semibold text-xs">{title}</label>
 
       <div
-        className={`border-2 border-dashed border-gray-300 ${bgColor} rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition relative ${height}`}
-        onClick={onUploadClick}
-      >
+        className={`border-2 border-dashed border-gray-300 ${bgColor} rounded-md flex flex-col items-center justify-center transition relative ${height} 
+             ${isDisabled ? "cursor-not-allowed opacity-60 bg-gray-100" : "cursor-pointer hover:bg-gray-50"}`}
+        // 👇 FIX: Disable onClick handler if isDisabled is true
+        onClick={isDisabled ? undefined : onUploadClick}
+      >
         {fileUrl ? (
           // ✅ Show image preview
           <img
