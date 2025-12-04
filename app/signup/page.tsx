@@ -127,7 +127,7 @@ function Page() {
   // Called after OTP verification
   const handleVerified = () => {
     localStorage.removeItem("vendorSignupState"); // cleanup
-    toast.success("You can now log in!");
+    // toast.success("You can now log in!");
     router.push("/login");
   };
 

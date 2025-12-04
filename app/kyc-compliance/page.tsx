@@ -8,14 +8,12 @@ import { toast } from "react-toastify";
 import UploadBox from "./Upload";
 import { useAuth } from "../_lib/AuthContext";
 
-// Cloudinary config (same example cloud & preset you've used earlier)
-
+// Cloudinary config
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
 
 const uploadToCloudinary = async (file: File): Promise<string | null> => {
   try {
-    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File size exceeds 5MB limit");
       return null;
@@ -37,7 +35,6 @@ const uploadToCloudinary = async (file: File): Promise<string | null> => {
   } catch (e: any) {
     console.error("Cloudinary upload error:", e);
 
-    // More specific error messages
     if (e.response?.data?.error?.message) {
       toast.error(`Upload failed: ${e.response.data.error.message}`);
     } else if (e.response?.status === 400) {
@@ -57,12 +54,12 @@ function Page() {
   const [ownerIdUrl, setOwnerIdUrl] = useState<string>("");
   const [bankStatementUrl, setBankStatementUrl] = useState<string>("");
 
-  // refs for hidden file inputs (keeps UI identical)
+  // refs for hidden file inputs
   const businessInputRef = useRef<HTMLInputElement | null>(null);
   const ownerInputRef = useRef<HTMLInputElement | null>(null);
   const bankInputRef = useRef<HTMLInputElement | null>(null);
 
-  // your original form fields (state only, no markup changes)
+  // form fields
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
@@ -79,18 +76,95 @@ function Page() {
   const [certified, setCertified] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+  
   const { user } = useAuth();
   const isDisabled =
     user?.is_bank_information_verified ||
     user?.is_business_verified ||
     user?.is_identity_verified;
 
+  // Check if draft exists on mount
+  useEffect(() => {
+    const draft = localStorage.getItem('kyc_draft');
+    if (draft) {
+      setHasDraft(true);
+    }
+  }, []);
+
+  // Save draft manually
+  const saveDraft = () => {
+    try {
+      const draftData = {
+        businessDocUrl,
+        ownerIdUrl,
+        bankStatementUrl,
+        businessName,
+        businessType,
+        registrationNumber,
+        taxId,
+        address1,
+        address2,
+        city,
+        stateName,
+        country,
+        postalCode,
+        bankName,
+        accountHolder,
+        accountNumber,
+        certified,
+        timestamp: new Date().toISOString()
+      };
+
+      localStorage.setItem('kyc_draft', JSON.stringify(draftData));
+      setHasDraft(true);
+      toast.success('Draft saved successfully!');
+    } catch (err) {
+      toast.error('Failed to save draft');
+      console.error(err);
+    }
+  };
+
+  // Load draft
+  const loadDraft = () => {
+    try {
+      const draft = localStorage.getItem('kyc_draft');
+      if (draft) {
+        const draftData = JSON.parse(draft);
+        
+        // Populate all fields
+        setBusinessDocUrl(draftData.businessDocUrl || "");
+        setOwnerIdUrl(draftData.ownerIdUrl || "");
+        setBankStatementUrl(draftData.bankStatementUrl || "");
+        setBusinessName(draftData.businessName || "");
+        setBusinessType(draftData.businessType || "");
+        setRegistrationNumber(draftData.registrationNumber || "");
+        setTaxId(draftData.taxId || "");
+        setAddress1(draftData.address1 || "");
+        setAddress2(draftData.address2 || "");
+        setCity(draftData.city || "");
+        setStateName(draftData.stateName || "");
+        setCountry(draftData.country || "");
+        setPostalCode(draftData.postalCode || "");
+        setBankName(draftData.bankName || "");
+        setAccountHolder(draftData.accountHolder || "");
+        setAccountNumber(draftData.accountNumber || "");
+        setCertified(draftData.certified || false);
+        
+        toast.success('Draft loaded successfully!');
+      }
+    } catch (err) {
+      toast.error('Failed to load draft');
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     const fetchKyc = async () => {
       setLoading(true);
       try {
         const res = await getKycDetails();
-        // console.log(res);
         if (res.success === false) {
           toast.error(res.message);
         } else {
@@ -122,7 +196,6 @@ function Page() {
     fetchKyc();
   }, []);
 
-  // handle file selection -> upload -> set URL
   const handleFileChange = async (
     e: ChangeEvent<HTMLInputElement>,
     type: "business" | "owner" | "bank"
@@ -139,7 +212,6 @@ function Page() {
       if (type === "business") setBusinessDocUrl(url);
       if (type === "owner") setOwnerIdUrl(url);
       if (type === "bank") setBankStatementUrl(url);
-      toast.success("Upload successful");
     }
     setImageUploading(false);
     toast.update(toastId, {
@@ -151,9 +223,7 @@ function Page() {
     setImageUploading(false);
   };
 
-  // Continue button handler — sends the URLs + fields to completeKyc
   const handleContinue = async () => {
-    // basic checks — preserve original UI/labels, only add these runtime checks
     if (!businessDocUrl || !ownerIdUrl || !bankStatementUrl) {
       toast.error(
         "Please upload Business Registration, Owner ID and Bank Statement."
@@ -161,7 +231,7 @@ function Page() {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       const res = await completeKyc(
         businessDocUrl,
@@ -183,15 +253,16 @@ function Page() {
 
       if (res?.success) {
         toast.success("KYC has been submitted for review");
+        // Clear draft after successful submission
+        localStorage.removeItem('kyc_draft');
+        setHasDraft(false);
       } else {
-        // backend may return { success: false, message }
         toast.error(res?.message || "KYC failed");
-        // console.log(res?.message)
       }
     } catch (err: any) {
       toast.error(err?.message || "An error occurred");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -222,7 +293,6 @@ function Page() {
             <hr className="text-gray-200  mb-2" />
             {/* documents upload div */}
             <section className="flex flex-wrap items-center gap-5">
-              {/* begining of business reg doc */}
               <UploadBox
                 isUploading={imageUploading}
                 title="Business Registration Document"
@@ -232,13 +302,9 @@ function Page() {
                 onFileChange={(e) => handleFileChange(e, "business")}
               />
 
-              {/* ending of business reg doc */}
-              {/* begining of owner id  */}
-              {/* ending of owner id */}
-              {/* begining of bank statement */}
               <UploadBox
                 isUploading={imageUploading}
-                title="Valid Owner ID (Passport/National ID/Driver’s License)"
+                title="Valid Owner ID (Passport/National ID/Driver's License)"
                 fileUrl={ownerIdUrl}
                 onUploadClick={() => ownerInputRef.current?.click()}
                 inputRef={ownerInputRef}
@@ -253,10 +319,7 @@ function Page() {
                 inputRef={bankInputRef}
                 onFileChange={(e) => handleFileChange(e, "bank")}
               />
-
-              {/* ending of bank statement */}
             </section>
-            {/* end of documents upload div */}
             <hr className="text-gray-200 mt-2 mb-4" />
             {/* begining of business details 1 */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
@@ -541,9 +604,34 @@ function Page() {
             </div>
 
             <div className="flex justify-between items-center">
-              <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
-                Back
-              </button>
+              <div className="flex gap-2">
+                <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
+                  Back
+                </button>
+                
+                {/* Save Draft Button */}
+                <button
+                  className="bg-gray-200 border border-gray-300 text-black p-[5px] w-[120px] text-sm hover:bg-gray-300"
+                  onClick={saveDraft}
+                  type="button"
+                  disabled={loading || isDisabled}
+                >
+                  Save Draft
+                </button>
+
+                {/* Load Draft Button - only shows if draft exists */}
+                {hasDraft && (
+                  <button
+                    className="bg-black text-white p-[5px] w-[120px] text-sm "
+                    onClick={loadDraft}
+                    type="button"
+                    disabled={loading || isDisabled}
+                  >
+                    Load Draft
+                  </button>
+                )}
+              </div>
+
               <button
                 className={`p-[5px] w-[120px] text-sm text-white ${
                   certified ? "bg-black" : "bg-gray-400 cursor-not-allowed"
@@ -552,7 +640,7 @@ function Page() {
                 type="button"
                 disabled={!certified || loading || isDisabled}
               >
-                {loading ? "Submitting..." : "Continue"}
+                {submitting ? "Submitting..." : "Continue"}
               </button>
             </div>
           </div>

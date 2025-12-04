@@ -120,11 +120,15 @@ function page() {
               Welcome back, {businessName}
             </p>
           </div>
-          <Link href="/product-upload">
+
+          { user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified &&   <Link href="/product-upload">
             <button className="bg-black capitalize  text-white p-[5px] w-fit text-xs">
               Upload new product
             </button>
-          </Link>
+          </Link>}
+         
         </div>
         <DashboardGrid products={products} />
 

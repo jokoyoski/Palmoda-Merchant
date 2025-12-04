@@ -56,7 +56,8 @@ const BrandProfilePage = () => {
   const [logoBlackUrl, setLogoBlackUrl] = useState("");
   const [logoWhiteUrl, setLogoWhiteUrl] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ Loading state
+  const [loading, setLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [brandName, setBrandName] = useState("");
   const [brandDescription, setBrandDescription] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -66,6 +67,8 @@ const BrandProfilePage = () => {
   const [brandExists, setBrandExists] = useState(false);
   const [tiktok, setTiktok] = useState("");
   const [website, setWebsite] = useState("");
+  const [hasDraft, setHasDraft] = useState(false);
+  
   const router = useRouter();
   const { user } = useAuth();
   const isDisabled =
@@ -77,19 +80,81 @@ const BrandProfilePage = () => {
   const logoWhiteRef = useRef<HTMLInputElement | null>(null);
   const bannerRef = useRef<HTMLInputElement | null>(null);
 
+  // Check if draft exists on mount
+  useEffect(() => {
+    const draft = localStorage.getItem('brand_draft');
+    if (draft) {
+      setHasDraft(true);
+    }
+  }, []);
+
+  // Save draft manually
+  const saveDraft = () => {
+    try {
+      const draftData = {
+        logoBlackUrl,
+        logoWhiteUrl,
+        bannerUrl,
+        brandName,
+        brandDescription,
+        instagram,
+        facebook,
+        twitter,
+        pinterest,
+        tiktok,
+        website,
+        timestamp: new Date().toISOString()
+      };
+
+      localStorage.setItem('brand_draft', JSON.stringify(draftData));
+      setHasDraft(true);
+      toast.success('Draft saved successfully!');
+    } catch (err) {
+      toast.error('Failed to save draft');
+      console.error(err);
+    }
+  };
+
+  // Load draft
+  const loadDraft = () => {
+    try {
+      const draft = localStorage.getItem('brand_draft');
+      if (draft) {
+        const draftData = JSON.parse(draft);
+        
+        // Populate all fields
+        setLogoBlackUrl(draftData.logoBlackUrl || "");
+        setLogoWhiteUrl(draftData.logoWhiteUrl || "");
+        setBannerUrl(draftData.bannerUrl || "");
+        setBrandName(draftData.brandName || "");
+        setBrandDescription(draftData.brandDescription || "");
+        setInstagram(draftData.instagram || "");
+        setFacebook(draftData.facebook || "");
+        setTwitter(draftData.twitter || "");
+        setPinterest(draftData.pinterest || "");
+        setTiktok(draftData.tiktok || "");
+        setWebsite(draftData.website || "");
+        
+        toast.success('Draft loaded successfully!');
+      }
+    } catch (err) {
+      toast.error('Failed to load draft');
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     const fetchBrand = async () => {
       setLoading(true);
       try {
         const res = await getBrandDetails();
-        // console.log("Brand Details>>>", res);
 
         if (
           res.success === false ||
           !res.data ||
           Object.keys(res.data).length === 0
         ) {
-          setBrandExists(false); // No brand exists
+          setBrandExists(false);
         } else {
           const data = res.data;
           setBrandName(data.brand_name || "");
@@ -104,7 +169,7 @@ const BrandProfilePage = () => {
           setTiktok(data.tiktok_handle || "");
           setWebsite(data.website_url || "");
 
-          setBrandExists(true); // Brand exists
+          setBrandExists(true);
         }
       } catch (err: any) {
         toast.error(err?.message || "Failed to fetch brand details");
@@ -124,6 +189,8 @@ const BrandProfilePage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const toastId = toast.loading("Uploading images...");
+
     const url = await uploadToCloudinary(file);
     if (!url) return;
 
@@ -131,7 +198,12 @@ const BrandProfilePage = () => {
     if (type === "logoWhite") setLogoWhiteUrl(url);
     if (type === "banner") setBannerUrl(url);
 
-    toast.success("Upload successful");
+    toast.update(toastId, {
+          render: "Image uploaded successfully!",
+          type: "success",
+          isLoading: false,
+          autoClose: 2000,
+        });
   };
 
   const handleCreate = async () => {
@@ -146,7 +218,7 @@ const BrandProfilePage = () => {
       return;
     }
 
-    setLoading(true);
+    setCreating(true);
     try {
       const res = await setUpBrandProfile(
         brandName,
@@ -168,12 +240,14 @@ const BrandProfilePage = () => {
       }
 
       toast.success("Brand Profile has been submitted for review");
-      // router.push("/");
-      setBrandExists(true); // After creation, show update button next time
+      // Clear draft after successful submission
+      localStorage.removeItem('brand_draft');
+      setHasDraft(false);
+      setBrandExists(true);
     } catch (err: any) {
       toast.error(err?.message || "An error occurred");
     } finally {
-      setLoading(false);
+      setCreating(false);
     }
   };
 
@@ -211,6 +285,9 @@ const BrandProfilePage = () => {
       }
 
       toast.success("Brand profile updated successfully!");
+      // Clear draft after successful update
+      localStorage.removeItem('brand_draft');
+      setHasDraft(false);
     } catch (err: any) {
       toast.error(err?.message || "An error occurred");
     } finally {
@@ -374,9 +451,29 @@ const BrandProfilePage = () => {
 
         {/* Actions */}
         <div className="flex justify-between items-center my-3">
-          <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
-            Save as Draft
-          </button>
+          <div className="flex gap-2">
+            <button 
+              className="bg-gray-200 border border-gray-300 text-black p-[5px] w-[120px] text-sm hover:bg-gray-300"
+              onClick={saveDraft}
+              type="button"
+              disabled={loading || creating || isDisabled}
+            >
+              {hasDraft ? "Update Draft" : "Save Draft"}
+            </button>
+
+            {/* Load Draft Button - only shows if draft exists */}
+            {hasDraft && (
+              <button
+                className="bg-black text-white p-[5px] w-[120px] text-sm "
+                onClick={loadDraft}
+                type="button"
+                disabled={loading || creating || isDisabled}
+              >
+                Load Draft
+              </button>
+            )}
+          </div>
+
           <div className="flex gap-2">
             <button
               onClick={() => router.back()}
@@ -389,21 +486,21 @@ const BrandProfilePage = () => {
               <button
                 onClick={handleCreate}
                 className="bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center"
-                disabled={loading}
+                disabled={creating || loading || isDisabled}
               >
-                {loading ? "Loading..." : "Create"}
+                {creating ? "Loading..." : "Create"}
               </button>
             )}
 
-            {/* {brandExists && (
-    <button
-      onClick={handleUpdate}
-      className='bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center'
-      disabled={loading}
-    >
-      {loading ? "Loading..." : "Update"}
-    </button>
-  )} */}
+            {brandExists && (
+              <button
+                onClick={handleUpdate}
+                className='bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center'
+                disabled={loading || creating || isDisabled}
+              >
+                {loading ? "Loading..." : "Update"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -415,9 +512,9 @@ const BrandProfilePage = () => {
             <BiSolidInfoCircle />
             <p>Need help setting up your brand profile? View our guide</p>
           </div>
-          <Link href="/" className="text-black font-semibold text-sm">
+          {/* <Link href="/" className="text-black font-semibold text-sm">
             Skip for now
-          </Link>
+          </Link> */}
         </div>
       </div>
     </section>

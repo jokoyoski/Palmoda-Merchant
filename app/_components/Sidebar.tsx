@@ -16,11 +16,34 @@ import { useAuth } from "../_lib/AuthContext";
 import { FaBell } from "react-icons/fa";
 import path from "path/win32";
 import { FaMessage } from "react-icons/fa6";
+import type { Notification as MyNotification } from "../_lib/type";
+import { getNotifications, readNotification } from "../_lib/notifications";
+import { toast } from "react-toastify";
 
 function Sidebar() {
   const pathname = usePathname();
   const { logout, user } = useAuth();
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+    const [notifications, setNotifications] = useState<MyNotification[]>([]);
+    const [expandedId, setExpandedId] = useState<string | null>(null); // track expanded notification
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+          setLoading(true);
+          try {
+            const res = await getNotifications();
+            const notifs: MyNotification[] = res.data?.notifications || [];
+            setNotifications(notifs);
+          } catch (error: any) {
+            toast.error(error?.message || "Failed to fetch notifications");
+          } finally {
+            setLoading(false);
+          }
+        };
+    
+        fetchNotifications();
+      }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -93,7 +116,19 @@ function Sidebar() {
           } font-semibold items-center ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
   
         >
-          <FaBell /> Notifications
+         <div className="relative flex items-center gap-2">
+  <FaBell />
+  <span>Notifications</span>
+
+  {notifications.length > 0 && (
+    <span
+      className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+    >
+      {notifications.length}
+    </span>
+  )}
+</div>
+ 
         </Link>
 
         <Link

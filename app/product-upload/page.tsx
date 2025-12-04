@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaFileUpload } from "react-icons/fa";
 import { createProduct } from "../_lib/product";
 import { toast } from "react-toastify";
@@ -78,9 +78,79 @@ function page() {
   const [newColorName, setNewColorName] = useState("");
   const [newColorCode, setNewColorCode] = useState("");
   const [addingColor, setAddingColor] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
   const router = useRouter();
 
   console.log(user);
+
+  // Check if draft exists on mount
+  useEffect(() => {
+    const draft = localStorage.getItem('product_draft');
+    if (draft) {
+      setHasDraft(true);
+    }
+  }, []);
+
+  // Save draft manually
+  const saveDraft = () => {
+    try {
+      const draftData = {
+        productName,
+        sku,
+        description,
+        careInstructions,
+        materials,
+        price,
+        comparePrice,
+        inventory,
+        images,
+        colors,
+        sizes,
+        selectedCategory,
+        selectedSubCategory,
+        gender,
+        timestamp: new Date().toISOString()
+      };
+
+      localStorage.setItem('product_draft', JSON.stringify(draftData));
+      setHasDraft(true);
+      toast.success('Draft saved successfully!');
+    } catch (err) {
+      toast.error('Failed to save draft');
+      console.error(err);
+    }
+  };
+
+  // Load draft
+  const loadDraft = () => {
+    try {
+      const draft = localStorage.getItem('product_draft');
+      if (draft) {
+        const draftData = JSON.parse(draft);
+        
+        // Populate all fields
+        setProductName(draftData.productName || "");
+        setSku(draftData.sku || "");
+        setDescription(draftData.description || "");
+        setCareInstructions(draftData.careInstructions || "");
+        setMaterials(draftData.materials || "");
+        setPrice(draftData.price || "");
+        setComparePrice(draftData.comparePrice || "");
+        setInventory(draftData.inventory || 0);
+        setImages(draftData.images || []);
+        setColors(draftData.colors || []);
+        setSizes(draftData.sizes || []);
+        setSelectedCategory(draftData.selectedCategory || "");
+        setSelectedSubCategory(draftData.selectedSubCategory || "");
+        setGender(draftData.gender || "");
+        
+        toast.success('Draft loaded successfully!');
+      }
+    } catch (err) {
+      toast.error('Failed to load draft');
+      console.error(err);
+    }
+  };
 
   // Category and subcategory data
   const categories: Record<string, string[]> = {
@@ -268,7 +338,9 @@ function page() {
 
     if (res.success) {
       toast.success("Product has been uploaded for review!");
-       router.push("/");
+      // Clear draft after successful submission
+      localStorage.removeItem('product_draft');
+      setHasDraft(false);
       // Reset form or redirect
     } else {
       toast.error(res.message);
@@ -628,12 +700,29 @@ function page() {
           </div>
 
           <div className="flex my-3 justify-between items-center">
-            <button
-              disabled
-              className="bg-inherit border opacity-30 cursor-not-allowed border-black text-black p-[5px] w-[120px] text-sm"
-            >
-              Save as Draft
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="bg-gray-200 border border-gray-300 text-black p-[5px] w-[120px] text-sm hover:bg-gray-300"
+                onClick={saveDraft}
+                type="button"
+                disabled={loading}
+              >
+                {hasDraft ? "Update Draft" : "Save Draft"}
+              </button>
+
+              {/* Load Draft Button - only shows if draft exists */}
+              {hasDraft && (
+                <button
+                  className="bg-black text-white p-[5px] w-[120px] text-sm hover:bg-gray-800"
+                  onClick={loadDraft}
+                  type="button"
+                  disabled={loading}
+                >
+                  Load Draft
+                </button>
+              )}
+            </div>
+
             <div className="flex items-center gap-2">
               <button disabled className="bg-inherit border opacity-30 cursor-not-allowed border-black text-black p-[5px] w-[120px] text-sm">
                 Preview Product
