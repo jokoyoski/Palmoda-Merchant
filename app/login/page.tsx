@@ -23,7 +23,7 @@ function Page() {
 
       if (res.success) {
         login(res);
-        toast.success("Login Successful");
+        // toast.success("Login Successful");
         setLoading(false);
       }
     } catch (error: any) {

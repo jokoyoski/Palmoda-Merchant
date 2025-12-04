@@ -17,36 +17,17 @@ import { FaBell } from "react-icons/fa";
 import path from "path/win32";
 import { FaMessage } from "react-icons/fa6";
 import type { Notification as MyNotification } from "../_lib/type";
-import { getNotifications, readNotification, notificationCount } from "../_lib/notifications";
+import { getNotifications, notificationCount, readNotification } from "../_lib/notifications";
 import { toast } from "react-toastify";
 
 function Sidebar() {
   const pathname = usePathname();
   const { logout, user } = useAuth();
   const [token, setToken] = useState<string | null>(null);
+  const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
-    const [notifications, setNotifications] = useState<MyNotification[]>([]);
-    const [count, setCount] = useState(0);
-    const [expandedId, setExpandedId] = useState<string | null>(null); // track expanded notification
-
-    useEffect(() => {
-        const fetchNotifications = async () => {
-          setLoading(true);
-          try {
-            const res = await notificationCount();
-            console.log(res);
-            setCount(res?.data?.count);
-            const notifs: MyNotification[] = res.data?.notifications || [];
-            setNotifications(notifs);
-          } catch (error: any) {
-            toast.error(error?.message || "Failed to fetch notifications");
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        fetchNotifications();
-      }, []);
+  const [notifications, setNotifications] = useState<MyNotification[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null); // track expanded notification
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -54,16 +35,41 @@ function Sidebar() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!token) return;
+ useEffect(() => {
+  const storedToken = localStorage.getItem("token");
+  if (!storedToken) {
+    console.log("No token in localStorage");
+    return;
+  }
+
+  setToken(storedToken);   // set token
+
+  const fetchNotifications = async () => {
+    setLoading(true);
+    try {
+      const res = await getNotifications();
+      console.log("Notifications response:", res);
+
+      const notifs: MyNotification[] = res?.data?.notifications || [];
+      setNotifications(notifs);
+    } catch (error) {
+      console.log("Notification error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchNotifications();
+}, []);
+
+useEffect(() => {
     const fetchNotifications = async () => {
       setLoading(true);
       try {
-        const res = await getNotifications();
-        const notifs: MyNotification[] = res?.data?.notifications || [];
-        setNotifications(notifs);
+        const res = await notificationCount();
+        setCount(res?.data?.count);
       } catch (error: any) {
-        toast.error(error?.message || "Failed to fetch notifications");
+        // toast.error(error?.message || "Failed to fetch notifications");
       } finally {
         setLoading(false);
       }
@@ -71,6 +77,8 @@ function Sidebar() {
 
     fetchNotifications();
   }, []);
+
+
 
   // Hide sidebar on both sign-up and login pages
   if (pathname.includes("signup") || pathname.includes("login")) {
@@ -138,15 +146,10 @@ function Sidebar() {
             <FaBell />
             <span>Notifications</span>
 
-  {count > 0 && (
-    <span
-      className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
-    >
-      {count}
-    </span>
-  )}
-</div>
- 
+              <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {count}
+              </span>
+          </div>
         </Link>
 
         <Link

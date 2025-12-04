@@ -1,11 +1,11 @@
 import axios from "axios"
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
 
-export const getNotifications = async () => {
+export const getNotifications = async (pageNumber = 1) => {
     try {
       const token = localStorage.getItem("token");
     if (!token) return console.log("No token found");
-    const res = await axios.get(`${backendUrl}/notification/all`, {
+    const res = await axios.get(`${backendUrl}/notification/all?page_number=${pageNumber}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }

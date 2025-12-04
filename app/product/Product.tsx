@@ -121,14 +121,14 @@ const formatFabrics = (fabrics: string[]) => fabrics?.join(", ") || "N/A";
                 <div className="flex flex-col gap-3">
                   <h1 className="text-sm font-semibold text-black">Product Details</h1>
                   <p className="text-xs text-black flex gap-2">
-  <span className="font-semibold">Category:</span> {mapIdsToNames(product.categories, categoriesArray)}
+  <span className="font-semibold">Category:</span> {mapIdsToNames(product.categories, categoriesArray || [])}
 </p>
 
                   <p className="text-xs text-black flex gap-2"><span className="font-semibold">Color:</span>
-                  {mapIdsToNames(product.colors, colorsArray)}
+                  {mapIdsToNames(product.colors, colorsArray || [])}
                   </p>
                   <p className="text-xs text-black flex gap-2"><span className="font-semibold">
-                    Sizes:</span> {mapIdsToNames(product.sizes, sizesArray)}</p>
+                    Sizes:</span> {mapIdsToNames(product.sizes, sizesArray || [])}</p>
                   <p className="text-xs text-black flex gap-2"><span className="font-semibold">
                     Material:</span> {formatFabrics(product.fabrics)}</p>
                 </div>

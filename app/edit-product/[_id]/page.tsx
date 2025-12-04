@@ -244,6 +244,7 @@ useEffect(() => {
   if (!products.length) return;
 
   const foundProduct = products.find((p) => p._id === _id);
+  console.log(foundProduct)
   if (!foundProduct) return;
 
   setProductName(foundProduct.name);
@@ -439,17 +440,16 @@ useEffect(() => {
                 id="subcategory"
                 value={selectedSubCategory}
                 onChange={(e) => setSelectedSubCategory(e.target.value)}
-                disabled={!selectedCategory}
-                className={`border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black ${
-                  !selectedCategory ? "bg-gray-100 cursor-not-allowed" : ""
-                }`}
+                disabled={!selectedCategory || true}
+                className={`border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black
+                  disabled:cursor-not-allowed`}
               >
                 <option value="">
                   {subCategoryLoader
                     ? "Loading..."
                     : "-- Select Subcategory --"}
                 </option>
-                {subCategoriesArray.map((sub) => (
+                {subCategoriesArray?.map((sub) => (
                   <option key={sub._id} value={sub._id}>
                     {sub.name}
                   </option>
@@ -479,7 +479,7 @@ useEffect(() => {
                 <option value="">
                   {genderLoading ? "Loading..." : "-- Select Gender --"}
                 </option>
-                {gendersArray.map((gender) => (
+                {gendersArray?.map((gender) => (
                   <option key={gender._id} value={gender._id}>
                     {gender.name}
                   </option>
@@ -614,7 +614,7 @@ useEffect(() => {
               <p className="text-xs text-gray-600 mb-1">Available Colors</p>
               <div className="flex gap-2 flex-wrap">
                 {colorsLoader && <Button isLoading>Loading</Button>}
-                {colorsArray.map((color) => (
+                {colorsArray?.map((color) => (
                   <button
                     key={color._id}
                     onClick={() =>
@@ -634,7 +634,7 @@ useEffect(() => {
             <div>
               <p className="text-xs text-gray-600 mb-1">Available Sizes</p>
               <div className="flex gap-2 flex-wrap">
-                {sizesArray.map((size) => (
+                {sizesArray?.map((size) => (
                   <button
                     key={size._id}
                     onClick={() => toggleSelection(size._id, sizes, setSizes)}
@@ -698,9 +698,9 @@ useEffect(() => {
           </div>
 
           <div className="flex my-3 justify-between items-center">
-            <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
+            {/* <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
               Save as Draft
-            </button>
+            </button> */}
             <div className="flex items-center gap-2">
               
               <button

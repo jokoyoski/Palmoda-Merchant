@@ -80,6 +80,7 @@ function Page() {
   const [hasDraft, setHasDraft] = useState(false);
   
   const { user } = useAuth();
+  console.log(user);
   const isDisabled =
     user?.is_bank_information_verified ||
     user?.is_business_verified ||

@@ -455,7 +455,7 @@ function page() {
                     ? "Loading..."
                     : "-- Select Subcategory --"}
                 </option>
-                {subCategoriesArray.map((sub) => (
+                {subCategoriesArray?.map((sub) => (
                   <option key={sub._id} value={sub._id}>
                     {sub.name}
                   </option>
@@ -479,7 +479,7 @@ function page() {
                 <option value="">
                   {genderLoading ? "Loading..." : "-- Select Gender --"}
                 </option>
-                {gendersArray.map((gender) => (
+                {gendersArray?.map((gender) => (
                   <option key={gender._id} value={gender._id}>
                     {gender.name}
                   </option>
@@ -609,7 +609,7 @@ function page() {
               <p className="text-xs text-gray-600 mb-1">Available Colors</p>
               <div className="flex gap-2 flex-wrap">
                 {colorsLoader && <Button isLoading>Loading</Button>}
-                {colorsArray.map((color) => (
+                {colorsArray?.map((color) => (
                   <button
                     key={color._id}
                     onClick={() =>
@@ -636,7 +636,7 @@ function page() {
             <div>
               <p className="text-xs text-gray-600 mb-1">Available Sizes</p>
               <div className="flex gap-2 flex-wrap">
-                {sizesArray.map((size) => (
+                {sizesArray?.map((size) => (
                   <button
                     key={size._id}
                     onClick={() => toggleSelection(size._id, sizes, setSizes)}
