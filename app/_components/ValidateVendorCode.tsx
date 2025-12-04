@@ -53,6 +53,9 @@ const VerifyVendorCode: React.FC<VerifyVendorCodeProps> = ({ email, onVerified, 
     }
   };
 
+  if (!email) return null; // or show a loading state
+
+
   return (
     <div className="max-w-md mx-auto mt-30 p-6 bg-white shadow-lg rounded-md">
       <h2 className="text-xl font-semibold mb-4 text-center">Verify Your Email</h2>

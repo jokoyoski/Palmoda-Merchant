@@ -8,6 +8,7 @@ export const getMessages = async () => {
       return {
         success: false,
         message: "No token found",
+        data: null, // always include data field
       };
     }
     const res = await axios.get(`${backendUrl}/message/all`, {

@@ -16,7 +16,10 @@ function page() {
       try {
         const res = await getNotifications();
         const notifs: MyNotification[] = res.data?.notifications || [];
-        setNotifications(notifs);
+        const sorted = [...notifs].sort(
+  (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+);
+      setNotifications(sorted);
       } catch (error: any) {
         toast.error(error?.message || "Failed to fetch notifications");
       } finally {
@@ -94,15 +97,18 @@ function page() {
                     <p>{notif.content}</p>
                     {notif.details && (
                       <div className="border-t border-gray-200 pt-2 mt-2 space-y-1">
-                        <p>
+                       
+                       {notif.details.amount &&  <p>
                           <strong>Amount:</strong> NGN{notif.details.amount}
-                        </p>
-                        <p>
+                        </p>}
+                        
+                        {notif.details.status &&  <p>
                           <strong>Status:</strong> {notif.details.status}
-                        </p>
-                        <p>
+                        </p>}
+                       {notif.details.transaction_reference &&  <p>
                           <strong>Reference:</strong> {notif.details.transaction_reference}
-                        </p>
+                        </p>}
+                       
                         {notif.details.rejection_reason && (
                           <p>
                             <strong>Rejection Reason:</strong> {notif.details.rejection_reason}

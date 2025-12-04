@@ -17,7 +17,7 @@ import { FaBell } from "react-icons/fa";
 import path from "path/win32";
 import { FaMessage } from "react-icons/fa6";
 import type { Notification as MyNotification } from "../_lib/type";
-import { getNotifications, readNotification } from "../_lib/notifications";
+import { getNotifications, readNotification, notificationCount } from "../_lib/notifications";
 import { toast } from "react-toastify";
 
 function Sidebar() {
@@ -26,13 +26,16 @@ function Sidebar() {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
     const [notifications, setNotifications] = useState<MyNotification[]>([]);
+    const [count, setCount] = useState(0);
     const [expandedId, setExpandedId] = useState<string | null>(null); // track expanded notification
 
     useEffect(() => {
         const fetchNotifications = async () => {
           setLoading(true);
           try {
-            const res = await getNotifications();
+            const res = await notificationCount();
+            console.log(res);
+            setCount(res.data.count);
             const notifs: MyNotification[] = res.data?.notifications || [];
             setNotifications(notifs);
           } catch (error: any) {
@@ -120,11 +123,11 @@ function Sidebar() {
   <FaBell />
   <span>Notifications</span>
 
-  {notifications.length > 0 && (
+  {count > 0 && (
     <span
       className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
     >
-      {notifications.length}
+      {count}
     </span>
   )}
 </div>

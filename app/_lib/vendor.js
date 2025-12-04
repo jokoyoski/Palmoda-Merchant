@@ -103,7 +103,13 @@ export const completeKyc = async (
 ) => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
+   if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
 
     const res = await axios.post(
       `${backendUrl}/vendor/complete-kyc`,
@@ -153,7 +159,13 @@ export const completeKyc = async (
 export const getKycDetails = async (params) => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
+    if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
     const res = await axios.get(`${backendUrl}/vendor/get-kyc-information`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -179,7 +191,13 @@ export const getKycDetails = async (params) => {
 export const fetchAnalytics = async () => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
+    if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
     const res = await axios.get(`${backendUrl}/order/analytics`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -205,7 +223,13 @@ export const fetchAnalytics = async () => {
 export const getOrders = async () => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
+    if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
     const res = await axios.get(`${backendUrl}/order/all`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -231,7 +255,13 @@ export const getOrders = async () => {
 export const activateWallet = async (bvn) => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
+    if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
     const res = await axios.post(
       `${backendUrl}/vendor/activate-wallet`,
       { bvn },
@@ -261,7 +291,13 @@ export const activateWallet = async (bvn) => {
 export const getWallet = async () => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
+    if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
     const res = await axios.get(`${backendUrl}/vendor/wallet`, {
       headers: {
         Authorization: `Bearer ${token}`,

@@ -9,9 +9,7 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 // 1. Modify fetch function to accept token as an argument
 const fetchColors = async (token: string | null) => {
-  if (!token) {
-    throw new Error("No auth token available");
-  }
+  if (!token) return null;
 
   const response = await axios.get<ColorResponse>(`${backendUrl}/color/`, {
     headers: {

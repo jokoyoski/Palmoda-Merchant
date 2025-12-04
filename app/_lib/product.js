@@ -6,7 +6,13 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 export const createProduct = async (productData) => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) return { success: false, message: "No token found" };
+    if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
 
     const res = await axios.post(
       `${backendUrl}/vendor/add-products`,
@@ -52,7 +58,13 @@ export const createProduct = async (productData) => {
 export const fetchProducts = async (page_number, page_size) => {
     try {
         const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
+    if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
     const decoded = jwtDecode(token);
     console.log(decoded);
 
@@ -81,7 +93,13 @@ export const fetchProducts = async (page_number, page_size) => {
 export const updateProduct = async (productData, id) => {
    try {
       const token = localStorage.getItem("token");
-    if (!token) return { success: false, message: "No token found" };
+   if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
     const res = await axios.put(`${backendUrl}/vendor/update-product/${id}`, {
     name:productData.name,
     images:productData.images,
@@ -123,7 +141,13 @@ return res.data;
 export const deleteProduct = async (id) => {
   try {
       const token = localStorage.getItem("token");
-    if (!token) return { success: false, message: "No token found" };
+  if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null, // always include data field
+      };
+    }
     const res = await axios.delete(`${backendUrl}/vendor/delete-product/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`

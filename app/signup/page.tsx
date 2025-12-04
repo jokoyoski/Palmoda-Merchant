@@ -24,22 +24,40 @@ function Page() {
   const router = useRouter();
   const verificationBtnRef = useRef<HTMLButtonElement | null>(null);
 
-  // Clear any stale signup cache on mount
   useEffect(() => {
-    localStorage.removeItem("vendorSignupState");
-  }, []);
+  const saved = localStorage.getItem("vendorSignupState");
+
+  if (saved) {
+    const data = JSON.parse(saved);
+
+    // Only clear if user is opening signup fresh, not returning from OTP
+    if (!data.signupSuccess) {
+      localStorage.removeItem("vendorSignupState");
+    }
+  }
+}, []);
+
+
+  // Clear any stale signup cache on mount
+  // useEffect(() => {
+  //   localStorage.removeItem("vendorSignupState");
+  // }, []);
 
   // If there is previous signup success, scroll to verification
   useEffect(() => {
-    const saved = localStorage.getItem("vendorSignupState");
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data.signupSuccess) {
-        setSignupSuccess(true);
-        setEmail(data.emailRegistered);
-      }
-    }
-  }, []);
+  const saved = localStorage.getItem("vendorSignupState");
+  if (!saved) return;
+
+  const data = JSON.parse(saved);
+
+  // Only load if user already completed step 1
+  if (data.signupSuccess) {
+    setSignupSuccess(true);
+    setEmail(data.emailRegistered || "");
+    setStep(2);
+  }
+}, []);
+
 
   useEffect(() => {
     if (signupSuccess && verificationBtnRef.current) {
@@ -309,7 +327,7 @@ function Page() {
         </div>
       )}
 
-      {step === 2 && (
+      {step === 2 && email && (
         <VerifyVendorCode email={email} onVerified={handleVerified}>
           {/* Back to Signup Button */}
           {/* <button

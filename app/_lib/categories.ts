@@ -9,9 +9,7 @@ export const fetchCategories = async (
   token: string | null
 ) => {
   // Safety check: This shouldn't be called without a token due to 'enabled' check below
-  if (!token) {
-    throw new Error("No auth token available");
-  }
+  if (!token) return null;
 
   const jsonString = JSON.stringify(queryParamsObj);
   const encodedQuery = encodeURIComponent(jsonString);
