@@ -15,7 +15,7 @@ function page() {
       setLoading(true);
       try {
         const res = await getNotifications();
-        const notifs: MyNotification[] = res.data?.notifications || [];
+        const notifs: MyNotification[] = res?.data?.notifications || [];
         setNotifications(notifs);
       } catch (error: any) {
         toast.error(error?.message || "Failed to fetch notifications");
@@ -32,21 +32,21 @@ function page() {
   };
 
   const handleMarkAsRead = async (id: string) => {
-  try {
-    const res = await readNotification(id);
-    if (res.success === false) {
-      toast.error(res.message || "Failed to mark as read");
-      return;
-    }
+    try {
+      const res = await readNotification(id);
+      if (res.success === false) {
+        toast.error(res.message || "Failed to mark as read");
+        return;
+      }
 
-    // Remove the notification from state
-    setNotifications((prev) => prev.filter((notif) => notif._id !== id));
-    setExpandedId(null); // collapse the details
-    toast.success("Notification marked as read");
-  } catch (error: any) {
-    toast.error(error?.message || "Something went wrong");
-  }
-};
+      // Remove the notification from state
+      setNotifications((prev) => prev.filter((notif) => notif._id !== id));
+      setExpandedId(null); // collapse the details
+      toast.success("Notification marked as read");
+    } catch (error: any) {
+      toast.error(error?.message || "Something went wrong");
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -78,11 +78,15 @@ function page() {
                   className="flex justify-between items-center"
                   onClick={() => handleToggle(notif._id)}
                 >
-                 <div>
-                     <h1 className="text-sm font-semibold text-black">{notif.title}</h1>
-                  <p className="text-xs text-gray-500">{notif.content}</p>
-                  <p className="text-xs my-1 text-gray-500">Click to see more Details</p>
-                 </div>
+                  <div>
+                    <h1 className="text-sm font-semibold text-black">
+                      {notif.title}
+                    </h1>
+                    <p className="text-xs text-gray-500">{notif.content}</p>
+                    <p className="text-xs my-1 text-gray-500">
+                      Click to see more Details
+                    </p>
+                  </div>
                   <span className="text-xs text-gray-500">
                     {new Date(notif.created_at).toLocaleDateString()}
                   </span>
@@ -101,23 +105,24 @@ function page() {
                           <strong>Status:</strong> {notif.details.status}
                         </p>
                         <p>
-                          <strong>Reference:</strong> {notif.details.transaction_reference}
+                          <strong>Reference:</strong>{" "}
+                          {notif.details.transaction_reference}
                         </p>
                         {notif.details.rejection_reason && (
                           <p>
-                            <strong>Rejection Reason:</strong> {notif.details.rejection_reason}
+                            <strong>Rejection Reason:</strong>{" "}
+                            {notif.details.rejection_reason}
                           </p>
                         )}
                       </div>
                     )}
 
                     <button
-  onClick={() => handleMarkAsRead(notif._id)}
-  className="mt-2 px-3 py-1 text-xs text-white bg-black rounded"
->
-  Mark as Read
-</button>
-
+                      onClick={() => handleMarkAsRead(notif._id)}
+                      className="mt-2 px-3 py-1 text-xs text-white bg-black rounded"
+                    >
+                      Mark as Read
+                    </button>
                   </div>
                 )}
               </div>

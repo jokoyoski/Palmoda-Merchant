@@ -9,7 +9,7 @@ import { fetchProducts } from "./_lib/product";
 import { useAuth } from "./_lib/AuthContext";
 import { getBrandDetails } from "./_lib/brand";
 import type { Notification as MyNotification } from "./_lib/type";
-import {getNotifications} from "./_lib/notifications"
+import { getNotifications } from "./_lib/notifications";
 import { toast } from "react-toastify";
 
 // Add this at the top of your file
@@ -32,7 +32,6 @@ function page() {
   const [brand, setBrand] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<MyNotification[]>([]);
-
 
   useEffect(() => {
     setBusinessName(user?.business_name || "");
@@ -59,25 +58,24 @@ function page() {
     fetchBrand();
   }, []);
 
- useEffect(() => {
-  const fetchNotifications = async () => {
-    setLoading(true);
-    try {
-      const res = await getNotifications();
-      console.log(res);
-      const notifs: MyNotification[] = res.data?.notifications || [];
-      setNotifications(notifs);
-    } catch (error: any) {
-      toast.error(error?.message || "Failed to fetch notifications");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true);
+      try {
+        const res = await getNotifications();
+        console.log(res);
+        const notifs: MyNotification[] = res?.data?.notifications || [];
+        setNotifications(notifs);
+      } catch (error: any) {
 
-  fetchNotifications();
-}, []);
+        toast.error(error?.message || "Failed to fetch notifications");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-
+    fetchNotifications();
+  }, []);
 
   const basicInfoComplete = !!businessName && businessName.trim() !== "";
   const brandStoryComplete =
@@ -121,14 +119,15 @@ function page() {
             </p>
           </div>
 
-          { user?.is_bank_information_verified &&
+          {user?.is_bank_information_verified &&
             user?.is_business_verified &&
-            user?.is_identity_verified &&   <Link href="/product-upload">
-            <button className="bg-black capitalize  text-white p-[5px] w-fit text-xs">
-              Upload new product
-            </button>
-          </Link>}
-         
+            user?.is_identity_verified && (
+              <Link href="/product-upload">
+                <button className="bg-black capitalize  text-white p-[5px] w-fit text-xs">
+                  Upload new product
+                </button>
+              </Link>
+            )}
         </div>
         <DashboardGrid products={products} />
 

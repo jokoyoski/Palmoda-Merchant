@@ -25,25 +25,8 @@ function Sidebar() {
   const { logout, user } = useAuth();
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-    const [notifications, setNotifications] = useState<MyNotification[]>([]);
-    const [expandedId, setExpandedId] = useState<string | null>(null); // track expanded notification
-
-    useEffect(() => {
-        const fetchNotifications = async () => {
-          setLoading(true);
-          try {
-            const res = await getNotifications();
-            const notifs: MyNotification[] = res.data?.notifications || [];
-            setNotifications(notifs);
-          } catch (error: any) {
-            toast.error(error?.message || "Failed to fetch notifications");
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        fetchNotifications();
-      }, []);
+  const [notifications, setNotifications] = useState<MyNotification[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null); // track expanded notification
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -51,7 +34,23 @@ function Sidebar() {
     }
   }, []);
 
-  
+  useEffect(() => {
+    if (!token) return;
+    const fetchNotifications = async () => {
+      setLoading(true);
+      try {
+        const res = await getNotifications();
+        const notifs: MyNotification[] = res?.data?.notifications || [];
+        setNotifications(notifs);
+      } catch (error: any) {
+        toast.error(error?.message || "Failed to fetch notifications");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   // Hide sidebar on both sign-up and login pages
   if (pathname.includes("signup") || pathname.includes("login")) {
@@ -114,21 +113,17 @@ function Sidebar() {
               ? ""
               : "pointer-events-none cursor-not-allowed opacity-30"
           } font-semibold items-center ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
-  
         >
-         <div className="relative flex items-center gap-2">
-  <FaBell />
-  <span>Notifications</span>
+          <div className="relative flex items-center gap-2">
+            <FaBell />
+            <span>Notifications</span>
 
-  {notifications.length > 0 && (
-    <span
-      className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
-    >
-      {notifications.length}
-    </span>
-  )}
-</div>
- 
+            {notifications.length > 0 && (
+              <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {notifications.length}
+              </span>
+            )}
+          </div>
         </Link>
 
         <Link
@@ -147,7 +142,6 @@ function Sidebar() {
               ? ""
               : "pointer-events-none cursor-not-allowed opacity-30"
           } font-semibold items-center ${pathname === "/" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
-          
         >
           <BsGraphUp /> Dashboard
         </Link>
@@ -208,7 +202,6 @@ function Sidebar() {
               ? ""
               : "pointer-events-none cursor-not-allowed opacity-30"
           } font-semibold items-center ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
-          
         >
           <FiDollarSign /> Payouts
         </Link>

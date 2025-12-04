@@ -18,7 +18,7 @@ const fetchWallet = async (token: string | null) => {
       },
     }
   );
-  return response.data.data;
+  return response?.data?.data;
 };
 
 export const useSubCategories = () => {
