@@ -35,7 +35,7 @@ function Sidebar() {
           try {
             const res = await notificationCount();
             console.log(res);
-            setCount(res.data.count);
+            setCount(res?.data?.count);
             const notifs: MyNotification[] = res.data?.notifications || [];
             setNotifications(notifs);
           } catch (error: any) {
@@ -54,7 +54,23 @@ function Sidebar() {
     }
   }, []);
 
-  
+  useEffect(() => {
+    if (!token) return;
+    const fetchNotifications = async () => {
+      setLoading(true);
+      try {
+        const res = await getNotifications();
+        const notifs: MyNotification[] = res?.data?.notifications || [];
+        setNotifications(notifs);
+      } catch (error: any) {
+        toast.error(error?.message || "Failed to fetch notifications");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   // Hide sidebar on both sign-up and login pages
   if (pathname.includes("signup") || pathname.includes("login")) {
@@ -117,11 +133,10 @@ function Sidebar() {
               ? ""
               : "pointer-events-none cursor-not-allowed opacity-30"
           } font-semibold items-center ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
-  
         >
-         <div className="relative flex items-center gap-2">
-  <FaBell />
-  <span>Notifications</span>
+          <div className="relative flex items-center gap-2">
+            <FaBell />
+            <span>Notifications</span>
 
   {count > 0 && (
     <span
@@ -150,7 +165,6 @@ function Sidebar() {
               ? ""
               : "pointer-events-none cursor-not-allowed opacity-30"
           } font-semibold items-center ${pathname === "/" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
-          
         >
           <BsGraphUp /> Dashboard
         </Link>
@@ -211,7 +225,6 @@ function Sidebar() {
               ? ""
               : "pointer-events-none cursor-not-allowed opacity-30"
           } font-semibold items-center ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
-          
         >
           <FiDollarSign /> Payouts
         </Link>
