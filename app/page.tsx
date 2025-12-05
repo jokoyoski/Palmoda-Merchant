@@ -67,8 +67,9 @@ function page() {
         const notifs: MyNotification[] = res?.data?.notifications || [];
         setNotifications(notifs);
       } catch (error: any) {
+        console.log(error?.message || "Failed to fetch notifications");
 
-        toast.error(error?.message || "Failed to fetch notifications");
+        // toast.error(error?.message || "Failed to fetch notifications");
       } finally {
         setLoading(false);
       }

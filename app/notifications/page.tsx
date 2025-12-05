@@ -1,7 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import type { Notification as MyNotification } from "../_lib/type";
-import { getNotifications, readNotification, notificationCount } from "../_lib/notifications";
+import {
+  getNotifications,
+  readNotification,
+  notificationCount,
+} from "../_lib/notifications";
 import { toast } from "react-toastify";
 import ProtectedRoute from "../_components/ProtectedRoute";
 
@@ -29,7 +33,8 @@ function Page() {
 
       setTotalPages(Math.ceil(totalItems / pageSize));
     } catch (error: any) {
-      toast.error(error?.message || "Failed to fetch notifications");
+      // toast.error(error?.message || "Failed to fetch notifications");
+      console.log(error?.message);
     } finally {
       setLoading(false);
     }
@@ -46,44 +51,44 @@ function Page() {
         const res = await notificationCount();
         setCount(res?.data?.count || 0);
       } catch (error: any) {
-        toast.error(error?.message || "Failed to fetch count");
+        // toast.error(error?.message || "Failed to fetch count");
+        console.log(error?.message || "Failed to get count");
       }
     };
     fetchCount();
   }, []);
 
   const handleToggle = (id: string) => {
-    setExpandedId(prev => (prev === id ? null : id));
+    setExpandedId((prev) => (prev === id ? null : id));
   };
 
   const handleMarkAsRead = async (id: string) => {
-  try {
-    const res = await readNotification(id);
-    if (res.success === false) {
-      toast.error(res.message || "Failed to mark as read");
-      return;
+    try {
+      const res = await readNotification(id);
+      if (res.success === false) {
+        toast.error(res.message || "Failed to mark as read");
+        return;
+      }
+
+      // Update the notification status locally
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif._id === id ? { ...notif, status: "read" } : notif
+        )
+      );
+
+      // Collapse expanded details if open
+      setExpandedId(null);
+
+      // Refetch unread count
+      const countRes = await notificationCount();
+      setCount(countRes?.data?.count || 0);
+
+      toast.success("Notification marked as read");
+    } catch (error: any) {
+      toast.error(error?.message || "Something went wrong");
     }
-
-    // Update the notification status locally
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif._id === id ? { ...notif, status: "read" } : notif
-      )
-    );
-
-    // Collapse expanded details if open
-    setExpandedId(null);
-
-    // Refetch unread count
-    const countRes = await notificationCount();
-    setCount(countRes?.data?.count || 0);
-
-    toast.success("Notification marked as read");
-  } catch (error: any) {
-    toast.error(error?.message || "Something went wrong");
-  }
-};
-
+  };
 
   return (
     <ProtectedRoute>
@@ -94,8 +99,11 @@ function Page() {
 
         {loading ? (
           <div className="space-y-2">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse h-12 bg-gray-200 rounded-md"></div>
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="animate-pulse h-12 bg-gray-200 rounded-md"
+              ></div>
             ))}
           </div>
         ) : notifications.length === 0 ? (
@@ -104,7 +112,7 @@ function Page() {
           <>
             {/* Notification List */}
             <div className="space-y-2">
-              {notifications.map(notif => (
+              {notifications.map((notif) => (
                 <div
                   key={notif._id}
                   className={`rounded-md p-3 cursor-pointer transition
@@ -115,11 +123,18 @@ function Page() {
                     }
                   `}
                 >
-                  <div className="flex justify-between items-center" onClick={() => handleToggle(notif._id)}>
+                  <div
+                    className="flex justify-between items-center"
+                    onClick={() => handleToggle(notif._id)}
+                  >
                     <div>
-                      <h1 className="text-sm font-semibold text-black">{notif.title}</h1>
+                      <h1 className="text-sm font-semibold text-black">
+                        {notif.title}
+                      </h1>
                       <p className="text-xs text-gray-500">{notif.content}</p>
-                      <p className="text-xs my-1 text-gray-500">Click to see details</p>
+                      <p className="text-xs my-1 text-gray-500">
+                        Click to see details
+                      </p>
                     </div>
                     <span className="text-xs text-gray-500">
                       {new Date(notif.created_at).toLocaleDateString()}
@@ -132,11 +147,21 @@ function Page() {
 
                       {notif.details && (
                         <div className="border-t border-gray-200 pt-2 mt-2 space-y-1">
-                          <p><strong>Amount:</strong> NGN{notif.details.amount}</p>
-                          <p><strong>Status:</strong> {notif.details.status}</p>
-                          <p><strong>Reference:</strong> {notif.details.transaction_reference}</p>
+                          <p>
+                            <strong>Amount:</strong> NGN{notif.details.amount}
+                          </p>
+                          <p>
+                            <strong>Status:</strong> {notif.details.status}
+                          </p>
+                          <p>
+                            <strong>Reference:</strong>{" "}
+                            {notif.details.transaction_reference}
+                          </p>
                           {notif.details.rejection_reason && (
-                            <p><strong>Rejection Reason:</strong> {notif.details.rejection_reason}</p>
+                            <p>
+                              <strong>Rejection Reason:</strong>{" "}
+                              {notif.details.rejection_reason}
+                            </p>
                           )}
                         </div>
                       )}
@@ -159,7 +184,7 @@ function Page() {
             <div className="flex items-center justify-between gap-4 mt-6">
               <button
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage(p => p - 1)}
+                onClick={() => setCurrentPage((p) => p - 1)}
                 className={`px-4 py-2 text-sm rounded border ${
                   currentPage === 1
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -175,7 +200,7 @@ function Page() {
 
               <button
                 disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(p => p + 1)}
+                onClick={() => setCurrentPage((p) => p + 1)}
                 className={`px-4 py-2 text-sm rounded border ${
                   currentPage === totalPages
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"

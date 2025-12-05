@@ -78,7 +78,7 @@ function Page() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
-  
+
   const { user } = useAuth();
   console.log(user);
   const isDisabled =
@@ -88,7 +88,7 @@ function Page() {
 
   // Check if draft exists on mount
   useEffect(() => {
-    const draft = localStorage.getItem('kyc_draft');
+    const draft = localStorage.getItem("kyc_draft");
     if (draft) {
       setHasDraft(true);
     }
@@ -115,14 +115,14 @@ function Page() {
         accountHolder,
         accountNumber,
         certified,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
-      localStorage.setItem('kyc_draft', JSON.stringify(draftData));
+      localStorage.setItem("kyc_draft", JSON.stringify(draftData));
       setHasDraft(true);
-      toast.success('Draft saved successfully!');
+      toast.success("Draft saved successfully!");
     } catch (err) {
-      toast.error('Failed to save draft');
+      toast.error("Failed to save draft");
       console.error(err);
     }
   };
@@ -130,10 +130,10 @@ function Page() {
   // Load draft
   const loadDraft = () => {
     try {
-      const draft = localStorage.getItem('kyc_draft');
+      const draft = localStorage.getItem("kyc_draft");
       if (draft) {
         const draftData = JSON.parse(draft);
-        
+
         // Populate all fields
         setBusinessDocUrl(draftData.businessDocUrl || "");
         setOwnerIdUrl(draftData.ownerIdUrl || "");
@@ -152,11 +152,11 @@ function Page() {
         setAccountHolder(draftData.accountHolder || "");
         setAccountNumber(draftData.accountNumber || "");
         setCertified(draftData.certified || false);
-        
-        toast.success('Draft loaded successfully!');
+
+        toast.success("Draft loaded successfully!");
       }
     } catch (err) {
-      toast.error('Failed to load draft');
+      toast.error("Failed to load draft");
       console.error(err);
     }
   };
@@ -167,7 +167,8 @@ function Page() {
       try {
         const res = await getKycDetails();
         if (res.success === false) {
-          toast.error(res.message);
+          // toast.error(res.message);
+          console.log(res.message);
         } else {
           // Populate form fields
           setBusinessDocUrl(res.data.business_registration_document || "");
@@ -189,6 +190,7 @@ function Page() {
         }
       } catch (err: any) {
         // toast.error(err?.message || "Failed to fetch KYC details");
+        console.log(err?.message);
       } finally {
         setLoading(false);
       }
@@ -255,7 +257,7 @@ function Page() {
       if (res?.success) {
         toast.success("KYC has been submitted for review");
         // Clear draft after successful submission
-        localStorage.removeItem('kyc_draft');
+        localStorage.removeItem("kyc_draft");
         setHasDraft(false);
       } else {
         toast.error(res?.message || "KYC failed");
@@ -609,7 +611,7 @@ function Page() {
                 <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
                   Back
                 </button>
-                
+
                 {/* Save Draft Button */}
                 <button
                   className="bg-gray-200 border border-gray-300 text-black p-[5px] w-[120px] text-sm hover:bg-gray-300"

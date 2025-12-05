@@ -183,7 +183,9 @@ function page() {
              const res = await getWallet();
              console.log(res);
              if (res.success === false) {
-               toast.error(res.message);
+              //  toast.error(res.message);
+              console.log(res.message);
+              
              } else {
                // Populate form fields
                setBankName(res.data.bank_name || "");
@@ -191,7 +193,7 @@ function page() {
                setAccountNumber(res.data.account_number || "");
              }
            } catch (err: any) {
-             toast.error(err?.message || "Failed to fetch KYC details");
+             console.log(err?.message || "Failed to fetch KYC details");
            } finally {
              setLoading(false);
            }

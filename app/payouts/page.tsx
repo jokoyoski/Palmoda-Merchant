@@ -33,7 +33,9 @@ function page() {
         const res = await getWallet();
         console.log(res);
         if (res.success === false) {
-          toast.error(res.message);
+          // toast.error(res.message);
+          console.log(res.message);
+          
         } else {
           // Populate form fields
           setBankName(res.data.bank_name || "");
@@ -42,7 +44,8 @@ function page() {
           setAccountBalance(res.data.available_balance);
         }
       } catch (err: any) {
-        toast.error(err?.message || "Failed to fetch KYC details");
+        console.log(err?.message || "Failed to fetch wallet details");
+        // toast.error(err?.message || "Failed to fetch KYC details");
       } finally {
         setLoading(false);
       }
@@ -59,7 +62,8 @@ function page() {
         const trans: TransactionType[] = res?.data?.data?.transactions ?? [];
         setTransactions(trans);
       } catch (error: any) {
-        toast.error(error?.message || "Failed to fetch transactions");
+        console.log(error?.message || "Failed to fetch transactions");
+        // toast.error(error?.message || "Failed to fetch transactions");
       } finally {
         setFetching(false);
       }

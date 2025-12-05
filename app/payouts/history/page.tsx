@@ -31,7 +31,9 @@ function Page() {
         const trans: TransactionType[] = res?.data?.data?.transactions ?? [];
         setTransactions(trans);
       } catch (error: any) {
-        toast.error(error?.message || "Failed to fetch transactions");
+        console.log(error?.message || "Failed to fetch transactions");
+
+        // toast.error(error?.message || "Failed to fetch transactions");
       } finally {
         setFetching(false);
       }
@@ -52,7 +54,8 @@ function Page() {
           setAccountBalance(res.data.available_balance || 0);
         }
       } catch (err: any) {
-        toast.error(err?.message || "Failed to fetch wallet details");
+        // toast.error(err?.message || "Failed to fetch wallet details");
+        console.log(err.message || "Failed to fetch wallet details");
       } finally {
         setLoading(false);
       }
@@ -71,12 +74,15 @@ function Page() {
 
       if (dateFrom && new Date(dateFrom) > itemDate) return false;
       if (dateTo && new Date(dateTo) < itemDate) return false;
-      if (status && item.status.toLowerCase() !== status.toLowerCase()) return false;
+      if (status && item.status.toLowerCase() !== status.toLowerCase())
+        return false;
       if (minAmount && item.amount < Number(minAmount)) return false;
       if (maxAmount && item.amount > Number(maxAmount)) return false;
       if (
         reference &&
-        !item.transaction_reference.toLowerCase().includes(reference.toLowerCase())
+        !item.transaction_reference
+          .toLowerCase()
+          .includes(reference.toLowerCase())
       )
         return false;
 
@@ -94,7 +100,10 @@ function Page() {
   const TableSkeleton = () => (
     <>
       {[1, 2, 3, 4, 5].map((i) => (
-        <tr key={i} className="border-b border-gray-200 animate-pulse text-center">
+        <tr
+          key={i}
+          className="border-b border-gray-200 animate-pulse text-center"
+        >
           {[...Array(6)].map((_, idx) => (
             <td key={idx} className="p-2">
               <div className="h-3 bg-gray-200 rounded"></div>
@@ -114,9 +123,12 @@ function Page() {
       <section className="bg-white min-h-screen px-4 md:px-8 py-6 w-full">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-black font-semibold text-lg">Payouts History</h1>
+            <h1 className="text-black font-semibold text-lg">
+              Payouts History
+            </h1>
             <p className="text-xs text-gray-500">
-              View all your withdrawals, settlement timelines, and payout statuses.
+              View all your withdrawals, settlement timelines, and payout
+              statuses.
             </p>
           </div>
           <div className="flex gap-2">
@@ -136,7 +148,9 @@ function Page() {
           </div>
           <div>
             <p className="text-xs text-gray-500">Available Balance</p>
-            <h1 className="text-black text-sm font-semibold">₦{accountBalance.toLocaleString()}</h1>
+            <h1 className="text-black text-sm font-semibold">
+              ₦{accountBalance.toLocaleString()}
+            </h1>
           </div>
         </div>
 
@@ -226,12 +240,19 @@ function Page() {
               <TableSkeleton />
             ) : paginatedData.length > 0 ? (
               paginatedData.map((row) => (
-                <tr key={row._id} className="border-b text-center border-gray-200">
+                <tr
+                  key={row._id}
+                  className="border-b text-center border-gray-200"
+                >
                   <td className="p-2 text-xs text-gray-500">
                     {new Date(row.created_at).toISOString().split("T")[0]}
                   </td>
-                  <td className="p-2 text-xs text-gray-500">{row.transaction_reference}</td>
-                  <td className="p-2 text-xs text-gray-500">₦{row.amount.toLocaleString()}</td>
+                  <td className="p-2 text-xs text-gray-500">
+                    {row.transaction_reference}
+                  </td>
+                  <td className="p-2 text-xs text-gray-500">
+                    ₦{row.amount.toLocaleString()}
+                  </td>
                   <td className="p-2 text-xs text-gray-500">₦0</td>
                   <td className="p-2 text-xs text-gray-500">
                     {row.vendor?.business_name ?? "Unknown Vendor"}
