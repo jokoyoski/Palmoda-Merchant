@@ -188,7 +188,7 @@ function Page() {
           setAccountNumber(res.data.account_number || "");
         }
       } catch (err: any) {
-        toast.error(err?.message || "Failed to fetch KYC details");
+        // toast.error(err?.message || "Failed to fetch KYC details");
       } finally {
         setLoading(false);
       }

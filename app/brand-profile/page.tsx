@@ -22,6 +22,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
+import ProtectedRoute from "../_components/ProtectedRoute";
 
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
@@ -174,7 +175,7 @@ const BrandProfilePage = () => {
           setBrandExists(true);
         }
       } catch (err: any) {
-        toast.error(err?.message || "Failed to fetch brand details");
+        // toast.error(err?.message || "Failed to fetch brand details");
         setBrandExists(false);
       } finally {
         setLoading(false);
@@ -319,7 +320,8 @@ const BrandProfilePage = () => {
   };
 
   return (
-    <section className="bg-white min-h-screen px-4 md:px-8 py-6 w-full">
+    <ProtectedRoute>
+      <section className="bg-white min-h-screen px-4 md:px-8 py-6 w-full">
       <div className="w-full md:w-[600px] lg:w-[750px]">
         <h1 className="text-black font-semibold text-xl">
           Brand Profile Setup
@@ -541,6 +543,7 @@ const BrandProfilePage = () => {
         </div>
       </div>
     </section>
+    </ProtectedRoute>
   );
 };
 

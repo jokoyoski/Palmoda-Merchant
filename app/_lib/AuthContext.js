@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Optionally log toast events as they change
     const unsubscribe = toast.onChange((toastEvent) => {
-      console.log("Toast event changed:", toastEvent);
+      // console.log("Toast event changed:", toastEvent);
     });
     return () => unsubscribe();
   }, []);
