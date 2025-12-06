@@ -48,7 +48,7 @@ function Page() {
       try {
         const res = await getWallet();
         if (!res.success) {
-          toast.error(res.message);
+          // toast.error(res.message);
         } else {
           setAccountNumber(res.data.account_number || "");
           setAccountBalance(res.data.available_balance || 0);
