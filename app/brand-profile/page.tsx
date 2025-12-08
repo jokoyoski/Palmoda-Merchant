@@ -248,24 +248,30 @@ const BrandProfilePage = () => {
       setHasDraft(false);
       setBrandExists(true);
 
-        await Swal.fire({
-      title: "Brand Created!",
-      html: `
-        Your brand profile has been submitted for review.<br/>
-        Please wait for the admin verification email.<br/><br/>
-        For now, you should logout and login again later.
-      `,
-      icon: "success",
-      showCancelButton: true,
-      confirmButtonText: "Logout Now",
-      cancelButtonText: "Later",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-    }).then((result: any) => {
-      if (result.isConfirmed) {
-        logout(); // Call the logout function from AuthContext
-      }
-    });
+       await Swal.fire({
+  title: "Brand Created!",
+  html: `
+    Your brand profile has been submitted for review.<br/>
+    Please wait for the admin verification email.<br/><br/>
+    For now, you should logout and login again later.
+  `,
+  icon: "success",
+  showCancelButton: true,
+  confirmButtonText: "Logout Now",
+  cancelButtonText: "Later",
+  allowOutsideClick: false,
+  allowEscapeKey: false,
+
+  // ⭐ CUSTOM BLACK BUTTON ⭐
+  customClass: {
+    confirmButton: "swal-confirm-black",
+  }
+}).then((result: any) => {
+  if (result.isConfirmed) {
+    logout();
+  }
+});
+
 
 
     } catch (err: any) {
@@ -318,6 +324,20 @@ const BrandProfilePage = () => {
       setLoading(false);
     }
   };
+
+  const isFormValid =
+  brandName.trim() !== "" &&
+  brandDescription.trim() !== "" &&
+  logoBlackUrl !== "" &&
+  logoWhiteUrl !== "" &&
+  bannerUrl !== "" &&
+  instagram !== "" &&
+  twitter !== "" &&
+  facebook !== "" &&
+  website !== "" &&
+  pinterest !== "" &&
+  tiktok !== "";
+  
 
   return (
     <ProtectedRoute>
@@ -509,15 +529,20 @@ const BrandProfilePage = () => {
 
             {!brandExists && (
               <button
-                onClick={handleCreate}
-                className="bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center"
-                disabled={creating || loading || isDisabled}
-              >
-                {creating ? "Loading..." : "Create"}
-              </button>
+  onClick={handleCreate}
+  className={`p-[5px] w-[120px] text-sm flex justify-center items-center ${
+    isFormValid
+      ? "bg-black text-white hover:bg-gray-900"
+      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+  }`}
+  disabled={!isFormValid || creating || loading || isDisabled}
+>
+  {creating ? "Loading..." : "Create"}
+</button>
+
             )}
 
-            {brandExists && (
+            {/* {brandExists && (
               <button
                 onClick={handleUpdate}
                 className='bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center'
@@ -525,7 +550,7 @@ const BrandProfilePage = () => {
               >
                 {loading ? "Loading..." : "Update"}
               </button>
-            )}
+            )} */}
           </div>
         </div>
 

@@ -6,3 +6,12 @@
   font-family: "Roboto Condensed", sans-serif;
 }
 
+/* styles/globals.css or wherever your global styles are */
+.swal-confirm-black {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+.swal-confirm-black:hover {
+  background-color: #111 !important;
+}

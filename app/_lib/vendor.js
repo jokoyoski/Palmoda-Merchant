@@ -319,3 +319,48 @@ export const getWallet = async () => {
     };
   }
 };
+
+
+export const fetchBanks = async (search) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return { success: false, message: "No token found", data: null };
+    }
+
+    const res = await axios.get(`${backendUrl}/user/banks`, {  // <-- notice the added slash
+      params: { search },
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    return res.data;
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || error.message || "Something went wrong"
+    };
+  }
+};
+
+
+export const resolveAccount = async (account_number, bank_code) => {
+   try {
+      const token = localStorage.getItem("token");
+    if (!token) {
+      return { success: false, message: "No token found", data: null };
+    }
+    const res = await axios.post(`${backendUrl}/user/resolve-account`, {account_number, bank_code}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return res.data;
+   } catch (error) {
+      return {
+      success: false,
+      message: error.response?.data?.message || error.message || "Something went wrong"
+    };
+   } 
+}

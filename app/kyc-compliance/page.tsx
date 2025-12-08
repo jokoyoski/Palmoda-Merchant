@@ -2,11 +2,12 @@
 import React, { useRef, useState, ChangeEvent, useEffect } from "react";
 import { FaFileUpload } from "react-icons/fa";
 import ProtectedRoute from "../_components/ProtectedRoute";
-import { completeKyc, getKycDetails } from "../_lib/vendor";
+import { completeKyc, getKycDetails, fetchBanks, resolveAccount } from "../_lib/vendor";
 import axios from "axios";
 import { toast } from "react-toastify";
 import UploadBox from "./Upload";
 import { useAuth } from "../_lib/AuthContext";
+import {Bank} from "../_lib/type"
 
 // Cloudinary config
 const cloudName = "jokoyoski";
@@ -54,6 +55,7 @@ function Page() {
   const [ownerIdUrl, setOwnerIdUrl] = useState<string>("");
   const [bankStatementUrl, setBankStatementUrl] = useState<string>("");
 
+
   // refs for hidden file inputs
   const businessInputRef = useRef<HTMLInputElement | null>(null);
   const ownerInputRef = useRef<HTMLInputElement | null>(null);
@@ -78,6 +80,15 @@ function Page() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
+  const [kycSubmitted, setKycSubmitted] = useState(false);
+  const [bankSearch, setBankSearch] = useState(""); // what user types
+const [bankResults, setBankResults] = useState<Bank[]>([]); // fetched banks
+const [showBankDropdown, setShowBankDropdown] = useState(false); // toggle dropdown
+const [selectedBankCode, setSelectedBankCode] = useState(""); // store bank code
+const [resolvedAccountName, setResolvedAccountName] = useState(""); // resolved account name
+
+
+
 
   const { user } = useAuth();
   console.log(user);
@@ -85,6 +96,50 @@ function Page() {
     user?.is_bank_information_verified ||
     user?.is_business_verified ||
     user?.is_identity_verified;
+
+
+    useEffect(() => {
+  if (!bankSearch) {
+    setBankResults([]);
+    return;
+  }
+
+  const delayDebounce = setTimeout(async () => {
+    const res = await fetchBanks(bankSearch);
+    console.log(res);
+    if (res?.success) {
+      setBankResults(res.data?.banks || []);
+    } else {
+      setBankResults([]);
+    }
+  }, 300); // debounce 300ms
+
+  return () => clearTimeout(delayDebounce);
+}, [bankSearch]);
+
+  
+useEffect(() => {
+  const resolve = async () => {
+    if (accountNumber.length === 10 && selectedBankCode) {
+      try {
+        const res = await resolveAccount(accountNumber, selectedBankCode);
+        if (res.success) {
+          setAccountHolder(res.data.account_name);
+          console.log("Resolved Account Name:", res.data.account_name);
+        } else {
+          toast.error(res.message || "Failed to resolve account");
+        }
+      } catch (err: any) {
+        console.log(err);
+        toast.error("Error resolving account");
+      }
+    }
+  };
+
+  resolve();
+}, [accountNumber, selectedBankCode]);
+
+
 
   // Check if draft exists on mount
   useEffect(() => {
@@ -138,7 +193,7 @@ function Page() {
         setBusinessDocUrl(draftData.businessDocUrl || "");
         setOwnerIdUrl(draftData.ownerIdUrl || "");
         setBankStatementUrl(draftData.bankStatementUrl || "");
-        setBusinessName(draftData.businessName || "");
+        setBusinessName(user?.business_name || "");
         setBusinessType(draftData.businessType || "");
         setRegistrationNumber(draftData.registrationNumber || "");
         setTaxId(draftData.taxId || "");
@@ -174,7 +229,7 @@ function Page() {
           setBusinessDocUrl(res.data.business_registration_document || "");
           setOwnerIdUrl(res.data.valid_owner_id || "");
           setBankStatementUrl(res.data.bank_statement || "");
-          setBusinessName(res.data.business_name || "");
+           setBusinessName(user?.business_name || "");
           setBusinessType(res.data.business_type || "");
           setRegistrationNumber(res.data.registration_number || "");
           setTaxId(res.data.tax_identification_number || "");
@@ -259,6 +314,7 @@ function Page() {
         // Clear draft after successful submission
         localStorage.removeItem("kyc_draft");
         setHasDraft(false);
+         setKycSubmitted(true); 
       } else {
         toast.error(res?.message || "KYC failed");
       }
@@ -341,7 +397,7 @@ function Page() {
                   className={`text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}
                     focus:ring-0`}
-                  value={businessName}
+                  value={user?.business_name}
                   disabled={isDisabled}
                   onChange={(e) => setBusinessName(e.target.value)}
                 />
@@ -529,23 +585,63 @@ function Page() {
                   onChange={(e) => setCountry(e.target.value)}
                 />
               </div>
+             <div className="flex flex-col gap-1.5 w-full relative">
+  <label htmlFor="bank name" className="text-black font-semibold text-xs">
+    Bank Name *
+  </label>
+  <input
+    type="text"
+    placeholder="Enter bank name"
+    className="text-gray-500 p-1 text-sm border border-gray-300"
+    value={bankSearch}
+    onChange={(e) => {
+      setBankSearch(e.target.value);
+      setShowBankDropdown(true);
+    }}
+    onFocus={() => setShowBankDropdown(true)}
+    onBlur={() => setTimeout(() => setShowBankDropdown(false), 200)} // hide dropdown slightly after click
+  />
+  {/* Dropdown */}
+  {showBankDropdown && bankResults.length > 0 && (
+    <ul className="absolute bg-white border border-gray-300 w-full max-h-40 overflow-y-auto z-50">
+      {bankResults.map((bank) => (
+        <li
+          key={bank._id}
+          className="p-1 text-sm hover:bg-gray-100 cursor-pointer"
+          onClick={() => {
+  setBankName(bank.bank_name); // display bank name
+  setBankSearch(bank.bank_name); // input field update
+  setSelectedBankCode(bank.bank_code); // store bank code
+  console.log("Selected Bank Code:", bank.bank_code);
+  setShowBankDropdown(false);
+}}
+
+        >
+          {bank.bank_name}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+              
               <div className="flex flex-col gap-1.5 w-full">
                 <label
-                  htmlFor="bank name"
+                  htmlFor="postal code"
                   className="text-black font-semibold text-xs"
                 >
-                  Bank Name *
+                  Account Number *
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   name=""
                   id=""
-                  placeholder="Enter bank name"
+                  placeholder="Enter bank account number"
                   className={`text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
-                  value={bankName}
-                  onChange={(e) => setBankName(e.target.value)}
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-1.5 w-full">
@@ -565,25 +661,6 @@ function Page() {
                   disabled={isDisabled}
                   value={accountHolder}
                   onChange={(e) => setAccountHolder(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5 w-full">
-                <label
-                  htmlFor="postal code"
-                  className="text-black font-semibold text-xs"
-                >
-                  Account Number *
-                </label>
-                <input
-                  type="number"
-                  name=""
-                  id=""
-                  placeholder="Enter bank account number"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
-                    ${isDisabled ? "cursor-not-allowed" : ""}`}
-                  disabled={isDisabled}
-                  value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value)}
                 />
               </div>
             </section>
@@ -638,10 +715,10 @@ function Page() {
               <button
                 className={`p-[5px] w-[120px] text-sm text-white ${
                   certified ? "bg-black" : "bg-gray-400 cursor-not-allowed"
-                }  ${isDisabled ? "cursor-not-allowed" : ""}`}
+                }  ${isDisabled ? "cursor-not-allowed" : ""} disabled:cursor-not-allowed`}
                 onClick={handleContinue}
                 type="button"
-                disabled={!certified || loading || isDisabled}
+                disabled={!certified || loading || isDisabled || kycSubmitted}
               >
                 {submitting ? "Submitting..." : "Continue"}
               </button>

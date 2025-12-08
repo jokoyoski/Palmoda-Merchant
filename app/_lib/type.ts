@@ -146,3 +146,10 @@ export interface MessageType {
   created_at: string; // ISO timestamp from backend
   updated_at: string;
 }
+
+
+export interface Bank {
+  _id: string;
+  bank_code: string;
+  bank_name: string;
+}
