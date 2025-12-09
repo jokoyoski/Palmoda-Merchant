@@ -7,6 +7,7 @@ import { AuthProvider } from "./_lib/AuthContext";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
+import Providers from "./_components/Providers";
 
 export const metadata: Metadata = {
   title: {
@@ -31,7 +32,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body className="min-h-screen  text-black">
-        <AuthProvider>
+       <Providers>
+        
           {/* Fixed Header */}
           <Header />
 
@@ -44,7 +46,8 @@ export default function RootLayout({
               {children}
             </main>
           </div>
-        </AuthProvider>
+        
+       </Providers>
         <ToastContainer position="top-right" autoClose={3000} />
       </body>
     </html>
