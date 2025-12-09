@@ -57,14 +57,26 @@ function Page() {
                 <div
                   key={notif._id}
                   className={`rounded-md p-3 cursor-pointer transition
-                    ${notif.status === "unread" ? "bg-yellow-50 border-0" : "bg-white border border-gray-200"}
+                    ${notif.status === "unread" ? "bg-gray-700 border-0" : "bg-white border border-gray-200"}
                   `}
                 >
                   <div className="flex justify-between items-center" onClick={() => handleToggle(notif._id)}>
                     <div>
-                      <h1 className="text-sm font-semibold text-black">{notif.title}</h1>
-                      <p className="text-xs text-gray-500">{notif.content}</p>
-                      <p className="text-xs my-1 text-gray-500">Click to see details</p>
+                      <h1
+                        className={`text-sm font-semibold ${notif.status === "unread" ? "text-white" : "text-black"} `}
+                      >
+                        {notif.title}
+                      </h1>
+                      <p
+                        className={`text-xs ${notif.status === "unread" ? "text-white" : "text-gray-500"} `}
+                      >
+                        {notif.content}
+                      </p>
+                     <p
+                        className={`text-xs my-1 ${notif.status === "unread" ? "text-white" : "text-gray-500"}`}
+                      >
+                        Click to see details
+                      </p>
                     </div>
                     <span className="text-xs text-gray-500">
                       {new Date(notif.created_at).toLocaleDateString()}

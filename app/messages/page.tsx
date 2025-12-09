@@ -12,6 +12,7 @@ function Page() {
   useEffect(() => {
     const fetchMessages = async () => {
       const res = await getMessages();
+      console.log(res);
       if (res.success) {
         setMessages(res.data);
       }
