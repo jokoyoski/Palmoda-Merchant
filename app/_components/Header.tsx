@@ -39,7 +39,7 @@ function Header() {
   }, [user]);
 
   // ❗ RETURN AFTER ALL HOOKS
-  if (pathname.includes("signup") || pathname.includes("login")) {
+  if (pathname.includes("signup") || pathname.includes("login") || pathname.includes("forgot-password")) {
     return null;
   }
 

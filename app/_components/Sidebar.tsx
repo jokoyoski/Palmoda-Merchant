@@ -83,7 +83,7 @@ function Sidebar() {
 
 
   // Hide sidebar on both sign-up and login pages
-  if (pathname.includes("signup") || pathname.includes("login")) {
+  if (pathname.includes("signup") || pathname.includes("login") || pathname.includes("forgot-password")) {
     return null;
   }
 

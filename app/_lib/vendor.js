@@ -62,27 +62,19 @@ export const validateVendorCode = async (email, code) => {
       `${backendUrl}/user/validate_code/${email}`,
       { code },
       {
-        params: {
-          user_type: "vendor",
-        },
+        params: { user_type: "vendor" },
       }
     );
 
     return res.data;
   } catch (error) {
-    if (error.response?.data?.message) {
-      return {
-        success: false,
-        message: error.response.data.message,
-      };
-    }
-
     return {
       success: false,
-      message: error.message || "Something went wrong",
+      message: error.response?.data?.message || error.message,
     };
   }
 };
+
 
 export const completeKyc = async (
   business_registration_document,
@@ -337,9 +329,17 @@ export const fetchBanks = async (search) => {
 
     return res.data;
   } catch (error) {
+    if (error.response?.data?.message) {
+      return {
+        success: false,
+        message: error.response.data.message,
+      };
+    }
+
+    // fallback message
     return {
       success: false,
-      message: error.response?.data?.message || error.message || "Something went wrong"
+      message: error.message || "Something went wrong",
     };
   }
 };
@@ -358,9 +358,112 @@ export const resolveAccount = async (account_number, bank_code) => {
     });
     return res.data;
    } catch (error) {
+     if (error.response?.data?.message) {
       return {
+        success: false,
+        message: error.response.data.message,
+      };
+    }
+
+    // fallback message
+    return {
       success: false,
-      message: error.response?.data?.message || error.message || "Something went wrong"
+      message: error.message || "Something went wrong",
     };
    } 
 }
+
+
+export const updatePassword = async (email, password) => {
+    try {
+       const res = await axios.post(`${backendUrl}/user/update-password/${email}`, {password}, {
+       params: {
+          user_type: "vendor",
+        },
+       });
+       return res.data;
+    } catch (error) {
+     if (error.response?.data?.message) {
+      return {
+        success: false,
+        message: error.response.data.message,
+      };
+    }
+
+    // fallback message
+    return {
+      success: false,
+      message: error.message || "Something went wrong",
+    };
+    }
+}
+
+export const changePassword = async (email, password, old_password) => {
+   try {
+      const res = await axios.post(`${backendUrl}/user/change_password/${email}`, {password, old_password}, {
+       params: {
+          user_type: "vendor",
+        },
+      });
+      return res.data;
+   } catch (error) {
+     if (error.response?.data?.message) {
+      return {
+        success: false,
+        message: error.response.data.message,
+      };
+    }
+
+    // fallback message
+    return {
+      success: false,
+      message: error.message || "Something went wrong",
+    };
+   }
+}
+
+export const resendCode = async (email) => {
+  try {
+    const res = await axios.put(
+      `${backendUrl}/user/resend_code/${email}`,
+      {},
+      {
+        params: { user_type: "vendor" },
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || error.message,
+    };
+  }
+};
+
+
+
+export const validateCode = async (email, code) => {
+   try {
+     const res = await axios.put(`${backendUrl}/user/validate_code/${email}`, {code}, {
+      params: {
+          user_type: "vendor",
+        },
+     })
+   } catch (error) {
+       if (error.response?.data?.message) {
+      return {
+        success: false,
+        message: error.response.data.message,
+      };
+    }
+
+    // fallback message
+    return {
+      success: false,
+      message: error.message || "Something went wrong",
+    };
+   } 
+}
+
+

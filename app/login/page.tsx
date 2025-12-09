@@ -34,7 +34,7 @@ function Page() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center = px-4 mt-[-10px]">
       <div className="bg-white w-full max-w-md p-6 rounded-xl shadow-md">
         <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">
           Log In
@@ -86,9 +86,11 @@ function Page() {
           </button>
         </form>
 
-        <p className="text-center text-gray-600 text-sm mt-4">
+        <div className="text-center mt-3">
+          <Link href="/forgot-password" className="text-center text-gray-600 text-sm mt-4">
           Forgot password?
-        </p>
+        </Link>
+        </div>
 
         <div className="justify-center text-center my-5">
           <small>Don't Have an account?</small>{" "}

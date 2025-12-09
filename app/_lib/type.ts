@@ -145,6 +145,7 @@ export interface MessageType {
   message_type: "text" | "image" | "video" | string; // extendable
   created_at: string; // ISO timestamp from backend
   updated_at: string;
+  is_read: boolean;
 }
 
 
