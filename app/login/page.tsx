@@ -60,7 +60,7 @@ function Page() {
             </label>
             <div className="relative w-full">
               <input
-                type={showPassword ? "password" : "text"}
+                type={showPassword ? "text" : "password"}
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
