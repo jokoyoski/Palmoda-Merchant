@@ -155,7 +155,7 @@ const formatFabrics = (fabrics: string[]) => fabrics?.join(", ") || "N/A";
 
                         </div>
           </div>
-          {product?.rejection_reason && <div className='border border-gray-200 '>
+          {product?.rejection_reason || product?.review && <div className='border border-gray-200 '>
                   <div className='px-4 py-3 border-b border-gray-200'>
                     <h1 className='text-black font-semibold text-sm'>Admin Rejection Reason</h1>
                   </div>
@@ -165,7 +165,7 @@ const formatFabrics = (fabrics: string[]) => fabrics?.join(", ") || "N/A";
                              <CiUser className='text-black text-[25px]'/>
                              <div className='w-[350px]'>
                                 
-                                 <p className='text-gray-500 text-xs'>{product.rejection_reason}</p>
+                                 <p className='text-gray-500 text-xs'>{product.rejection_reason || product?.review}</p>
                              </div>
                            </div>
                            {/* <p className='text-gray-500 text-xs'>Oct 11, 2023 - 14:32</p> */}
