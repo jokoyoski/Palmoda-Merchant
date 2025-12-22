@@ -23,6 +23,7 @@ export const createProduct = async (productData) => {
         description: productData.description,
         genders: productData.genders,
         sizes: productData.sizes,
+        weight:productData.weight,
         look_after_me: productData.look_after_me,
         colors: productData.colors,
         fabrics: productData.fabrics,

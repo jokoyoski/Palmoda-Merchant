@@ -64,6 +64,7 @@ function page() {
   const [careInstructions, setCareInstructions] = useState("");
   const [materials, setMaterials] = useState("");
   const [price, setPrice] = useState("");
+  const [weight, setWeight] = useState("");
   const [comparePrice, setComparePrice] = useState("");
   const [inventory, setInventory] = useState<number>(0);
   const [images, setImages] = useState<string[]>([]);
@@ -85,7 +86,7 @@ function page() {
 
   // Check if draft exists on mount
   useEffect(() => {
-    const draft = localStorage.getItem('product_draft');
+    const draft = localStorage.getItem("product_draft");
     if (draft) {
       setHasDraft(true);
     }
@@ -109,14 +110,15 @@ function page() {
         selectedCategory,
         selectedSubCategory,
         gender,
-        timestamp: new Date().toISOString()
+        weight,
+        timestamp: new Date().toISOString(),
       };
 
-      localStorage.setItem('product_draft', JSON.stringify(draftData));
+      localStorage.setItem("product_draft", JSON.stringify(draftData));
       setHasDraft(true);
-      toast.success('Draft saved successfully!');
+      toast.success("Draft saved successfully!");
     } catch (err) {
-      toast.error('Failed to save draft');
+      toast.error("Failed to save draft");
       console.error(err);
     }
   };
@@ -124,10 +126,10 @@ function page() {
   // Load draft
   const loadDraft = () => {
     try {
-      const draft = localStorage.getItem('product_draft');
+      const draft = localStorage.getItem("product_draft");
       if (draft) {
         const draftData = JSON.parse(draft);
-        
+
         // Populate all fields
         setProductName(draftData.productName || "");
         setSku(draftData.sku || "");
@@ -138,16 +140,17 @@ function page() {
         setComparePrice(draftData.comparePrice || "");
         setInventory(draftData.inventory || 0);
         setImages(draftData.images || []);
+        setWeight(draftData.weight)
         setColors(draftData.colors || []);
         setSizes(draftData.sizes || []);
         setSelectedCategory(draftData.selectedCategory || "");
         setSelectedSubCategory(draftData.selectedSubCategory || "");
         setGender(draftData.gender || "");
-        
-        toast.success('Draft loaded successfully!');
+
+        toast.success("Draft loaded successfully!");
       }
     } catch (err) {
-      toast.error('Failed to load draft');
+      toast.error("Failed to load draft");
       console.error(err);
     }
   };
@@ -326,6 +329,7 @@ function page() {
       sizes,
       look_after_me: careInstructions,
       colors,
+      weight,
       fabrics: [materials],
       discounted_price: parseFloat(comparePrice),
       countries: ["68fc2044c642a564a546feda"],
@@ -339,7 +343,7 @@ function page() {
     if (res.success) {
       toast.success("Product has been uploaded for review!");
       // Clear draft after successful submission
-      localStorage.removeItem('product_draft');
+      localStorage.removeItem("product_draft");
       setHasDraft(false);
       // Reset form or redirect
     } else {
@@ -558,7 +562,7 @@ function page() {
                   Price (NGN)*
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   onBlur={() => setPrice(formatMoney(price))}
@@ -573,7 +577,7 @@ function page() {
                   Discount Price (NGN)
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   value={comparePrice}
                   onChange={(e) => setComparePrice(e.target.value)}
                   onBlur={() => setComparePrice(formatMoney(comparePrice))}
@@ -595,6 +599,23 @@ function page() {
                   onChange={(e) => setInventory(Number(e.target.value))}
                   className="
              text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                />
+              </div>
+
+              {/* Weight  */}
+
+              <div className="flex flex-col gap-1.5 w-full">
+                <label
+                  htmlFor="price"
+                  className="text-black font-semibold text-xs"
+                >
+                  Product Weight (KG)
+                </label>
+                <input
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  className="text-gray-500 p-1 text-sm border border-gray-300"
                 />
               </div>
             </div>
@@ -724,7 +745,10 @@ function page() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button disabled className="bg-inherit border opacity-30 cursor-not-allowed border-black text-black p-[5px] w-[120px] text-sm">
+              <button
+                disabled
+                className="bg-inherit border opacity-30 cursor-not-allowed border-black text-black p-[5px] w-[120px] text-sm"
+              >
                 Preview Product
               </button>
               <button

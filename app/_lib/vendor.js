@@ -75,7 +75,6 @@ export const validateVendorCode = async (email, code) => {
   }
 };
 
-
 export const completeKyc = async (
   business_registration_document,
   valid_owner_id,
@@ -95,7 +94,7 @@ export const completeKyc = async (
 ) => {
   try {
     const token = localStorage.getItem("token");
-   if (!token) {
+    if (!token) {
       return {
         success: false,
         message: "No token found",
@@ -245,8 +244,8 @@ export const getOrders = async () => {
 };
 
 export const getOrderDetails = async (id) => {
-    try {
-       const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
     if (!token) {
       return {
         success: false,
@@ -256,12 +255,12 @@ export const getOrderDetails = async (id) => {
     }
     const res = await axios.get(`${backendUrl}/vendor/orders/${id}`, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     return res.data;
-    } catch (error) {
-        if (error.response?.data?.message) {
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -273,8 +272,8 @@ export const getOrderDetails = async (id) => {
       success: false,
       message: error.message || "Something went wrong",
     };
-    }
-}
+  }
+};
 
 export const activateWallet = async (bvn) => {
   try {
@@ -344,7 +343,6 @@ export const getWallet = async () => {
   }
 };
 
-
 export const fetchBanks = async (search) => {
   try {
     const token = localStorage.getItem("token");
@@ -352,11 +350,12 @@ export const fetchBanks = async (search) => {
       return { success: false, message: "No token found", data: null };
     }
 
-    const res = await axios.get(`${backendUrl}/user/banks`, {  // <-- notice the added slash
+    const res = await axios.get(`${backendUrl}/user/banks`, {
+      // <-- notice the added slash
       params: { search },
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     return res.data;
@@ -376,21 +375,24 @@ export const fetchBanks = async (search) => {
   }
 };
 
-
 export const resolveAccount = async (account_number, bank_code) => {
-   try {
-      const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
     if (!token) {
       return { success: false, message: "No token found", data: null };
     }
-    const res = await axios.post(`${backendUrl}/user/resolve-account`, {account_number, bank_code}, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const res = await axios.post(
+      `${backendUrl}/user/resolve-account`,
+      { account_number, bank_code },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     return res.data;
-   } catch (error) {
-     if (error.response?.data?.message) {
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -402,20 +404,23 @@ export const resolveAccount = async (account_number, bank_code) => {
       success: false,
       message: error.message || "Something went wrong",
     };
-   } 
-}
-
+  }
+};
 
 export const updatePassword = async (email, password) => {
-    try {
-       const res = await axios.post(`${backendUrl}/user/update_password/${email}`, {password}, {
-       params: {
+  try {
+    const res = await axios.post(
+      `${backendUrl}/user/update_password/${email}`,
+      { password },
+      {
+        params: {
           user_type: "vendor",
         },
-       });
-       return res.data;
-    } catch (error) {
-     if (error.response?.data?.message) {
+      }
+    );
+    return res.data;
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -427,19 +432,23 @@ export const updatePassword = async (email, password) => {
       success: false,
       message: error.message || "Something went wrong",
     };
-    }
-}
+  }
+};
 
 export const changePassword = async (email, password, old_password) => {
-   try {
-      const res = await axios.post(`${backendUrl}/user/change_password/${email}`, {password, old_password}, {
-       params: {
+  try {
+    const res = await axios.post(
+      `${backendUrl}/user/change_password/${email}`,
+      { password, old_password },
+      {
+        params: {
           user_type: "vendor",
         },
-      });
-      return res.data;
-   } catch (error) {
-     if (error.response?.data?.message) {
+      }
+    );
+    return res.data;
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -451,8 +460,8 @@ export const changePassword = async (email, password, old_password) => {
       success: false,
       message: error.message || "Something went wrong",
     };
-   }
-}
+  }
+};
 
 export const resendCode = async (email) => {
   try {
@@ -473,17 +482,19 @@ export const resendCode = async (email) => {
   }
 };
 
-
-
 export const validateCode = async (email, code) => {
-   try {
-     const res = await axios.put(`${backendUrl}/user/validate_code/${email}`, {code}, {
-      params: {
+  try {
+    const res = await axios.put(
+      `${backendUrl}/user/validate_code/${email}`,
+      { code },
+      {
+        params: {
           user_type: "vendor",
         },
-     })
-   } catch (error) {
-       if (error.response?.data?.message) {
+      }
+    );
+  } catch (error) {
+    if (error.response?.data?.message) {
       return {
         success: false,
         message: error.response.data.message,
@@ -495,7 +506,5 @@ export const validateCode = async (email, code) => {
       success: false,
       message: error.message || "Something went wrong",
     };
-   } 
-}
-
-
+  }
+};

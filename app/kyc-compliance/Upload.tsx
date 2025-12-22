@@ -20,6 +20,8 @@ function UploadBox({
   onFileChange: (e: any) => void;
 }) {
   const {user} = useAuth();
+
+  
   
 
   console.log(user);
