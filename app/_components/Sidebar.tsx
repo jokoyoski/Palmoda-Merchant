@@ -17,7 +17,11 @@ import { FaBell } from "react-icons/fa";
 import path from "path/win32";
 import { FaMessage } from "react-icons/fa6";
 import type { Notification as MyNotification } from "../_lib/type";
-import { getNotifications, notificationCount, readNotification } from "../_lib/notifications";
+import {
+  getNotifications,
+  notificationCount,
+  readNotification,
+} from "../_lib/notifications";
 import { toast } from "react-toastify";
 import { useNotificationCount } from "../_lib/useNotifications";
 import { useMessageCount } from "../_lib/useMessages";
@@ -69,7 +73,11 @@ function Sidebar() {
   };
 
   // Hide sidebar on both sign-up and login pages
-  if (pathname.includes("signup") || pathname.includes("login") || pathname.includes("forgot-password")) {
+  if (
+    pathname.includes("signup") ||
+    pathname.includes("login") ||
+    pathname.includes("forgot-password")
+  ) {
     return null;
   }
 
@@ -122,21 +130,15 @@ function Sidebar() {
               ? "Upload new products"
               : "Complete KYC to upload products"
           }
-          className={`flex hover:bg-gray-50 ${
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? ""
-              : "pointer-events-none cursor-not-allowed opacity-30"
-          } font-semibold items-center ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+          className={`flex hover:bg-gray-50 font-semibold items-center ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <div className="relative flex items-center gap-2">
             <FaBell />
             <span>Notifications</span>
 
-              <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {count || 0}
-              </span>
+            <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {count || 0}
+            </span>
           </div>
         </Link>
 
@@ -201,9 +203,9 @@ function Sidebar() {
             <FaMessage />
             <span>Messages</span>
 
-              <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {messageCount || 0}
-              </span>
+            <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {messageCount || 0}
+            </span>
           </div>
         </Link>
 
