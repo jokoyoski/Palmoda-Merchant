@@ -26,16 +26,19 @@ function Page() {
   const filteredData = useMemo(() => {
     return orders.filter((order) => {
       const itemDate = new Date(order.order_info.transaction_date.$date);
-      
+
       // Calculate total amount from vendor_orders
       const totalAmount = order.vendor_orders.reduce(
-        (sum, vo) => sum + vo.amount * vo.quantity,
+        (sum, vo) => sum + vo.amount,
         0
       );
 
       if (dateFrom && new Date(dateFrom) > itemDate) return false;
       if (dateTo && new Date(dateTo) < itemDate) return false;
-      if (status && order.order_info.status.toLowerCase() !== status.toLowerCase())
+      if (
+        status &&
+        order.order_info.status.toLowerCase() !== status.toLowerCase()
+      )
         return false;
       if (minAmount && totalAmount < Number(minAmount)) return false;
       if (maxAmount && totalAmount > Number(maxAmount)) return false;
@@ -59,9 +62,12 @@ function Page() {
 
   // Calculate total orders value
   const totalOrdersValue = orders.reduce((sum, order) => {
-    return sum + order.vendor_orders.reduce(
-      (orderSum, vo) => orderSum + vo.amount * vo.quantity,
-      0
+    return (
+      sum +
+      order.vendor_orders.reduce(
+        (orderSum, vo) => orderSum + vo.amount * vo.quantity,
+        0
+      )
     );
   }, 0);
 
@@ -210,7 +216,7 @@ function Page() {
               ) : paginatedData.length > 0 ? (
                 paginatedData.map((order) => {
                   const totalAmount = order.vendor_orders.reduce(
-                    (sum, vo) => sum + vo.amount * vo.quantity,
+                    (sum, vo) => sum + vo.amount,
                     0
                   );
                   const totalItems = order.vendor_orders.reduce(
@@ -224,9 +230,11 @@ function Page() {
                       className="border-b text-center border-gray-200"
                     >
                       <td className="p-2 text-xs text-gray-500">
-                        {new Date(order.order_info.transaction_date.$date)
-                          .toISOString()
-                          .split("T")[0]}
+                        {
+                          new Date(order.order_info.transaction_date.$date)
+                            .toISOString()
+                            .split("T")[0]
+                        }
                       </td>
                       <td className="p-2 text-xs text-gray-500">
                         {order.order_info.transaction_reference}
@@ -250,10 +258,10 @@ function Page() {
                             order.order_info.status === "delivered"
                               ? "bg-green-100 text-green-700"
                               : order.order_info.status === "cancelled"
-                              ? "bg-red-100 text-red-700"
-                              : order.order_info.status === "shipped"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-yellow-100 text-yellow-700"
+                                ? "bg-red-100 text-red-700"
+                                : order.order_info.status === "shipped"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-yellow-100 text-yellow-700"
                           }`}
                         >
                           {order.order_info.status.charAt(0).toUpperCase() +

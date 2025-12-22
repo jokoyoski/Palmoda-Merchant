@@ -67,15 +67,16 @@ export interface Product {
   images: string[];
   cost_price: number;
   description: string;
+  weight: number;
   look_after_me: string;
   countries: string[];
   quantity: number;
   categories: string[];
   sub_categories: string[];
-  genders: string[] | any[]; 
+  genders: string[] | any[];
   colors: string[];
   sizes: string[];
-  fabrics: string[] ; 
+  fabrics: string[];
   discounted_price: number;
   sku: string;
   created_at: string;
@@ -106,7 +107,7 @@ export interface TransactionType {
   vendor_id: string;
   amount: number;
   transaction_reference: string;
-  status: "pending" | "failed" | "successful"; 
+  status: "pending" | "failed" | "successful";
   narration: string;
   transaction_type: "credit" | "debit";
   created_at: string;
@@ -149,11 +150,8 @@ export interface MessageType {
   is_read: boolean;
 }
 
-
 export interface Bank {
   _id: string;
   bank_code: string;
   bank_name: string;
 }
-
-
