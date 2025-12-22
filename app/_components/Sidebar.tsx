@@ -20,16 +20,19 @@ import type { Notification as MyNotification } from "../_lib/type";
 import { getNotifications, notificationCount, readNotification } from "../_lib/notifications";
 import { toast } from "react-toastify";
 import { useNotificationCount } from "../_lib/useNotifications";
+import { useMessageCount } from "../_lib/useMessages";
+import Swal from "sweetalert2"; // ✅ Import SweetAlert2
 
 function Sidebar() {
   const pathname = usePathname();
   const { logout, user } = useAuth();
   const [token, setToken] = useState<string | null>(null);
-  // const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
- const { data: countData } = useNotificationCount();
-  const [expandedId, setExpandedId] = useState<string | null>(null); // track expanded notification
+  const { data: countData } = useNotificationCount();
+  const { data: msgcountData } = useMessageCount();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const count = countData?.data?.count || 0;
+  const messageCount = msgcountData?.data?.unread_count || 0;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -37,50 +40,33 @@ function Sidebar() {
     }
   }, []);
 
- useEffect(() => {
-  const storedToken = localStorage.getItem("token");
-  if (!storedToken) {
-    console.log("No token in localStorage");
-    return;
-  }
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
+      console.log("No token in localStorage");
+      return;
+    }
 
-  setToken(storedToken);   // set token
+    setToken(storedToken);
+  }, []);
 
-  // const fetchNotifications = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await getNotifications();
-  //     console.log("Notifications response:", res);
+  // ✅ Add logout confirmation handler
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "Logout",
+      text: "Are you sure you want to logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#000000",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, Logout",
+      cancelButtonText: "Cancel",
+    });
 
-  //     const notifs: MyNotification[] = res?.data?.notifications || [];
-  //     setNotifications(notifs);
-  //   } catch (error) {
-  //     console.log("Notification error:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // fetchNotifications();
-}, []);
-
-// useEffect(() => {
-//     const fetchNotifications = async () => {
-//       setLoading(true);
-//       try {
-//         const res = await notificationCount();
-//         setCount(res?.data?.count);
-//       } catch (error: any) {
-//         // toast.error(error?.message || "Failed to fetch notifications");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchNotifications();
-//   }, []);
-
-
+    if (result.isConfirmed) {
+      logout();
+    }
+  };
 
   // Hide sidebar on both sign-up and login pages
   if (pathname.includes("signup") || pathname.includes("login") || pathname.includes("forgot-password")) {
@@ -211,7 +197,14 @@ function Sidebar() {
               : "pointer-events-none cursor-not-allowed opacity-30"
           } font-semibold items-center ${pathname === "/messages" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
-          <FaMessage /> Messages
+          <div className="relative flex items-center gap-2">
+            <FaMessage />
+            <span>Messages</span>
+
+              <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {messageCount || 0}
+              </span>
+          </div>
         </Link>
 
         <Link
@@ -257,8 +250,9 @@ function Sidebar() {
         <hr className="my-3 border-gray-200" />
 
         <div className="flex hover:bg-red-100 p-3 ease-in-out transition-all duration-300 flex-col gap-4 mt-auto">
+          {/* ✅ Changed from onClick={logout} to onClick={handleLogout} */}
           <p
-            onClick={logout}
+            onClick={handleLogout}
             className="flex items-center cursor-pointer gap-3 text-red-500 hover:text-red-700"
           >
             <FiLogOut /> Logout

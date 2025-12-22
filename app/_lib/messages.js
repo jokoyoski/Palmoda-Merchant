@@ -31,7 +31,10 @@ export const getMessages = async () => {
 export const messageCount = async () => {
    try {
       const token = localStorage.getItem("token");
-    if (!token) return console.log("No token found");
+    if (!token) {
+      console.log("No token found");
+      return { data: { unread_count: 0 } };
+    }
     const res = await axios.get(`${backendUrl}/message/unread-count`, {
       headers: {
         Authorization: `Bearer ${token}`

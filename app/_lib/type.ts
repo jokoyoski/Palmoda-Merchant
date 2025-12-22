@@ -84,6 +84,7 @@ export interface Product {
   is_active: boolean;
   hidden: boolean;
   rejection_reason?: string;
+  review?: string;
 }
 
 export interface PayoutType {

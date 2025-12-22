@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import ProtectedRoute from "../_components/ProtectedRoute";
 import { useMessageCount, useMessageList, useReadMessage } from "../_lib/useMessages";
 import { MessageType } from "../_lib/type";
@@ -10,11 +10,18 @@ function Page() {
   const { data: countData } = useMessageCount();
   const readMessageMutation = useReadMessage();
 
+  // ✅ Track locally marked messages
+  const [locallyReadMessages, setLocallyReadMessages] = useState<Set<string>>(new Set());
+
   const messages = data?.data || [];
-  const count = countData?.data?.count || 0;
+  const count = countData?.data?.unread_count || 0;
 
   const handleMarkAsRead = (messageId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // ✅ Immediately mark as read locally for instant UI update
+    setLocallyReadMessages(prev => new Set(prev).add(messageId));
+    
     readMessageMutation.mutate(messageId);
   };
 
@@ -62,73 +69,63 @@ function Page() {
 
           {/* Message List */}
           <div className="space-y-3">
-            {messages.map((msg: MessageType) => (
-              <div
-                key={msg._id}
-                className={`relative bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 ${
-                  !msg.is_read ? "border-l-4 border-black" : ""
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  {/* Icon */}
-                  {/* <div
-                    className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                      msg.is_read
-                        ? "bg-gray-100 text-gray-400"
-                        : "bg-black text-white"
-                    }`}
-                  >
-                    {msg.is_read ? (
-                      <MailOpen className="w-5 h-5" />
-                    ) : (
-                      <Mail className="w-5 h-5" />
-                    )}
-                  </div> */}
+            {messages.map((msg: MessageType) => {
+              // ✅ Check both server state and local state
+              const isRead = msg.is_read || locallyReadMessages.has(msg._id);
+              
+              return (
+                <div
+                  key={msg._id}
+                  className={`relative bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 ${
+                    !isRead ? "border-l-4 border-black" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3 mb-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h2 className="font-semibold text-black text-base">
+                            {msg.title}
+                          </h2>
+                          {!isRead && (
+                            <span className="px-2 py-0.5 bg-black text-white text-xs rounded-full font-medium">
+                              New
+                            </span>
+                          )}
+                        </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-3 mb-1.5">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="font-semibold text-black text-base">
-                          {msg.title}
-                        </h2>
-                        {!msg.is_read && (
-                          <span className="px-2 py-0.5 bg-black text-white text-xs rounded-full font-medium">
-                            New
-                          </span>
+                        {/* Mark as read button - ✅ now uses combined isRead state */}
+                        {!isRead && (
+                          <button
+                            onClick={(e) => handleMarkAsRead(msg._id, e)}
+                            disabled={readMessageMutation.isPending}
+                            className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-black text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Mark as read
+                          </button>
                         )}
                       </div>
 
-                      {/* Mark as read button */}
-                      {!msg.is_read && (
-                        <button
-                          onClick={(e) => handleMarkAsRead(msg._id, e)}
-                          disabled={readMessageMutation.isPending}
-                          className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-black text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          Mark as read
-                        </button>
-                      )}
-                    </div>
+                      <p className="text-gray-600 text-sm leading-relaxed mb-2">
+                        {msg.content}
+                      </p>
 
-                    <p className="text-gray-600 text-sm leading-relaxed mb-2">
-                      {msg.content}
-                    </p>
-
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <span>{msg.created_at}</span>
-                      {msg.message_type && msg.message_type !== "text" && (
-                        <>
-                          <span>•</span>
-                          <span className="capitalize">{msg.message_type}</span>
-                        </>
-                      )}
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <span>{msg.created_at}</span>
+                        {msg.message_type && msg.message_type !== "text" && (
+                          <>
+                            <span>•</span>
+                            <span className="capitalize">{msg.message_type}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

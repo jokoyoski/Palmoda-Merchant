@@ -40,8 +40,10 @@ export const useNotificationList = (pageNumber: number) => {
   return useQuery<NotificationListResponse>({
     queryKey: ["notifications", pageNumber] as QueryKey,
     queryFn: () => getNotifications(pageNumber),
-    staleTime: 5 * 60 * 1000,
+    staleTime:  1* 60 * 1000,
     placeholderData: (previousData) => previousData,
+    refetchOnWindowFocus: false,
+    refetchInterval: 1000,
   });
 };
 

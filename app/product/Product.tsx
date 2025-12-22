@@ -19,6 +19,7 @@ function ProductComponent({ product,  }: ProductProps) {
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
     const [gender, setGender] = useState<string[]>([]);
+    const [currentMainImage, setCurrentMainImage] = useState(product.images[0]);
 
      const [queryParams, setQueryParams] = useState<CategoryQueryParams>({
         page_number: 1,
@@ -93,29 +94,32 @@ const formatFabrics = (fabrics: string[]) => fabrics?.join(", ") || "N/A";
 
       {/* Product Details */}
           <div className="flex gap-7">
-            <div className="flex flex-col gap-6 w-[250px]">
-             <img
-                src={product.images[0]}
-                alt="Main Product"
-                className="w-full h-[300px] object-cover rounded-md"
+           <div className="flex flex-col gap-6 w-[250px]">
+          <img
+            src={currentMainImage}
+            alt="Main Product"
+            className="w-full h-[300px] object-cover rounded-md"
+          />
+
+          <div className="flex gap-1">
+            {product.images.slice(1).map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt={`Thumbnail ${idx + 1}`}
+                className="w-1/4 h-[50px] object-cover rounded-sm cursor-pointer hover:scale-105 transition-transform"
+                onClick={() => setCurrentMainImage(img)}
               />
-              <div className="flex gap-1">
-                {product.images.slice(1).map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    alt={`Thumbnail ${idx + 1}`}
-                    className="w-1/4 h-[50px] object-cover rounded-sm cursor-pointer hover:scale-105 transition-transform"
-                  />
-                ))}
-              </div>
-            </div>
+            ))}
+          </div>
+        </div>
+
 
                         <div className="w-full">
                            <h1 className="text-sm font-semibold text-black">{product.name}</h1>
               <div className="flex items-center gap-4 my-3.5">
-                <h3 className="text-xl font-semibold text-black">{product.discounted_price}</h3>
-                <h4 className="text-gray-500 text-sm line-through">{product.cost_price}</h4>
+                <h3 className="text-xl font-semibold text-black">₦{product.discounted_price}</h3>
+                <h4 className="text-gray-500 text-sm line-through">₦{product.cost_price}</h4>
               </div>
               <div className="flex gap-12">
                 <div className="flex flex-col gap-3">
@@ -151,7 +155,7 @@ const formatFabrics = (fabrics: string[]) => fabrics?.join(", ") || "N/A";
 
                         </div>
           </div>
-          {product?.rejection_reason && <div className='border border-gray-200 '>
+          {product?.rejection_reason || product?.review && <div className='border border-gray-200 '>
                   <div className='px-4 py-3 border-b border-gray-200'>
                     <h1 className='text-black font-semibold text-sm'>Admin Rejection Reason</h1>
                   </div>
@@ -161,7 +165,7 @@ const formatFabrics = (fabrics: string[]) => fabrics?.join(", ") || "N/A";
                              <CiUser className='text-black text-[25px]'/>
                              <div className='w-[350px]'>
                                 
-                                 <p className='text-gray-500 text-xs'>{product.rejection_reason}</p>
+                                 <p className='text-gray-500 text-xs'>{product.rejection_reason || product?.review}</p>
                              </div>
                            </div>
                            {/* <p className='text-gray-500 text-xs'>Oct 11, 2023 - 14:32</p> */}

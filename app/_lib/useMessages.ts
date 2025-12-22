@@ -16,7 +16,7 @@ export interface MessageCountResponse {
   success: boolean;
   message: string;
   data: {
-    count: number;
+    unread_count: number; // ✅ Changed from 'count' to 'unread_count'
   };
 }
 
@@ -30,7 +30,10 @@ export const useMessageList = () => {
   return useQuery<MessageListResponse>({
     queryKey: ["messages"] as QueryKey,
     queryFn: getMessages,
-    staleTime: 5 * 60 * 1000, // cache is fresh for 5 minutes
+    staleTime: 1 * 60 * 1000,
+     // cache is fresh for 5 minutes
+      refetchOnWindowFocus: false,
+     refetchInterval: 1000,
   });
 };
 
@@ -55,10 +58,10 @@ export const useReadMessage = () => {
       queryClient.setQueryData<MessageCountResponse>(
         ["messageCount"],
         (oldCount) => {
-          if (!oldCount || oldCount.data.count <= 0) return oldCount;
+          if (!oldCount || oldCount.data.unread_count <= 0) return oldCount; // ✅ Changed
           return {
             ...oldCount,
-            data: { count: oldCount.data.count - 1 },
+            data: { unread_count: oldCount.data.unread_count - 1 }, // ✅ Changed
           };
         }
       );

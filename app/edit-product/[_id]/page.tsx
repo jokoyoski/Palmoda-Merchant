@@ -426,8 +426,10 @@ function EditProductPage() {
                   <select
                     id="gender"
                     value={selectedGender}
+                   disabled={true}
                     onChange={(e) => setSelectedGender(e.target.value)}
-                    className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    className="border border-gray-300 text-sm text-gray-600
+                     p-2 focus:outline-none focus:ring-2 focus:ring-black disabled:cursor-not-allowed"
                   >
                     <option value="">
                       {genderLoading ? "Loading..." : "-- Select Gender --"}

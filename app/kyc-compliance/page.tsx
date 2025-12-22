@@ -448,7 +448,7 @@ function Page() {
                   htmlFor="Tax ID"
                   className="text-black font-semibold text-xs"
                 >
-                  Tax ID (optional) *
+                  Tax ID (optional) 
                 </label>
                 <input
                   type="number"
