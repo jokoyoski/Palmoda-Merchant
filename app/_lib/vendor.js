@@ -147,6 +147,76 @@ export const completeKyc = async (
   }
 };
 
+export const updateKyc = async (
+  business_registration_document,
+  valid_owner_id,
+  bank_statement,
+  business_type,
+  registration_number,
+  tax_identification_number,
+  address_line_one,
+  address_line_two,
+  city,
+  state,
+  country,
+  postal_code,
+  bank_name,
+  account_number,
+  account_holder_name
+) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return {
+        success: false,
+        message: "No token found",
+        data: null,
+      };
+    }
+
+    const res = await axios.put(
+      `${backendUrl}/vendor/update-kyc`,
+      {
+        business_registration_document,
+        valid_owner_id,
+        bank_statement,
+        business_type,
+        registration_number,
+        tax_identification_number,
+        address_line_one,
+        address_line_two,
+        city,
+        state,
+        country,
+        postal_code,
+        bank_name,
+        account_number,
+        account_holder_name,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    if (error.response?.data?.message) {
+      return {
+        success: false,
+        message: error.response.data.message,
+      };
+    }
+
+    return {
+      success: false,
+      message: error.message || "Something went wrong",
+    };
+  }
+};
+
 export const getKycDetails = async (params) => {
   try {
     const token = localStorage.getItem("token");

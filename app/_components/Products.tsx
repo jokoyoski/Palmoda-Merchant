@@ -10,11 +10,12 @@ import { toast } from "react-toastify";
 interface ProductType {
   _id: string;
   name: string;
-  discounted_price: number;
+  cost_price: number;
+  discounted_price: number | null;
   status: string;
   quantity: number;
- images: string[];
- sku: string;
+  images: string[];
+  sku: string;
 }
 
 interface ProductsProps {
@@ -146,7 +147,7 @@ const goToPage = (page: number) => {
                 </td>
 
                 <td className="p-3 text-xs font-semibold">
-                  ₦{product.discounted_price?.toLocaleString()}
+                  ₦{(product.discounted_price ?? product.cost_price)?.toLocaleString()}
                 </td>
 
                 <td

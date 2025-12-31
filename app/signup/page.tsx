@@ -24,39 +24,10 @@ function Page() {
   const router = useRouter();
   const verificationBtnRef = useRef<HTMLButtonElement | null>(null);
 
+  // Always clear signup state on mount - user should always start fresh
   useEffect(() => {
-  const saved = localStorage.getItem("vendorSignupState");
-
-  if (saved) {
-    const data = JSON.parse(saved);
-
-    // Only clear if user is opening signup fresh, not returning from OTP
-    if (!data.signupSuccess) {
-      localStorage.removeItem("vendorSignupState");
-    }
-  }
-}, []);
-
-
-  // Clear any stale signup cache on mount
-  // useEffect(() => {
-  //   localStorage.removeItem("vendorSignupState");
-  // }, []);
-
-  // If there is previous signup success, scroll to verification
-  useEffect(() => {
-  const saved = localStorage.getItem("vendorSignupState");
-  if (!saved) return;
-
-  const data = JSON.parse(saved);
-
-  // Only load if user already completed step 1
-  if (data.signupSuccess) {
-    setSignupSuccess(true);
-    setEmail(data.emailRegistered || "");
-    setStep(2);
-  }
-}, []);
+    localStorage.removeItem("vendorSignupState");
+  }, []);
 
 
   useEffect(() => {
@@ -126,26 +97,15 @@ function Page() {
       toast.success("Signup successful! Proceed to verification.");
       setSignupSuccess(true);
 
-      // Save minimal state for OTP
-      localStorage.setItem(
-        "vendorSignupState",
-        JSON.stringify({
-          emailRegistered: email,
-          signupSuccess: true,
-        })
-      );
       setStep(2);
     } else {
       toast.error(res.message || "Signup failed");
       setSignupSuccess(false);
-      localStorage.removeItem("vendorSignupState");
     }
   };
 
   // Called after OTP verification
   const handleVerified = () => {
-    localStorage.removeItem("vendorSignupState"); // cleanup
-    // toast.success("You can now log in!");
     router.push("/login");
   };
 

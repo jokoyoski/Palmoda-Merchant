@@ -46,7 +46,6 @@ const VerifyVendorCode: React.FC<VerifyVendorCodeProps> = ({ email, onVerified, 
 
     if (res.success) {
       toast.success("Email verified successfully!");
-       localStorage.removeItem("vendorSignupState");
       onVerified();
     } else {
       toast.error(res.message || "Verification failed");

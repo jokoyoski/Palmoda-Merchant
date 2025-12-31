@@ -19,6 +19,7 @@ import {
   getBrandDetails,
   updateBrandDetails,
 } from "../_lib/brand";
+import { completeKyc } from "../_lib/vendor";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
@@ -70,24 +71,27 @@ const BrandProfilePage = () => {
   const [tiktok, setTiktok] = useState("");
   const [website, setWebsite] = useState("");
   const [hasDraft, setHasDraft] = useState(false);
-  
-  
+  const [hasPendingKyc, setHasPendingKyc] = useState(false);
+
   const router = useRouter();
   const { user, logout } = useAuth();
-  const isDisabled =
-    user?.is_bank_information_verified ||
-    user?.is_business_verified ||
-    user?.is_identity_verified;
+  // Brand profile is always editable regardless of verification status
+  const isDisabled = false;
 
   const logoBlackRef = useRef<HTMLInputElement | null>(null);
   const logoWhiteRef = useRef<HTMLInputElement | null>(null);
   const bannerRef = useRef<HTMLInputElement | null>(null);
 
-  // Check if draft exists on mount
+  // Check if draft exists and if there's pending KYC data on mount
   useEffect(() => {
     const draft = localStorage.getItem('brand_draft');
     if (draft) {
       setHasDraft(true);
+    }
+
+    const pendingKyc = localStorage.getItem('kyc_pending');
+    if (pendingKyc) {
+      setHasPendingKyc(true);
     }
   }, []);
 
@@ -221,9 +225,45 @@ const BrandProfilePage = () => {
       return;
     }
 
+    // Check if there's pending KYC data that needs to be submitted
+    const pendingKycData = localStorage.getItem('kyc_pending');
+    if (!pendingKycData) {
+      toast.error("KYC data not found. Please complete KYC first.");
+      router.push("/kyc-compliance");
+      return;
+    }
+
     setCreating(true);
     try {
-      const res = await setUpBrandProfile(
+      // Parse the pending KYC data
+      const kycData = JSON.parse(pendingKycData);
+
+      // Step 1: Submit KYC data first
+      const kycRes = await completeKyc(
+        kycData.businessDocUrl,
+        kycData.ownerIdUrl,
+        kycData.bankStatementUrl,
+        kycData.businessType,
+        kycData.registrationNumber,
+        kycData.taxId,
+        kycData.address1,
+        kycData.address2,
+        kycData.city,
+        kycData.stateName,
+        kycData.country,
+        kycData.postalCode,
+        kycData.bankName,
+        kycData.accountNumber,
+        kycData.accountHolder
+      );
+
+      if (!kycRes?.success) {
+        toast.error(kycRes?.message || "Failed to submit KYC. Please try again.");
+        return;
+      }
+
+      // Step 2: Submit Brand Profile
+      const brandRes = await setUpBrandProfile(
         brandName,
         brandDescription,
         logoBlackUrl,
@@ -237,42 +277,42 @@ const BrandProfilePage = () => {
         pinterest
       );
 
-      if (!res.success) {
-        toast.error(res.message || "Failed to create brand profile");
+      if (!brandRes.success) {
+        toast.error(brandRes.message || "Failed to create brand profile");
         return;
       }
 
-      toast.success("Brand Profile has been submitted for review");
-      // Clear draft after successful submission
+      // Both submissions successful - clear all saved data
+      localStorage.removeItem('kyc_pending');
+      localStorage.removeItem('kyc_draft');
       localStorage.removeItem('brand_draft');
       setHasDraft(false);
+      setHasPendingKyc(false);
       setBrandExists(true);
 
-       await Swal.fire({
-  title: "Brand Created!",
-  html: `
-    Your brand profile has been submitted for review.<br/>
-    Please wait for the admin verification email.<br/><br/>
-    For now, you should logout and login again later.
-  `,
-  icon: "success",
-  showCancelButton: true,
-  confirmButtonText: "Logout Now",
-  cancelButtonText: "Later",
-  allowOutsideClick: false,
-  allowEscapeKey: false,
+      toast.success("KYC and Brand Profile submitted successfully!");
 
-  // ⭐ CUSTOM BLACK BUTTON ⭐
-  customClass: {
-    confirmButton: "swal-confirm-black",
-  }
-}).then((result: any) => {
-  if (result.isConfirmed) {
-    logout();
-  }
-});
-
-
+      await Swal.fire({
+        title: "Profile Complete!",
+        html: `
+          Your KYC and brand profile have been submitted for review.<br/>
+          Please wait for the admin verification email.<br/><br/>
+          For now, you should logout and login again later.
+        `,
+        icon: "success",
+        showCancelButton: true,
+        confirmButtonText: "Logout Now",
+        cancelButtonText: "Later",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+          confirmButton: "swal-confirm-black",
+        }
+      }).then((result: any) => {
+        if (result.isConfirmed) {
+          logout();
+        }
+      });
 
     } catch (err: any) {
       toast.error(err?.message || "An error occurred");
@@ -350,6 +390,29 @@ const BrandProfilePage = () => {
           Create your brand's presence on PALMODA. This information will be
           visible to customers.
         </p>
+
+        {/* KYC Status Notice - only show if KYC is pending AND brand doesn't exist yet */}
+        {hasPendingKyc && !brandExists && (
+          <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
+            <p className="text-green-800 text-sm">
+              ✓ KYC details saved. Complete your brand profile and click Submit to finalize both.
+            </p>
+          </div>
+        )}
+
+        {!hasPendingKyc && !brandExists && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
+            <p className="text-yellow-800 text-sm">
+              ⚠ Please complete KYC first before setting up your brand profile.{" "}
+              <button
+                onClick={() => router.push("/kyc-compliance")}
+                className="underline font-semibold"
+              >
+                Go to KYC
+              </button>
+            </p>
+          </div>
+        )}
 
         <hr className="text-gray-200 mb-3.5" />
 
@@ -529,28 +592,27 @@ const BrandProfilePage = () => {
 
             {!brandExists && (
               <button
-  onClick={handleCreate}
-  className={`p-[5px] w-[120px] text-sm flex justify-center items-center ${
-    isFormValid
-      ? "bg-black text-white hover:bg-gray-900"
-      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-  }`}
-  disabled={!isFormValid || creating || loading || isDisabled}
->
-  {creating ? "Loading..." : "Create"}
-</button>
-
+                onClick={handleCreate}
+                className={`p-[5px] w-[120px] text-sm flex justify-center items-center ${
+                  isFormValid && hasPendingKyc
+                    ? "bg-black text-white hover:bg-gray-900"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+                disabled={!isFormValid || !hasPendingKyc || creating || loading || isDisabled}
+              >
+                {creating ? "Submitting..." : "Submit"}
+              </button>
             )}
 
-            {/* {brandExists && (
+            {brandExists && (
               <button
                 onClick={handleUpdate}
-                className='bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center'
+                className="bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center"
                 disabled={loading || creating || isDisabled}
               >
-                {loading ? "Loading..." : "Update"}
+                {loading ? "Updating..." : "Edit"}
               </button>
-            )} */}
+            )}
           </div>
         </div>
 

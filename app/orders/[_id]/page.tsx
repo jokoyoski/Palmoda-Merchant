@@ -80,10 +80,15 @@ export default function OrderDetailsPage() {
   if (isError || !data?.data || data.data.length === 0)
     return <div className="p-6 text-center text-xl font-medium text-red-500">Failed to load order or order not found.</div>;
 
-  const orderDetail = data.data[0];
-  const orderInfo = orderDetail.order_info;
+  // All items in this order
+  const orderItems = data.data;
+  // Use first item to get shared order info
+  const orderInfo = orderItems[0].order_info;
   const address = orderInfo.address;
-  const item = orderDetail.item;
+  const user = orderItems[0].user;
+
+  // Calculate total subtotal from all items
+  const subtotal = orderItems[0].amount;
 
   // Format transaction date nicely
   const formattedDate = new Date(orderInfo.transaction_date.$date).toLocaleDateString('en-US', {
@@ -113,13 +118,15 @@ export default function OrderDetailsPage() {
         <div className="grid lg:grid-cols-3 gap-8 mb-10">
           
           {/* 1. ORDER SUMMARY CARD */}
-          <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-6 shadow-md h-full">
+          <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-6 shadow-md h-full flex flex-col">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Financial Summary</h2>
-            <DetailRow label="Subtotal" value={`₦${orderDetail.amount.toLocaleString()}`} />
-            <DetailRow label="Delivery Fee" value={`₦${orderInfo.delivery_fee.toLocaleString()}`} />
-            <DetailRow label="Tax Rate" value={`${orderInfo.tax}%`} />
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <DetailRow label="Total Amount Paid" value={`₦${(orderDetail.amount + orderInfo.delivery_fee).toLocaleString()}`} isTotal />
+            <div className="flex-grow">
+              <DetailRow label="Items" value={`${orderItems.length} item${orderItems.length > 1 ? 's' : ''}`} />
+              <DetailRow label="Subtotal" value={`₦${subtotal.toLocaleString()}`} />
+              <DetailRow label="Tax Rate" value={`${orderInfo.tax}%`} />
+            </div>
+            <div className="mt-auto pt-4 border-t border-gray-200">
+              <DetailRow label="Total Amount Paid" value={`₦${(subtotal).toLocaleString()}`} isTotal />
             </div>
           </div>
 
@@ -129,7 +136,7 @@ export default function OrderDetailsPage() {
             
             <h3 className="font-medium text-gray-700 mt-2">Recipient</h3>
             <p className="text-sm text-gray-600">{address.first_name} {address.last_name}</p>
-            <p className="text-sm text-gray-600 mb-3">{orderDetail.user.email}</p>
+            <p className="text-sm text-gray-600 mb-3">{user.email}</p>
             
             <h3 className="font-medium text-gray-700 mt-4">Contact Info</h3>
             <p className="text-sm text-gray-600">{address.phone_number}</p>
@@ -142,51 +149,57 @@ export default function OrderDetailsPage() {
 
           {/* 3. PRODUCT ITEM CARD */}
           <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-6 shadow-md h-full">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Product Details</h2>
-            
-            <div className="flex items-start space-x-4 mb-4">
-              {item.images && item.images.length > 0 && (
-                <img
-                  src={item.images[0]}
-                  alt={item.name}
-                  width={80}
-                  height={80}
-                  className="rounded-lg object-cover border"
-                />
-              )}
-              <div>
-                <h3 className="text-lg font-semibold text-black">{item.name}</h3>
-                <p className="text-sm text-gray-500">SKU: {item.sku}</p>
-                <p className="text-sm text-gray-500">Qty: <strong>{orderDetail.quantity}</strong></p>
-              </div>
-            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
+              Product Details ({orderItems.length} item{orderItems.length > 1 ? 's' : ''})
+            </h2>
 
-            <DetailRow label="Price per unit" value={`₦${item.discounted_price.toLocaleString()}`} />
-            <DetailRow 
-              label="Category" 
-              value={item.categories?.length ? getCategoryName(item.categories[0]) : 'N/A'} 
-            />
-            <DetailRow 
-              label="Color" 
-              value={item.colors?.length ? getColorName(item.colors[0]) : 'N/A'} 
-            />
-            <DetailRow 
-              label="Size" 
-              value={item.sizes?.length ? getSizeName(item.sizes[0]) : 'N/A'} 
-            />
-            {/* {item.gender && (
-              <DetailRow 
-                label="Gender" 
-                value={getGenderName(item.gender)} 
-              />
-            )} */}
+            <div className="space-y-6 max-h-[400px] overflow-y-auto">
+              {orderItems.map((orderItem: any, index: number) => {
+                const item = orderItem.item;
+                return (
+                  <div key={orderItem._id} className={index > 0 ? "pt-4 border-t border-gray-200" : ""}>
+                    <div className="flex items-start space-x-4 mb-4">
+                      {item.images && item.images.length > 0 && (
+                        <img
+                          src={item.images[0]}
+                          alt={item.name}
+                          width={80}
+                          height={80}
+                          className="rounded-lg object-cover border"
+                        />
+                      )}
+                      <div>
+                        <h3 className="text-lg font-semibold text-black">{item.name}</h3>
+                        <p className="text-sm text-gray-500">SKU: {item.sku}</p>
+                        <p className="text-sm text-gray-500">Qty: <strong>{orderItem.quantity}</strong></p>
+                      </div>
+                    </div>
+
+                    <DetailRow label="Price per unit" value={`₦${(item.discounted_price ?? item.cost_price)?.toLocaleString()}`} />
+                    <DetailRow label="Item Total" value={`₦${(orderItem.amount).toLocaleString()}`} />
+                    <DetailRow
+                      label="Category"
+                      value={item.categories?.length ? getCategoryName(item.categories[0]) : 'N/A'}
+                    />
+                    <DetailRow
+                      label="Color"
+                      value={item.colors?.length ? getColorName(item.colors[0]) : 'N/A'}
+                    />
+                    <DetailRow
+                      label="Size"
+                      value={item.sizes?.length ? getSizeName(item.sizes[0]) : 'N/A'}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* --- ORDER TRACKING TIMELINE --- */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-md mt-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">Order Tracking History</h2>
-          <TrackingTimeline tracking={orderDetail.tracking} />
+          <TrackingTimeline tracking={orderItems[0].tracking} />
         </div>
       </section>
     </ProtectedRoute>

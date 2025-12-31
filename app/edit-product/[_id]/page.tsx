@@ -594,8 +594,28 @@ function EditProductPage() {
                     </label>
                     <input
                       type="number"
-                      value={inventory}
-                      onChange={(e) => setInventory(Number(e.target.value))}
+                      name="inventory"
+                      id="inventory"
+                      min="0"
+                      value={inventory === 0 ? "" : inventory}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "") {
+                          setInventory(0);
+                        } else {
+                          const num = parseInt(val, 10);
+                          if (!isNaN(num) && num >= 0) {
+                            setInventory(num);
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // Ensure value is set to 0 if empty on blur
+                        if (e.target.value === "") {
+                          setInventory(0);
+                        }
+                      }}
+                      placeholder="0"
                       className="text-gray-500 p-2 text-sm border border-gray-300 focus:ring-2 focus:ring-black"
                     />
                   </div>

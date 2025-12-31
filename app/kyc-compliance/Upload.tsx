@@ -3,6 +3,7 @@ import React from "react";
 import { FaFileUpload } from "react-icons/fa";
 import { useAuth } from "../_lib/AuthContext";
 
+type DocumentStatus = "pending" | "approved" | "revoked" | undefined;
 
 function UploadBox({
   title,
@@ -11,22 +12,46 @@ function UploadBox({
   inputRef,
   onFileChange,
   isUploading,
+  status,
 }: {
   title: string;
   fileUrl: string;
   onUploadClick: () => void;
   inputRef: any;
-  isUploading: boolean
+  isUploading: boolean;
   onFileChange: (e: any) => void;
+  status?: DocumentStatus;
 }) {
-  const {user} = useAuth();
+  const { user } = useAuth();
 
-  
-  
-
-  console.log(user);
-  const isDisabled = isUploading || user?.is_bank_information_verified || user?.is_business_verified || user?.is_identity_verified;
+  // Disable only when vendor is fully verified
+  const isDisabled = isUploading || user?.is_verified;
   const isPdf = fileUrl?.endsWith(".pdf");
+
+  // Status badge styles
+  const getStatusBadge = () => {
+    if (!status || !fileUrl) return null;
+
+    const styles = {
+      pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
+      approved: "bg-green-100 text-green-800 border-green-300",
+      revoked: "bg-red-100 text-red-800 border-red-300",
+    };
+
+    const labels = {
+      pending: "Pending",
+      approved: "Approved",
+      revoked: "Revoked",
+    };
+
+    return (
+      <span
+        className={`absolute top-2 right-2 px-2 py-0.5 text-[10px] font-semibold rounded border ${styles[status]}`}
+      >
+        {labels[status]}
+      </span>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-1 w-full md:w-[230px]">
@@ -34,7 +59,8 @@ function UploadBox({
 
       {/* If file uploaded → show preview */}
       {fileUrl ? (
-        <div className="border-2 border-gray-300 p-2 rounded-md h-[180px] flex flex-col items-center justify-center bg-gray-50">
+        <div className="relative border-2 border-gray-300 p-2 rounded-md h-[180px] flex flex-col items-center justify-center bg-gray-50">
+          {getStatusBadge()}
           {isPdf ? (
             <p className="text-center text-sm text-black font-semibold">PDF Uploaded</p>
           ) : (

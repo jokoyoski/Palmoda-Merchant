@@ -3,16 +3,18 @@ import React, { useRef, useState, ChangeEvent, useEffect } from "react";
 import { FaFileUpload } from "react-icons/fa";
 import ProtectedRoute from "../_components/ProtectedRoute";
 import {
-  completeKyc,
   getKycDetails,
   fetchBanks,
   resolveAccount,
+  updateKyc,
 } from "../_lib/vendor";
 import axios from "axios";
 import { toast } from "react-toastify";
 import UploadBox from "./Upload";
 import { useAuth } from "../_lib/AuthContext";
+import { useRouter } from "next/navigation";
 import { Bank } from "../_lib/type";
+import { NIGERIAN_STATES } from "@/constants/nigeriaStates";
 
 // Cloudinary config
 const cloudName = "jokoyoski";
@@ -82,9 +84,10 @@ function Page() {
   const [certified, setCertified] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
   const [kycSubmitted, setKycSubmitted] = useState(false);
+  const [kycExists, setKycExists] = useState(false); // tracks if KYC already exists in backend
+  const [updating, setUpdating] = useState(false); // loading state for edit button
   const [bankSearch, setBankSearch] = useState(""); // what user types
   const [bankResults, setBankResults] = useState<Bank[]>([]); // fetched banks
   const [showBankDropdown, setShowBankDropdown] = useState(false); // toggle dropdown
@@ -92,11 +95,41 @@ function Page() {
   const [resolvedAccountName, setResolvedAccountName] = useState(""); // resolved account name
 
   const { user } = useAuth();
+  const router = useRouter();
   console.log(user);
-  const isDisabled =
-    user?.is_bank_information_verified ||
-    user?.is_business_verified ||
-    user?.is_identity_verified;
+  // Disable editing only when vendor is fully verified
+  const isDisabled = user?.is_verified;
+
+  // Helper function to determine document status
+  const getDocumentStatus = (
+    isVerified: boolean | undefined,
+    isRevoked: boolean | undefined
+  ): "pending" | "approved" | "revoked" | undefined => {
+    if (isRevoked && !isVerified) return "revoked";
+    if (!isRevoked && isVerified) return "approved";
+    if (!isRevoked && !isVerified) return "pending";
+    return undefined;
+  };
+
+  // Document statuses based on user data
+  const businessDocStatus = getDocumentStatus(
+    user?.is_business_verified,
+    user?.is_business_registration_revoked
+  );
+  const ownerIdStatus = getDocumentStatus(
+    user?.is_identity_verified,
+    user?.is_identity_verification_revoked
+  );
+  const bankStatementStatus = getDocumentStatus(
+    user?.is_bank_information_verified,
+    user?.is_bank_information_verification_revoked
+  );
+
+  // Check if all KYC documents have been approved
+  const allKycApproved =
+    businessDocStatus === "approved" &&
+    ownerIdStatus === "approved" &&
+    bankStatementStatus === "approved";
 
   useEffect(() => {
     if (!bankSearch) {
@@ -201,6 +234,7 @@ function Page() {
         setCountry(draftData.country || "");
         setPostalCode(draftData.postalCode || "");
         setBankName(draftData.bankName || "");
+        setBankSearch(draftData.bankName || ""); // Also set the search field to display the bank name
         setAccountHolder(draftData.accountHolder || "");
         setAccountNumber(draftData.accountNumber || "");
         setCertified(draftData.certified || false);
@@ -221,7 +255,10 @@ function Page() {
         if (res.success === false) {
           // toast.error(res.message);
           console.log(res.message);
-        } else {
+          setKycExists(false);
+        } else if (res.data && res.data._id) {
+          // KYC data exists in backend
+          setKycExists(true);
           // Populate form fields
           setBusinessDocUrl(res.data.business_registration_document || "");
           setOwnerIdUrl(res.data.valid_owner_id || "");
@@ -237,8 +274,11 @@ function Page() {
           setCountry(res.data.country || "");
           setPostalCode(res.data.postal_code || "");
           setBankName(res.data.bank_name || "");
+          setBankSearch(res.data.bank_name || ""); // Also set the search field to display the bank name
           setAccountHolder(res.data.account_holder_name || "");
           setAccountNumber(res.data.account_number || "");
+        } else {
+          setKycExists(false);
         }
       } catch (err: any) {
         // toast.error(err?.message || "Failed to fetch KYC details");
@@ -285,9 +325,65 @@ function Page() {
       );
       return;
     }
-    setSubmitting(true);
+
+    // Validate required fields
+    if (!businessType || !registrationNumber || !address1 || !city || !stateName || !country || !postalCode) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (!bankName || !accountNumber || !accountHolder) {
+      toast.error("Please fill in all bank details.");
+      return;
+    }
+
+    // Save KYC data to localStorage for submission on Brand Profile page
+    const kycData = {
+      businessDocUrl,
+      ownerIdUrl,
+      bankStatementUrl,
+      businessType,
+      registrationNumber,
+      taxId,
+      address1,
+      address2,
+      city,
+      stateName,
+      country,
+      postalCode,
+      bankName,
+      accountNumber,
+      accountHolder,
+      timestamp: new Date().toISOString(),
+    };
+
+    localStorage.setItem("kyc_pending", JSON.stringify(kycData));
+    toast.success("KYC details saved. Please complete your Brand Profile.");
+    router.push("/brand-profile");
+  };
+
+  // Handle editing existing KYC
+  const handleEdit = async () => {
+    if (!businessDocUrl || !ownerIdUrl || !bankStatementUrl) {
+      toast.error(
+        "Please upload Business Registration, Owner ID and Bank Statement."
+      );
+      return;
+    }
+
+    if (!businessType || !registrationNumber || !address1 || !city || !stateName || !country || !postalCode) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (!bankName || !accountNumber || !accountHolder) {
+      toast.error("Please fill in all bank details.");
+      return;
+    }
+
+    setUpdating(true);
     try {
-      const res = await completeKyc(
+      const res = await updateKyc(
         businessDocUrl,
         ownerIdUrl,
         bankStatementUrl,
@@ -306,18 +402,14 @@ function Page() {
       );
 
       if (res?.success) {
-        toast.success("KYC has been submitted for review");
-        // Clear draft after successful submission
-        localStorage.removeItem("kyc_draft");
-        setHasDraft(false);
-        setKycSubmitted(true);
+        toast.success("KYC updated successfully!");
       } else {
-        toast.error(res?.message || "KYC failed");
+        toast.error(res?.message || "Failed to update KYC");
       }
     } catch (err: any) {
       toast.error(err?.message || "An error occurred");
     } finally {
-      setSubmitting(false);
+      setUpdating(false);
     }
   };
 
@@ -355,6 +447,7 @@ function Page() {
                 onUploadClick={() => businessInputRef.current?.click()}
                 inputRef={businessInputRef}
                 onFileChange={(e) => handleFileChange(e, "business")}
+                status={kycExists ? businessDocStatus : undefined}
               />
 
               <UploadBox
@@ -364,6 +457,7 @@ function Page() {
                 onUploadClick={() => ownerInputRef.current?.click()}
                 inputRef={ownerInputRef}
                 onFileChange={(e) => handleFileChange(e, "owner")}
+                status={kycExists ? ownerIdStatus : undefined}
               />
 
               <UploadBox
@@ -373,6 +467,7 @@ function Page() {
                 onUploadClick={() => bankInputRef.current?.click()}
                 inputRef={bankInputRef}
                 onFileChange={(e) => handleFileChange(e, "bank")}
+                status={kycExists ? bankStatementStatus : undefined}
               />
             </section>
             <hr className="text-gray-200 mt-2 mb-4" />
@@ -393,7 +488,7 @@ function Page() {
                   className={`text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}
                     focus:ring-0`}
-                  value={user?.business_name}
+                  value={user?.business_name ?? ""}
                   disabled={isDisabled}
                   onChange={(e) => setBusinessName(e.target.value)}
                 />
@@ -432,15 +527,19 @@ function Page() {
                   Registration Number *
                 </label>
                 <input
-                  type="number"
-                  name=""
-                  id=""
-                  placeholder="Enter Business Registration Number"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  type="text"
+                  name="registrationNumber"
+                  id="registrationNumber"
+                  placeholder="Enter Business Registration Number (e.g., 1A2B3C)"
+                  className={`text-gray-500 p-1 text-sm border border-gray-300 uppercase
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={registrationNumber}
-                  onChange={(e) => setRegistrationNumber(e.target.value)}
+                  onChange={(e) => {
+                    // Only allow hexadecimal characters (0-9, a-f, A-F)
+                    const hexValue = e.target.value.replace(/[^0-9a-fA-F]/g, '').toUpperCase();
+                    setRegistrationNumber(hexValue);
+                  }}
                 />
               </div>
               <div className="flex flex-col gap-1.5 w-full">
@@ -531,17 +630,21 @@ function Page() {
                 >
                   State/Province *
                 </label>
-                <input
-                  type="text"
-                  name=""
-                  id=""
-                  placeholder="Enter state"
+                <select
+                  name="state"
                   className={`text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={stateName}
                   onChange={(e) => setStateName(e.target.value)}
-                />
+                >
+                  <option value="">Select State</option>
+                  {NIGERIAN_STATES.map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex flex-col gap-1.5 w-full">
                 <label
@@ -604,7 +707,7 @@ function Page() {
                 />
                 {/* Dropdown */}
                 {showBankDropdown && bankResults.length > 0 && (
-                  <ul className="absolute bg-white border border-gray-300 w-full max-h-40 overflow-y-auto z-50">
+                  <ul className="absolute top-full mt-1 bg-white border border-gray-300 w-full max-h-40 overflow-y-auto z-50 shadow-md">
                     {bankResults.map((bank) => (
                       <li
                         key={bank._id}
@@ -711,16 +814,30 @@ function Page() {
                 )}
               </div>
 
-              <button
-                className={`p-[5px] w-[120px] text-sm text-white ${
-                  certified ? "bg-black" : "bg-gray-400 cursor-not-allowed"
-                }  ${isDisabled ? "cursor-not-allowed" : ""} disabled:cursor-not-allowed`}
-                onClick={handleContinue}
-                type="button"
-                disabled={!certified || loading || isDisabled || kycSubmitted}
-              >
-                {submitting ? "Submitting..." : "Continue"}
-              </button>
+              {/* Show Edit button if KYC exists, otherwise show Continue */}
+              {kycExists ? (
+                <button
+                  className={`p-[5px] w-[120px] text-sm text-white ${
+                    certified && !allKycApproved ? "bg-black" : "bg-gray-400 cursor-not-allowed"
+                  } ${isDisabled || allKycApproved ? "cursor-not-allowed" : ""} disabled:cursor-not-allowed`}
+                  onClick={handleEdit}
+                  type="button"
+                  disabled={!certified || loading || updating || isDisabled || allKycApproved}
+                >
+                  {updating ? "Updating..." : "Edit"}
+                </button>
+              ) : (
+                <button
+                  className={`p-[5px] w-[120px] text-sm text-white ${
+                    certified ? "bg-black" : "bg-gray-400 cursor-not-allowed"
+                  } ${isDisabled ? "cursor-not-allowed" : ""} disabled:cursor-not-allowed`}
+                  onClick={handleContinue}
+                  type="button"
+                  disabled={!certified || loading || isDisabled || kycSubmitted}
+                >
+                  Continue
+                </button>
+              )}
             </div>
           </div>
         </div>

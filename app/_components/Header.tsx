@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { BsGraphUp } from "react-icons/bs";
 import { useAuth } from "../_lib/AuthContext";
+import { toast } from "react-toastify";
 
 function Header() {
   const pathname = usePathname();
@@ -93,17 +94,52 @@ function Header() {
           onClick={(e) => e.stopPropagation()}
         >
           <nav className="flex flex-col gap-5 mt-20 text-[15px]">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center font-semibold gap-5 text-[15px]"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              // Special handling for Product Catalog
+              if (item.href === "/product-catalog") {
+                const isKycComplete = user?.is_bank_information_verified && user?.is_business_verified && user?.is_identity_verified;
+                const hasWallet = user?.is_wallet_activated;
+                const canUpload = isKycComplete && hasWallet;
+
+                const handleClick = (e: React.MouseEvent) => {
+                  if (!isKycComplete) {
+                    e.preventDefault();
+                    toast.error("Please complete your KYC verification to upload products");
+                    return;
+                  }
+                  if (!hasWallet) {
+                    e.preventDefault();
+                    toast.error("Please activate your wallet in Payouts to upload products");
+                    return;
+                  }
+                  setMobileMenuOpen(false);
+                };
+
+                return (
+                  <Link
+                    key={item.href}
+                    href="/product-upload"
+                    className={`flex items-center font-semibold gap-5 text-[15px] ${!canUpload ? "opacity-50" : ""}`}
+                    onClick={handleClick}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center font-semibold gap-5 text-[15px]"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              );
+            })}
 
             <hr className="my-3 border-gray-200" />
 

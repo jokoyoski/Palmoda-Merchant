@@ -11,6 +11,7 @@ import { useSubCategories } from "../_lib/subcategories";
 import { useFetchGenders } from "../_lib/gender";
 import { useFetchSizes } from "../_lib/sizes";
 import { useFetchColors, addColor } from "../_lib/colors";
+import { useFetchCountries } from "../_lib/countries";
 import { Button } from "@heroui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
@@ -73,6 +74,7 @@ function page() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
   const [gender, setGender] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [showColorModal, setShowColorModal] = useState(false);
@@ -81,6 +83,14 @@ function page() {
   const [addingColor, setAddingColor] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
   const router = useRouter();
+
+  // Check if user has wallet activated
+  useEffect(() => {
+    if (user && !user.is_wallet_activated) {
+      toast.error("Please activate your wallet in Payouts to upload products");
+      router.push("/payouts");
+    }
+  }, [user, router]);
 
   console.log(user);
 
@@ -100,6 +110,7 @@ const resetForm = () => {
   setSelectedCategory("");
   setSelectedSubCategory("");
   setGender("");
+  setSelectedCountry("");
 };
 
   // Check if draft exists on mount
@@ -128,6 +139,7 @@ const resetForm = () => {
         selectedCategory,
         selectedSubCategory,
         gender,
+        selectedCountry,
         weight,
         timestamp: new Date().toISOString(),
       };
@@ -164,6 +176,7 @@ const resetForm = () => {
         setSelectedCategory(draftData.selectedCategory || "");
         setSelectedSubCategory(draftData.selectedSubCategory || "");
         setGender(draftData.gender || "");
+        setSelectedCountry(draftData.selectedCountry || "");
 
         toast.success("Draft loaded successfully!");
       }
@@ -264,6 +277,14 @@ const resetForm = () => {
     isError: colorIsError,
     error: colorError,
   } = useFetchColors();
+
+  const {
+    data: countriesArray = [],
+    isLoading: countriesLoading,
+    isError: countriesIsError,
+    error: countriesError,
+  } = useFetchCountries();
+
   // complete fetch categories
 
   // ✅ fix #3: strongly type list arguments
@@ -318,11 +339,18 @@ const resetForm = () => {
       !selectedCategory ||
       !selectedSubCategory ||
       !gender ||
+      !selectedCountry ||
       !description ||
       !inventory ||
       !price
     ) {
       toast.error("Please fill all required fields");
+      return;
+    }
+
+    const vendorId = user?._id || user?.vendor_id;
+    if (!vendorId) {
+      toast.error("Vendor ID is missing. Please log in again.");
       return;
     }
 
@@ -339,6 +367,7 @@ const resetForm = () => {
     setLoading(true);
 
     const productData = {
+      vendor_id: vendorId,
       name: productName,
       images,
       cost_price: parseFloat(price),
@@ -350,7 +379,7 @@ const resetForm = () => {
       weight,
       fabrics: [materials],
       discounted_price: parseFloat(comparePrice),
-      countries: ["68fc2044c642a564a546feda"],
+      countries: [selectedCountry],
       quantity: inventory,
       sub_categories: [selectedSubCategory],
       categories: [selectedCategory],
@@ -428,7 +457,7 @@ const resetForm = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-4">
             <div className="flex flex-col gap-1.5 mb-4">
               <label
                 htmlFor="category"
@@ -505,6 +534,31 @@ const resetForm = () => {
                 {gendersArray?.map((gender) => (
                   <option key={gender._id} value={gender._id}>
                     {gender.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Country Selector */}
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="country"
+                className="text-black font-semibold text-xs"
+              >
+                Country *
+              </label>
+              <select
+                id="country"
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
+                className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
+              >
+                <option value="">
+                  {countriesLoading ? "Loading..." : "-- Select Country --"}
+                </option>
+                {countriesArray?.map((country) => (
+                  <option key={country._id} value={country._id}>
+                    {country.name}
                   </option>
                 ))}
               </select>
@@ -612,12 +666,29 @@ const resetForm = () => {
                 </label>
                 <input
                   type="number"
-                  name=""
-                  id=""
-                  value={inventory}
-                  onChange={(e) => setInventory(Number(e.target.value))}
-                  className="
-             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                  name="inventory"
+                  id="inventory"
+                  min="0"
+                  value={inventory === 0 ? "" : inventory}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      setInventory(0);
+                    } else {
+                      const num = parseInt(val, 10);
+                      if (!isNaN(num) && num >= 0) {
+                        setInventory(num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    // Ensure value is set to 0 if empty on blur
+                    if (e.target.value === "") {
+                      setInventory(0);
+                    }
+                  }}
+                  placeholder="0"
+                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
                 />
               </div>
 

@@ -121,7 +121,7 @@ function ProductComponent({ product }: ProductProps) {
             <h1 className="text-sm font-semibold text-black">{product.name}</h1>
             <div className="flex items-center gap-4 my-3.5">
               <h3 className="text-xl font-semibold text-black">
-                ₦{product.discounted_price.toLocaleString()}
+                ₦{(product.discounted_price ?? product.cost_price).toLocaleString()}
               </h3>
               <h4 className="text-gray-500 text-sm line-through">
                 ₦{product.cost_price.toLocaleString()}

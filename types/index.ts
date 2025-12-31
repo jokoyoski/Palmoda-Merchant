@@ -49,6 +49,19 @@ interface Gender {
   is_active: boolean;
 }
 
+export interface Country {
+  _id: string;
+  name: string;
+  code: string;
+  is_active: boolean;
+}
+
+export interface CountryResponse {
+  success: boolean;
+  data: Country[];
+  message: string;
+}
+
 interface Color {
   _id: string;
   name: string;

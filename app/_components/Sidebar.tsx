@@ -101,25 +101,45 @@ function Sidebar() {
           <FiTag /> Brand Profile
         </Link>
 
-        <Link
-          href="/product-upload"
-          title={
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? "Upload new products"
-              : "Complete KYC to upload products"
-          }
-          className={`flex hover:bg-gray-50 ${
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? ""
-              : "pointer-events-none cursor-not-allowed opacity-30"
-          } font-semibold items-center ${pathname === "/product-upload" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
-        >
-          <FiGrid /> Product Catalog
-        </Link>
+        {(() => {
+          const isKycComplete = user?.is_bank_information_verified && user?.is_business_verified && user?.is_identity_verified;
+          const hasWallet = user?.is_wallet_activated;
+          const canUpload = isKycComplete && hasWallet;
+
+          const handleProductCatalogClick = (e: React.MouseEvent) => {
+            if (!isKycComplete) {
+              e.preventDefault();
+              toast.error("Please complete your KYC verification to upload products");
+              return;
+            }
+            if (!hasWallet) {
+              e.preventDefault();
+              toast.error("Please activate your wallet in Payouts to upload products");
+              return;
+            }
+          };
+
+          return (
+            <Link
+              href="/product-upload"
+              onClick={handleProductCatalogClick}
+              title={
+                !isKycComplete
+                  ? "Complete KYC to upload products"
+                  : !hasWallet
+                  ? "Activate wallet to upload products"
+                  : "Upload new products"
+              }
+              className={`flex hover:bg-gray-50 ${
+                canUpload
+                  ? ""
+                  : "cursor-not-allowed opacity-50"
+              } font-semibold items-center ${pathname === "/product-upload" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+            >
+              <FiGrid /> Product Catalog
+            </Link>
+          );
+        })()}
 
         <Link
           href="/notifications"

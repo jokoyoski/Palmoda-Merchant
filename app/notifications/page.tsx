@@ -4,10 +4,11 @@ import type { Notification } from "../_lib/type";
 import { toast } from "react-toastify";
 import ProtectedRoute from "../_components/ProtectedRoute";
 import { useNotificationList, useNotificationCount, useReadNotification } from "../_lib/useNotifications";
+import { useRouter } from "next/navigation";
 
 function Page() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const router = useRouter();
 
   // React Query hooks
   const { data: listData, isLoading: loadingList } = useNotificationList(currentPage);
@@ -20,13 +21,38 @@ function Page() {
   const totalPages = Math.ceil(totalItems / pageSize);
   const count = countData?.data?.count || 0;
 
-  const handleToggle = (id: string) => setExpandedId(prev => (prev === id ? null : id));
+  const handleToggle = (notif: Notification) => {
+    // Redirect to KYC compliance page for verification notifications
+    if (notif.type === "verification") {
+      router.push("/kyc-compliance");
+      return;
+    }
+    // Redirect to product details page for product notifications
+    if (notif.type === "product" && notif.details?._id) {
+      router.push(`/product/${notif.details._id}`);
+      return;
+    }
+    // Redirect to messages page for message notifications
+    if (notif.type === "message") {
+      router.push("/messages");
+      return;
+    }
+    // Redirect to order details page for order notifications
+    if (notif.type === "order" && notif.details?._id) {
+      router.push(`/orders/${notif.details._id}`);
+      return;
+    }
+    // For payout type, redirect to transactions/wallet page
+    if (notif.type === "payout") {
+      router.push("/transactions");
+      return;
+    }
+  };
 
   const handleMarkAsRead = async (id: string) => {
     readMutation.mutate(id, {
       onSuccess: () => {
         toast.success("Notification marked as read");
-        setExpandedId(null);
       },
       onError: (error: any) => {
         toast.error(error?.message || "Failed to mark notification as read");
@@ -60,56 +86,43 @@ function Page() {
                   className={`rounded-md p-3 cursor-pointer transition
                     ${notif.status === "unread" ? "bg-gray-700 border-0" : "bg-white border border-gray-200"}
                   `}
+                  onClick={() => handleToggle(notif)}
                 >
-                  <div className="flex justify-between items-center" onClick={() => handleToggle(notif._id)}>
-                    <div>
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex-1 min-w-0">
                       <h1
-                        className={`text-sm font-semibold ${notif.status === "unread" ? "text-white" : "text-black"} `}
+                        className={`text-sm font-semibold ${notif.status === "unread" ? "text-white" : "text-black"}`}
                       >
                         {notif.title}
                       </h1>
                       <p
-                        className={`text-xs ${notif.status === "unread" ? "text-white" : "text-gray-500"} `}
+                        className={`text-xs ${notif.status === "unread" ? "text-white" : "text-gray-500"} line-clamp-2`}
                       >
                         {notif.content}
                       </p>
-                     <p
-                        className={`text-xs my-1 ${notif.status === "unread" ? "text-white" : "text-gray-500"}`}
+                      <p
+                        className={`text-xs my-1 ${notif.status === "unread" ? "text-gray-300" : "text-gray-400"}`}
                       >
                         Click to see details
                       </p>
                     </div>
-                    <span className={`text-xs ${notif.status === "unread" ? "text-white" : "text-gray-500"} `}>
-                      {new Date(notif.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  {expandedId === notif._id && (
-                    <div className={`mt-2 text-xs ${notif.status === "unread" ? "text-white" : "text-gray-600"} space-y-1`}>
-                      <p>{notif.content}</p>
-
-                      {notif.details && (
-                        <div className="border-t border-gray-200 pt-2 mt-2 space-y-1">
-                          {notif.details.amount && <p><strong>Amount:</strong> NGN{notif.details.amount}</p> }
-                          {notif.details.status &&  <p><strong>Status:</strong> {notif.details.status}</p> }
-                          {notif.details.transaction_reference &&  <p><strong>Reference:</strong> {notif.details.transaction_reference}</p>}
-                         
-                          {notif.details.rejection_reason && (
-                            <p><strong>Rejection Reason:</strong> {notif.details.rejection_reason}</p>
-                          )}
-                        </div>
-                      )}
-
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <span className={`text-xs ${notif.status === "unread" ? "text-white" : "text-gray-500"}`}>
+                        {new Date(notif.created_at).toLocaleDateString()}
+                      </span>
                       {notif.status === "unread" && (
                         <button
-                          onClick={() => handleMarkAsRead(notif._id)}
-                          className="mt-2 px-3 py-1 cursor-pointer text-xs text-white bg-gray-900 rounded"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkAsRead(notif._id);
+                          }}
+                          className="px-3 py-1 cursor-pointer text-xs text-black bg-white hover:bg-gray-100 rounded transition"
                         >
                           Mark as Read
                         </button>
                       )}
                     </div>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>

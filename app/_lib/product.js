@@ -17,6 +17,7 @@ export const createProduct = async (productData) => {
     const res = await axios.post(
       `${backendUrl}/vendor/add-products`,
       {
+        vendor_id: productData.vendor_id,
         name: productData.name,
         images: productData.images,
         cost_price: productData.cost_price,
@@ -169,4 +170,3 @@ export const deleteProduct = async (id) => {
     };
   }
 }
-

@@ -77,7 +77,7 @@ export interface Product {
   colors: string[];
   sizes: string[];
   fabrics: string[];
-  discounted_price: number;
+  discounted_price: number | null;
   sku: string;
   created_at: string;
   updated_at: string;
