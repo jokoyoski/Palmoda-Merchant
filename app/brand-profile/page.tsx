@@ -365,18 +365,13 @@ const BrandProfilePage = () => {
     }
   };
 
+  // Only require essential fields - social media handles are optional
   const isFormValid =
-  brandName.trim() !== "" &&
-  brandDescription.trim() !== "" &&
-  logoBlackUrl !== "" &&
-  logoWhiteUrl !== "" &&
-  bannerUrl !== "" &&
-  instagram !== "" &&
-  twitter !== "" &&
-  facebook !== "" &&
-  website !== "" &&
-  pinterest !== "" &&
-  tiktok !== "";
+    brandName.trim() !== "" &&
+    brandDescription.trim() !== "" &&
+    logoBlackUrl !== "" &&
+    logoWhiteUrl !== "" &&
+    bannerUrl !== "";
   
 
   return (
@@ -486,7 +481,10 @@ const BrandProfilePage = () => {
 
         <hr className="text-gray-200 my-5" />
 
-        {/* Social Media Inputs */}
+        {/* Social Media Inputs (All Optional) */}
+        <p className="text-xs text-gray-500 mb-3">
+          Social media links are optional. Add them to help customers connect with your brand.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             {
@@ -534,7 +532,7 @@ const BrandProfilePage = () => {
           ].map((input, idx) => (
             <div className="flex flex-col gap-1.5 w-full" key={idx}>
               <label className="text-black font-semibold text-xs">
-                {input.label}
+                {input.label} <span className="text-gray-400 font-normal">(Optional)</span>
               </label>
               <div className="relative w-full">
                 <div className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">

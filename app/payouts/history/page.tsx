@@ -2,6 +2,7 @@
 import Link from "next/link";
 import React, { useState, useMemo, useEffect } from "react";
 import { FaWallet } from "react-icons/fa6";
+import { FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { TransactionType } from "../../_lib/type";
 import { getTransactions } from "@/app/_lib/transactions";
 import { toast } from "react-toastify";
@@ -13,6 +14,7 @@ function Page() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [status, setStatus] = useState("");
+  const [transactionType, setTransactionType] = useState("");
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [reference, setReference] = useState("");
@@ -20,6 +22,7 @@ function Page() {
   const [fetching, setFetching] = useState(false);
   const [accountNumber, setAccountNumber] = useState("");
   const [accountBalance, setAccountBalance] = useState(0.0);
+  const [ledgerBalance, setLedgerBalance] = useState(0.0);
   const [loading, setLoading] = useState(false);
 
   // Fetch transactions
@@ -52,6 +55,7 @@ function Page() {
         } else {
           setAccountNumber(res.data.account_number || "");
           setAccountBalance(res.data.available_balance || 0);
+          setLedgerBalance(res.data.ledger_balance || 0);
         }
       } catch (err: any) {
         // toast.error(err?.message || "Failed to fetch wallet details");
@@ -76,6 +80,8 @@ function Page() {
       if (dateTo && new Date(dateTo) < itemDate) return false;
       if (status && item.status.toLowerCase() !== status.toLowerCase())
         return false;
+      if (transactionType && item.transaction_type?.toLowerCase() !== transactionType.toLowerCase())
+        return false;
       if (minAmount && item.amount < Number(minAmount)) return false;
       if (maxAmount && item.amount > Number(maxAmount)) return false;
       if (
@@ -88,7 +94,7 @@ function Page() {
 
       return true;
     });
-  }, [transactions, dateFrom, dateTo, status, minAmount, maxAmount, reference]);
+  }, [transactions, dateFrom, dateTo, status, transactionType, minAmount, maxAmount, reference]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice(
@@ -124,11 +130,10 @@ function Page() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-black font-semibold text-lg">
-              Payouts History
+              Transactions
             </h1>
             <p className="text-xs text-gray-500">
-              View all your withdrawals, settlement timelines, and payout
-              statuses.
+              View all your transactions, including credits and debits.
             </p>
           </div>
           <div className="flex gap-2">
@@ -142,15 +147,28 @@ function Page() {
         </div>
 
         {/* BALANCE CARD */}
-        <div className="flex gap-3 my-6 items-center">
-          <div className="p-2 bg-gray-200 rounded-[5px]">
-            <FaWallet className="text-black text-[25px]" />
+        <div className="flex gap-6 my-6 items-center">
+          <div className="flex gap-3 items-center">
+            <div className="p-2 bg-gray-200 rounded-[5px]">
+              <FaWallet className="text-black text-[25px]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Available Balance</p>
+              <h1 className="text-black text-sm font-semibold">
+                ₦{accountBalance.toLocaleString()}
+              </h1>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Available Balance</p>
-            <h1 className="text-black text-sm font-semibold">
-              ₦{accountBalance.toLocaleString()}
-            </h1>
+          <div className="flex gap-3 items-center">
+            <div className="p-2 bg-gray-200 rounded-[5px]">
+              <FaWallet className="text-black text-[25px]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Ledger Balance</p>
+              <h1 className="text-black text-sm font-semibold">
+                ₦{ledgerBalance.toLocaleString()}
+              </h1>
+            </div>
           </div>
         </div>
 
@@ -187,6 +205,19 @@ function Page() {
               <option value="Successful">Successful</option>
               <option value="Pending">Pending</option>
               <option value="Failed">Failed</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-xs">Transaction Type</label>
+            <select
+              className="text-sm border border-gray-200 rounded-[5px] p-1"
+              value={transactionType}
+              onChange={(e) => setTransactionType(e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="credit">Credit</option>
+              <option value="debit">Debit</option>
             </select>
           </div>
 
@@ -250,8 +281,15 @@ function Page() {
                   <td className="p-2 text-xs text-gray-500">
                     {row.transaction_reference}
                   </td>
-                  <td className="p-2 text-xs text-gray-500">
-                    ₦{row.amount.toLocaleString()}
+                  <td className="p-2 text-xs">
+                    <div className={`flex items-center justify-center gap-1 ${row.transaction_type === "credit" ? "text-green-600" : "text-red-600"}`}>
+                      {row.transaction_type === "credit" ? (
+                        <FaArrowDown className="text-green-600" />
+                      ) : (
+                        <FaArrowUp className="text-red-600" />
+                      )}
+                      <span>₦{row.amount.toLocaleString()}</span>
+                    </div>
                   </td>
                   <td className="p-2 text-xs text-gray-500">₦0</td>
                   <td className="p-2 text-xs text-gray-500">

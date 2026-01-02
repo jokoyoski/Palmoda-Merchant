@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { CiBank } from 'react-icons/ci';
-import { FaCheckCircle, FaClock, FaHourglassHalf, FaTimesCircle } from "react-icons/fa";
+import { FaCheckCircle, FaClock, FaHourglassHalf, FaTimesCircle, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { LuWarehouse } from "react-icons/lu";
 import PayoutFailed from '../PayoutFailed';
 import WithdrawalSubmitted from '../WithDrawalSubmitted';
@@ -223,28 +223,66 @@ function page() {
   return (
     <section className="bg-gray-200  min-h-screen px-4 md:px-8 py-6 w-full">
       <div className='w-[500px] mx-auto bg-white rounded-[6px] px-4 py-3'>
-           <h1 className='text-sm text-black font-semibold'>Payout Details – {transaction?.transaction_reference} </h1>
+           <h1 className='text-sm text-black font-semibold'>Transaction Details – {transaction?.transaction_reference} </h1>
            <div className='flex flex-col justify-center text-center my-4'>
-              <p className='text-xs text-gray-500'>Amount withdrawn</p>
-              <h1 className='text-2xl text-black font-semibold'>₦{transaction?.amount}</h1>
+              <div className='flex items-center justify-center gap-2 mb-1'>
+                {transaction?.transaction_type === "credit" ? (
+                  <FaArrowDown className="text-green-600 text-lg" />
+                ) : (
+                  <FaArrowUp className="text-red-600 text-lg" />
+                )}
+                <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                  transaction?.transaction_type === "credit"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}>
+                  {transaction?.transaction_type === "credit" ? "Credit" : "Debit"}
+                </span>
+              </div>
+              <p className='text-xs text-gray-500'>
+                {transaction?.transaction_type === "credit" ? "Amount received" : "Amount withdrawn"}
+              </p>
+              <h1 className={`text-2xl font-semibold ${
+                transaction?.transaction_type === "credit" ? "text-green-600" : "text-red-600"
+              }`}>₦{transaction?.amount?.toLocaleString()}</h1>
            </div>
            <div className='my-4 flex flex-col gap-3'>
+             <div className='flex justify-between'>
+               <p className='text-gray-500 text-xs'>Transaction type</p>
+               <h3 className={`text-xs font-semibold ${
+                 transaction?.transaction_type === "credit" ? "text-green-600" : "text-red-600"
+               }`}>
+                 {transaction?.transaction_type === "credit" ? "Credit" : "Debit"}
+               </h3>
+             </div>
+             {transaction?.narration && (
+               <div className='flex justify-between'>
+                 <p className='text-gray-500 text-xs'>Narration</p>
+                 <h3 className='text-black text-xs text-right max-w-[60%]'>{transaction.narration}</h3>
+               </div>
+             )}
              <div className='flex justify-between'>
                <p className='text-gray-500 text-xs'>Transaction fee</p>
                <h3 className='text-black text-xs'>₦0</h3>
              </div>
-               <div className='flex justify-between'>
-               <p className='text-gray-500 text-xs'>You will receive</p>
-               <h3 className='text-black text-xs'>₦{transaction?.amount}</h3>
+             <div className='flex justify-between'>
+               <p className='text-gray-500 text-xs'>
+                 {transaction?.transaction_type === "credit" ? "You received" : "You will receive"}
+               </p>
+               <h3 className='text-black text-xs'>₦{transaction?.amount?.toLocaleString()}</h3>
              </div>
              <div className='flex justify-between'>
-               <p className='text-gray-500 text-xs'>Requested on</p>
+               <p className='text-gray-500 text-xs'>
+                 {transaction?.transaction_type === "credit" ? "Received on" : "Requested on"}
+               </p>
                <h3 className='text-black text-xs'>{transaction?.created_at}</h3>
              </div>
-             <div className='flex justify-between'>
-               <p className='text-gray-500 text-xs'>Estimated settlement</p>
-               <h3 className='text-black text-xs'>Within 24 hours</h3>
-             </div>
+             {transaction?.transaction_type === "debit" && (
+               <div className='flex justify-between'>
+                 <p className='text-gray-500 text-xs'>Estimated settlement</p>
+                 <h3 className='text-black text-xs'>Within 24 hours</h3>
+               </div>
+             )}
            </div>
            <hr className='text-gray-200 my-4'/>
            <div className="my-4 flex flex-col gap-3">
@@ -252,13 +290,17 @@ function page() {
 
       <div className="flex flex-col gap-6 border-l-2 border-gray-200 pl-4">
 
-        {/* Request Received */}
-        {transaction?.status === "successful" && (
+        {/* Status based on transaction status */}
+        {(transaction?.status === "successful" || transaction?.status === "success") && (
     <div className="flex items-start gap-3 relative">
       <FaCheckCircle className="text-green-500 text-lg absolute -left-6" />
       <div>
-        <p className="font-semibold text-black text-sm">Payout Successful</p>
-        <p className="text-xs text-gray-500">Your payout has been completed successfully.</p>
+        <p className="font-semibold text-black text-sm">Transaction Successful</p>
+        <p className="text-xs text-gray-500">
+          {transaction?.transaction_type === "credit"
+            ? "Payment has been credited to your account."
+            : "Your withdrawal has been completed successfully."}
+        </p>
       </div>
     </div>
   )}
@@ -268,18 +310,21 @@ function page() {
       <FaHourglassHalf className="text-yellow-500 text-lg absolute -left-6" />
       <div>
         <p className="font-semibold text-black text-sm">Pending</p>
-        <p className="text-xs text-gray-500">Your payout is awaiting confirmation from the bank.</p>
+        <p className="text-xs text-gray-500">
+          {transaction?.transaction_type === "credit"
+            ? "Payment is being processed."
+            : "Your withdrawal is awaiting confirmation from the bank."}
+        </p>
       </div>
     </div>
   )}
 
-        {/* Pending */}
         {transaction?.status === "failed" && (
     <div className="flex items-start gap-3 relative">
       <FaTimesCircle className="text-red-500 text-lg absolute -left-6" />
       <div>
-        <p className="font-semibold text-black text-sm">Payout Failed</p>
-        <p className="text-xs text-gray-500">This payout attempt was not completed.</p>
+        <p className="font-semibold text-black text-sm">Transaction Failed</p>
+        <p className="text-xs text-gray-500">This transaction was not completed.</p>
       </div>
     </div>
   )}
@@ -288,7 +333,7 @@ function page() {
     </div>
 
           <div className='bg-gray-100 px-3 py-1.5 rounded-[6px]'>
-            <h1 className='text-black text-sm font-semibold mb-2'>Payout account</h1>
+            <h1 className='text-black text-sm font-semibold mb-2'>Account Details</h1>
             <div className='flex items-center gap-1.5'>
                <div className='bg-gray-300 rounded-[5px] p-2'>
                   <CiBank className='text-black font-semibold text-[23px]'/>
@@ -302,7 +347,7 @@ function page() {
           </div>
           
           <div className='bg-gray-300 px-3 my-4 py-1.5 rounded-[6px]'>
-              <h1 className='text-sm text-black font-semibold'>Payout tips</h1>
+              <h1 className='text-sm text-black font-semibold'>Settlement Tips</h1>
               <div className='my-3 flex gap-1.5'>
                 <LuWarehouse className='text-gray-800 text-[20px]'/>
                 <div>
@@ -319,9 +364,9 @@ function page() {
               </div>
           </div>
           <div className='flex justify-between my-3'>
-            <Link href="/payouts" className='px-4 py-2 border text-xs
+            <Link href="/payouts/history" className='px-4 py-2 border text-xs
              border-gray-500 rounded-[6px] text-gray-500'>
-              Back to Payouts
+              Back to Transactions
             </Link>
             <button className='bg-gray-400 px-4 py-2 rounded-[6px] text-gray-800 text-xs'>
               Download Reciepts

@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { FaArrowUp, FaArrowDown, FaEye, FaEyeSlash, FaWallet } from "react-icons/fa";
+import { CiBank } from "react-icons/ci";
 import ProtectedRoute from "../_components/ProtectedRoute";
 import { toast } from "react-toastify";
 import { getKycDetails, activateWallet, getWallet } from "../_lib/vendor";
@@ -10,11 +12,21 @@ import { TransactionType } from "../_lib/type";
 
 function page() {
   const { user } = useAuth();
-  const [bankName, setBankName] = useState("");
-  const [accountHolder, setAccountHolder] = useState("");
-  const [amountError, setAmountError] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
+  // Payout Account (from KYC)
+  const [payoutBankName, setPayoutBankName] = useState("");
+  const [payoutAccountHolder, setPayoutAccountHolder] = useState("");
+  const [payoutAccountNumber, setPayoutAccountNumber] = useState("");
+  const [showPayoutAccountNumber, setShowPayoutAccountNumber] = useState(false);
+
+  // Wallet Details
+  const [walletBankName, setWalletBankName] = useState("");
+  const [walletAccountName, setWalletAccountName] = useState("");
+  const [walletAccountNumber, setWalletAccountNumber] = useState("");
+  const [showWalletAccountNumber, setShowWalletAccountNumber] = useState(false);
   const [accountBalance, setAccountBalance] = useState(0.0);
+  const [ledgerBalance, setLedgerBalance] = useState(0.0);
+
+  const [amountError, setAmountError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showBvnModal, setShowBvnModal] = useState(false);
   const [bvn, setBvn] = useState("");
@@ -26,6 +38,7 @@ function page() {
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [fetching, setFetching] = useState(false);
 
+  // Fetch Wallet Details
   useEffect(() => {
     const fetchWallet = async () => {
       setLoading(true);
@@ -33,25 +46,40 @@ function page() {
         const res = await getWallet();
         console.log(res);
         if (res.success === false) {
-          // toast.error(res.message);
           console.log(res.message);
-          
         } else {
-          // Populate form fields
-          setBankName(res.data.bank_name || "");
-          setAccountHolder(res.data.account_holder_name || "");
-          setAccountNumber(res.data.account_number || "");
-          setAccountBalance(res.data.available_balance);
+          setWalletBankName(res.data.bank_name || "");
+          setWalletAccountName(res.data.account_name || "");
+          setWalletAccountNumber(res.data.account_number || "");
+          setAccountBalance(res.data.available_balance || 0);
+          setLedgerBalance(res.data.ledger_balance || 0);
         }
       } catch (err: any) {
         console.log(err?.message || "Failed to fetch wallet details");
-        // toast.error(err?.message || "Failed to fetch KYC details");
       } finally {
         setLoading(false);
       }
     };
 
     fetchWallet();
+  }, []);
+
+  // Fetch Payout Account (from KYC)
+  useEffect(() => {
+    const fetchKyc = async () => {
+      try {
+        const res = await getKycDetails();
+        if (res.success && res.data) {
+          setPayoutBankName(res.data.bank_name || "");
+          setPayoutAccountHolder(res.data.account_holder_name || "");
+          setPayoutAccountNumber(res.data.account_number || "");
+        }
+      } catch (err: any) {
+        console.log(err?.message || "Failed to fetch KYC details");
+      }
+    };
+
+    fetchKyc();
   }, []);
 
   useEffect(() => {
@@ -87,12 +115,14 @@ function page() {
         return;
       }
 
-      // Refresh KYC details so UI updates
+      // Refresh wallet details so UI updates
       const refreshed = await getWallet();
       if (refreshed.success) {
-        setBankName(refreshed.data.bank_name || "");
-        setAccountHolder(refreshed.data.account_holder_name || "");
-        setAccountNumber(refreshed.data.account_number || "");
+        setWalletBankName(refreshed.data.bank_name || "");
+        setWalletAccountName(refreshed.data.account_name || "");
+        setWalletAccountNumber(refreshed.data.account_number || "");
+        setAccountBalance(refreshed.data.available_balance || 0);
+        setLedgerBalance(refreshed.data.ledger_balance || 0);
       }
       toast.success("Wallet activated successfully");
       setShowBvnModal(false); // Close modal on success
@@ -103,7 +133,11 @@ function page() {
     }
   };
 
-  const last4Digits = accountNumber.slice(-4);
+  // Helper to mask account number
+  const maskAccountNumber = (accNum: string) => {
+    if (!accNum || accNum.length < 4) return accNum;
+    return "•••• •••• " + accNum.slice(-4);
+  };
 
   const handlePayout = async () => {
     if (!amount || Number(amount) <= 0) {
@@ -159,53 +193,149 @@ function page() {
               Transfer your available balance to your registered bank account.
             </p>
           </div>
-          <div className="bg-white px-3 py-1 rounded-[6px]">
-            <p className="text-xs text-gray-500">Available Balance</p>
-            <h1 className="text-black font-semibold text-lg">
-              {" "}
-              ₦{accountBalance.toLocaleString()}
-            </h1>
-            <p className="text-xs text-gray-500">
-              Next settlement: Today Minimum withdrawal: ₦5000
-            </p>
-
+          <div>
             {user?.is_wallet_activated ? (
-              <h3 className="text-xs text-black my-3">Wallet activated</h3>
+              <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full">
+                Wallet Activated
+              </span>
             ) : (
               <button
                 onClick={() => setShowBvnModal(true)}
-                className="bg-purple-600 text-white text-xs px-3 py-1 mb-2 rounded-md mt-2"
+                className="bg-purple-600 text-white text-xs px-3 py-2 rounded-md"
               >
-                Add BVN
+                Activate Wallet (Add BVN)
               </button>
             )}
           </div>
         </div>
 
+        {/* Balance Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          {/* Available Balance Card */}
+          <div className="bg-white px-4 py-4 rounded-[6px]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Available Balance</p>
+                <h1 className="text-black font-bold text-2xl">
+                  ₦{accountBalance.toLocaleString()}
+                </h1>
+                <p className="text-xs text-gray-400 mt-2">
+                  Available for withdrawal
+                </p>
+              </div>
+              <div className="bg-green-100 p-3 rounded-full">
+                <FaWallet className="text-green-600 text-xl" />
+              </div>
+            </div>
+          </div>
+
+          {/* Ledger Balance Card */}
+          <div className="bg-white px-4 py-4 rounded-[6px]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Ledger Balance</p>
+                <h1 className="text-black font-bold text-2xl">
+                  ₦{ledgerBalance.toLocaleString()}
+                </h1>
+                <p className="text-xs text-gray-400 mt-2">
+                  Total balance (including pending)
+                </p>
+              </div>
+              <div className="bg-purple-100 p-3 rounded-full">
+                <FaWallet className="text-purple-600 text-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Wallet Details Card */}
+        <div className="bg-white px-4 py-3 rounded-[6px] mt-6">
+          <div className="flex items-center gap-2 mb-3">
+            <FaWallet className="text-purple-600 text-lg" />
+            <h1 className="text-black font-semibold">Wallet Details</h1>
+          </div>
+          {loading ? (
+            <div className="animate-pulse bg-gray-200 rounded-md h-20"></div>
+          ) : (
+            <div className="bg-gray-100 px-4 py-3 rounded-[6px]">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-gray-500 text-xs mb-1">Bank</p>
+                  <h1 className="text-gray-900 text-sm font-medium">{walletBankName}</h1>
+                </div>
+                <div className="text-right">
+                  <p className="text-gray-500 text-xs mb-1">Account Name</p>
+                  <h1 className="text-gray-900 text-sm font-medium">{walletAccountName}</h1>
+                </div>
+              </div>
+              <div className="flex justify-between items-center mt-3">
+                <div>
+                  <p className="text-gray-500 text-xs mb-1">Account Number</p>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-gray-900 text-sm font-medium">
+                      {showWalletAccountNumber ? walletAccountNumber : maskAccountNumber(walletAccountNumber)}
+                    </h1>
+                    <button
+                      onClick={() => setShowWalletAccountNumber(!showWalletAccountNumber)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      {showWalletAccountNumber ? <FaEyeSlash className="text-sm" /> : <FaEye className="text-sm" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <p className="text-gray-500 my-2 text-xs">
+            This is your virtual wallet. Funds from sales are credited here.
+          </p>
+        </div>
+
         {/* Main Content Area */}
-        <div className="flex gap-3 items-start mt-6">
+        <div className="flex gap-3 items-start mt-4">
           {/* Left Column - Withdrawal Forms */}
           <div className="flex-1 w-full">
-            <div className="bg-white px-4 my-2 rounded-[6px] py-2">
-              <h1 className="text-black font-semibold">Payout Account</h1>
+            {/* Payout Account Card */}
+            <div className="bg-white px-4 my-2 rounded-[6px] py-3">
+              <div className="flex items-center gap-2 mb-3">
+                <CiBank className="text-black text-xl" />
+                <h1 className="text-black font-semibold">Payout Account</h1>
+              </div>
               {loading ? (
-                // Skeleton loader
-                <div className="animate-pulse bg-gray-200 rounded-md h-20 mt-3"></div>
+                <div className="animate-pulse bg-gray-200 rounded-md h-20"></div>
               ) : (
-                <div className="bg-gray-200 px-3 flex justify-between py-1 rounded-[6px] mt-3">
-                  <div>
-                    <h1 className="text-gray-900 text-sm">{bankName}</h1>
-                    <p className="text-gray-700 text-xs">{accountHolder}</p>
-                    <p className="text-gray-500 text-xs">
-                      Account ending in •••• {last4Digits}
-                    </p>
+                <div className="bg-gray-100 px-4 py-3 rounded-[6px]">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-gray-500 text-xs mb-1">Bank</p>
+                      <h1 className="text-gray-900 text-sm font-medium">{payoutBankName}</h1>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-gray-500 text-xs mb-1">Account Holder</p>
+                      <h1 className="text-gray-900 text-sm font-medium">{payoutAccountHolder}</h1>
+                    </div>
                   </div>
-                  <p className="text-purple-500 text-xs">Primary · Locked</p>
+                  <div className="flex justify-between items-center mt-3">
+                    <div>
+                      <p className="text-gray-500 text-xs mb-1">Account Number</p>
+                      <div className="flex items-center gap-2">
+                        <h1 className="text-gray-900 text-sm font-medium">
+                          {showPayoutAccountNumber ? payoutAccountNumber : maskAccountNumber(payoutAccountNumber)}
+                        </h1>
+                        <button
+                          onClick={() => setShowPayoutAccountNumber(!showPayoutAccountNumber)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          {showPayoutAccountNumber ? <FaEyeSlash className="text-sm" /> : <FaEye className="text-sm" />}
+                        </button>
+                      </div>
+                    </div>
+                    <span className="text-purple-500 text-xs font-medium">Primary · Locked</span>
+                  </div>
                 </div>
               )}
               <p className="text-gray-500 my-2 text-xs">
-                Payout account can only be updated by Palmoda admin. Contact
-                support to make changes.
+                This is where your withdrawals are sent. Contact support to update.
               </p>
             </div>
 
@@ -328,9 +458,9 @@ function page() {
             </div>
           </div>
 
-          {/* Right Column - Recent Payouts */}
+          {/* Right Column - Recent Transactions */}
           <div className="w-[30%] bg-white px-4 my-2 rounded-[6px] py-2 h-fit hidden md:block">
-            <h1 className="text-black font-semibold">Recent Payouts</h1>
+            <h1 className="text-black font-semibold">Recent Transactions</h1>
 
             {fetching ? (
               // Skeleton loader while fetching
@@ -357,9 +487,16 @@ function page() {
                     className="my-2 border-b border-gray-200 px-3 flex justify-between py-1"
                   >
                     <div>
-                      <h1 className="text-black text-sm font-semibold">
-                        ₦{txn.amount.toLocaleString()}
-                      </h1>
+                      <div className={`flex items-center gap-1 ${txn.transaction_type === "credit" ? "text-green-600" : "text-red-600"}`}>
+                        {txn.transaction_type === "credit" ? (
+                          <FaArrowDown className="text-green-600 text-xs" />
+                        ) : (
+                          <FaArrowUp className="text-red-600 text-xs" />
+                        )}
+                        <h1 className="text-sm font-semibold">
+                          ₦{txn.amount.toLocaleString()}
+                        </h1>
+                      </div>
                       <p className="text-gray-500 text-xs">
                         {new Date(txn.created_at).toLocaleDateString()}
                       </p>
@@ -369,7 +506,7 @@ function page() {
                     </div>
                     <p
                       className={`text-xs ${
-                        txn.status.toLowerCase() === "successful"
+                        txn.status.toLowerCase() === "successful" || txn.status.toLowerCase() === "success"
                           ? "text-green-500"
                           : txn.status.toLowerCase() === "pending"
                             ? "text-yellow-500"
@@ -387,7 +524,7 @@ function page() {
               href="/payouts/history"
               className="text-blue-400 text-xs underline my-2 block"
             >
-              View History
+              View All Transactions
             </Link>
           </div>
         </div>
