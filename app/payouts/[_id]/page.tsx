@@ -105,15 +105,18 @@ const Skeleton = () => (
 
 // Map status → icon, color, message
 const getStatusDisplay = (status: string) => {
-  switch (status?.toLowerCase()) {
-    case "successful":
-    case "success":
-      return {
-        icon: <FaCheckCircle className="text-green-500 text-lg absolute -left-6" />,
-        label: "Successful",
-        message: "Your payout has been successfully processed.",
-        color: "text-green-500"
-      };
+  const statusLower = status?.toLowerCase();
+
+  if (statusLower?.startsWith("success")) {
+    return {
+      icon: <FaCheckCircle className="text-green-500 text-lg absolute -left-6" />,
+      label: "Successful",
+      message: "Your payout has been successfully processed.",
+      color: "text-green-500"
+    };
+  }
+
+  switch (statusLower) {
 
     case "pending":
       return {
@@ -291,7 +294,7 @@ function page() {
       <div className="flex flex-col gap-6 border-l-2 border-gray-200 pl-4">
 
         {/* Status based on transaction status */}
-        {(transaction?.status === "successful" || transaction?.status === "success") && (
+        {transaction?.status?.toLowerCase().startsWith("success") && (
     <div className="flex items-start gap-3 relative">
       <FaCheckCircle className="text-green-500 text-lg absolute -left-6" />
       <div>

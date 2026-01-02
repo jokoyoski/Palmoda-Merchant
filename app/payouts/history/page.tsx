@@ -295,8 +295,16 @@ function Page() {
                   <td className="p-2 text-xs text-gray-500">
                     {row.vendor?.business_name ?? "Unknown Vendor"}
                   </td>
-                  <td className="p-2 text-xs text-gray-500">
-                    {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+                  <td className={`p-2 text-xs font-medium ${
+                    row.status.toLowerCase().startsWith("success")
+                      ? "text-green-500"
+                      : row.status.toLowerCase() === "pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                  }`}>
+                    {row.status.toLowerCase().startsWith("success")
+                      ? "Successful"
+                      : row.status.charAt(0).toUpperCase() + row.status.slice(1)}
                   </td>
                   <td className="p-2 text-xs text-gray-500">
                     <Link

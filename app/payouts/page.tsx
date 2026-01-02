@@ -506,14 +506,16 @@ function page() {
                     </div>
                     <p
                       className={`text-xs ${
-                        txn.status.toLowerCase() === "successful" || txn.status.toLowerCase() === "success"
+                        txn.status.toLowerCase().startsWith("success")
                           ? "text-green-500"
                           : txn.status.toLowerCase() === "pending"
                             ? "text-yellow-500"
                             : "text-red-500"
                       }`}
                     >
-                      {txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
+                      {txn.status.toLowerCase().startsWith("success")
+                        ? "Successful"
+                        : txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
                     </p>
                   </div>
                 ))}
