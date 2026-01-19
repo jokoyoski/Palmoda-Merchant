@@ -15,3 +15,41 @@
 .swal-confirm-black:hover {
   background-color: #111 !important;
 }
+
+/* Phone input custom styling */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+}
+
+.PhoneInput input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  padding: 0;
+}
+
+.PhoneInput input:focus {
+  outline: none;
+}
+
+.PhoneInputCountry {
+  margin-right: 0.5rem;
+}
+
+.PhoneInputCountrySelect {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.PhoneInputCountrySelect:focus {
+  outline: none;
+}
+
+.PhoneInputCountryIcon {
+  width: 1.5rem;
+  height: 1rem;
+  margin-right: 0.25rem;
+}

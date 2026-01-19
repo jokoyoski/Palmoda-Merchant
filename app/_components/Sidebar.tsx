@@ -88,6 +88,26 @@ function Sidebar() {
     >
       <nav className="flex flex-col mt-5 text-[15px]">
         <Link
+          href="/"
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "View Dashboard"
+              : "Complete KYC to access Dashboard"
+          }
+          className={`flex hover:bg-gray-50 ${
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? ""
+              : "pointer-events-none cursor-not-allowed opacity-30"
+          } font-semibold items-center ${pathname === "/" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+        >
+          <BsGraphUp /> Dashboard
+        </Link>
+
+        <Link
           href="/kyc-compliance"
           className={`flex ${pathname === "/kyc-compliance" ? "bg-gray-300" : ""} hover:bg-gray-100 p-3 transition-all duration-300 ease-in-out font-semibold items-center gap-3 text-black`}
         >
@@ -143,13 +163,7 @@ function Sidebar() {
 
         <Link
           href="/notifications"
-          title={
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? "Upload new products"
-              : "Complete KYC to upload products"
-          }
+          title="View notifications"
           className={`flex hover:bg-gray-50 font-semibold items-center ${pathname === "/notifications" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <div className="relative flex items-center gap-2">
@@ -160,26 +174,6 @@ function Sidebar() {
               {count || 0}
             </span>
           </div>
-        </Link>
-
-        <Link
-          href="/"
-          title={
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? "Upload new products"
-              : "Complete KYC to upload products"
-          }
-          className={`flex hover:bg-gray-50 ${
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? ""
-              : "pointer-events-none cursor-not-allowed opacity-30"
-          } font-semibold items-center ${pathname === "/" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
-        >
-          <BsGraphUp /> Dashboard
         </Link>
 
         <Link

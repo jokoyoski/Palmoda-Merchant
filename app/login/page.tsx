@@ -43,7 +43,7 @@ function Page() {
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
             <label className="block text-left text-sm font-medium text-gray-700 mb-1">
-              Email
+              Email *
             </label>
             <input
               type="email"
@@ -56,7 +56,7 @@ function Page() {
 
           <div>
             <label className="block text-left text-sm font-medium text-gray-700 mb-1">
-              Password
+              Password *
             </label>
             <div className="relative w-full">
               <input

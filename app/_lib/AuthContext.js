@@ -1,7 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -25,8 +24,6 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   };
-
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   // ============================================================
   // 🔥 GLOBAL TOAST WRAPPER
@@ -142,12 +139,18 @@ export const AuthProvider = ({ children }) => {
     toastWithLog("info", "Logged out", "logout");
   };
 
+  // Expose refresh function for components to manually refresh user data
+  const refreshUser = async () => {
+    const savedToken = localStorage.getItem("token");
+    if (savedToken) {
+      await fetchCurrentVendor(savedToken);
+    }
+  };
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout, loading, toastWithLog }}>
-        {children}
-      </AuthContext.Provider>
-    </QueryClientProvider>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout, loading, toastWithLog, refreshUser }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

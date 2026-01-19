@@ -11,7 +11,7 @@ import { getTransactions, requestPayout } from "../_lib/transactions";
 import { TransactionType } from "../_lib/type";
 
 function page() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   // Payout Account (from KYC)
   const [payoutBankName, setPayoutBankName] = useState("");
   const [payoutAccountHolder, setPayoutAccountHolder] = useState("");
@@ -124,6 +124,10 @@ function page() {
         setAccountBalance(refreshed.data.available_balance || 0);
         setLedgerBalance(refreshed.data.ledger_balance || 0);
       }
+
+      // Refresh user context to immediately show "Wallet Activated" status
+      await refreshUser();
+
       toast.success("Wallet activated successfully");
       setShowBvnModal(false); // Close modal on success
     } catch (error: any) {

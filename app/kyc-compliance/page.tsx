@@ -1,6 +1,5 @@
 "use client";
-import React, { useRef, useState, ChangeEvent, useEffect } from "react";
-import { FaFileUpload } from "react-icons/fa";
+import { useRef, useState, ChangeEvent, useEffect } from "react";
 import ProtectedRoute from "../_components/ProtectedRoute";
 import {
   getKycDetails,
@@ -14,7 +13,7 @@ import UploadBox from "./Upload";
 import { useAuth } from "../_lib/AuthContext";
 import { useRouter } from "next/navigation";
 import { Bank } from "../_lib/type";
-import { NIGERIAN_STATES } from "@/constants/nigeriaStates";
+import { COUNTRIES, COUNTRY_STATES } from "@/constants/countries";
 
 // Cloudinary config
 const cloudName = "jokoyoski";
@@ -92,7 +91,6 @@ function Page() {
   const [bankResults, setBankResults] = useState<Bank[]>([]); // fetched banks
   const [showBankDropdown, setShowBankDropdown] = useState(false); // toggle dropdown
   const [selectedBankCode, setSelectedBankCode] = useState(""); // store bank code
-  const [resolvedAccountName, setResolvedAccountName] = useState(""); // resolved account name
 
   const { user } = useAuth();
   const router = useRouter();
@@ -170,6 +168,11 @@ function Page() {
 
     resolve();
   }, [accountNumber, selectedBankCode]);
+
+  // Clear state when country changes
+  useEffect(() => {
+    setStateName("");
+  }, [country]);
 
   // Check if draft exists on mount
   useEffect(() => {
@@ -541,15 +544,16 @@ function Page() {
                   type="text"
                   name="registrationNumber"
                   id="registrationNumber"
-                  placeholder="Enter Business Registration Number (e.g., 1A2B3C)"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300 uppercase
+                  placeholder="Enter 9-digit Business Registration Number"
+                  maxLength={9}
+                  className={`text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={registrationNumber}
                   onChange={(e) => {
-                    // Only allow hexadecimal characters (0-9, a-f, A-F)
-                    const hexValue = e.target.value.replace(/[^0-9a-fA-F]/g, '').toUpperCase();
-                    setRegistrationNumber(hexValue);
+                    // Only allow numbers (0-9) and max 9 digits
+                    const numericValue = e.target.value.replace(/[^0-9]/g, '').slice(0, 9);
+                    setRegistrationNumber(numericValue);
                   }}
                 />
               </div>
@@ -561,7 +565,7 @@ function Page() {
                   Tax ID (optional)
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name=""
                   id=""
                   placeholder="Enter tax identification number"
@@ -617,6 +621,65 @@ function Page() {
               </div>
               <div className="flex flex-col gap-1.5 w-full">
                 <label
+                  htmlFor="Country"
+                  className="text-black font-semibold text-xs"
+                >
+                  Country *
+                </label>
+                <select
+                  name="country"
+                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                    ${isDisabled ? "cursor-not-allowed" : ""}`}
+                  disabled={isDisabled}
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                >
+                  <option value="">Select Country</option>
+                  {COUNTRIES.map((countryOption) => (
+                    <option key={countryOption} value={countryOption}>
+                      {countryOption}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1.5 w-full">
+                <label
+                  htmlFor="State"
+                  className="text-black font-semibold text-xs"
+                >
+                  State/Province *
+                </label>
+                {country && COUNTRY_STATES[country]?.length > 0 ? (
+                  <select
+                    name="state"
+                    className={`text-gray-500 p-1 text-sm border border-gray-300
+                      ${isDisabled ? "cursor-not-allowed" : ""}`}
+                    disabled={isDisabled}
+                    value={stateName}
+                    onChange={(e) => setStateName(e.target.value)}
+                  >
+                    <option value="">Select State/Province</option>
+                    {COUNTRY_STATES[country].map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    name="state"
+                    placeholder="Enter State/Province"
+                    className={`text-gray-500 p-1 text-sm border border-gray-300
+                      ${isDisabled ? "cursor-not-allowed" : ""}`}
+                    disabled={isDisabled || !country}
+                    value={stateName}
+                    onChange={(e) => setStateName(e.target.value)}
+                  />
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5 w-full">
+                <label
                   htmlFor="City"
                   className="text-black font-semibold text-xs"
                 >
@@ -636,36 +699,13 @@ function Page() {
               </div>
               <div className="flex flex-col gap-1.5 w-full">
                 <label
-                  htmlFor="State"
-                  className="text-black font-semibold text-xs"
-                >
-                  State/Province *
-                </label>
-                <select
-                  name="state"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
-                    ${isDisabled ? "cursor-not-allowed" : ""}`}
-                  disabled={isDisabled}
-                  value={stateName}
-                  onChange={(e) => setStateName(e.target.value)}
-                >
-                  <option value="">Select State</option>
-                  {NIGERIAN_STATES.map((state) => (
-                    <option key={state} value={state}>
-                      {state}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5 w-full">
-                <label
                   htmlFor="postal code"
                   className="text-black font-semibold text-xs"
                 >
                   Postal Code *
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name=""
                   id=""
                   placeholder="Enter postal code"
@@ -674,25 +714,6 @@ function Page() {
                   disabled={isDisabled}
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5 w-full">
-                <label
-                  htmlFor="Country"
-                  className="text-black font-semibold text-xs"
-                >
-                  Country *
-                </label>
-                <input
-                  type="text"
-                  name=""
-                  id=""
-                  placeholder="Enter Country"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
-                    ${isDisabled ? "cursor-not-allowed" : ""}`}
-                  disabled={isDisabled}
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-1.5 w-full relative">
@@ -746,7 +767,7 @@ function Page() {
                   Account Number *
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name=""
                   id=""
                   placeholder="Enter bank account number"

@@ -11,6 +11,8 @@ import {
   readNotification,
 } from "./notifications";
 
+const getToken = () => (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+
 export interface NotificationListResponse {
   success: boolean;
   message: string;
@@ -37,23 +39,30 @@ export interface ReadNotificationResponse {
 }
 
 export const useNotificationList = (pageNumber: number) => {
+  const token = getToken();
+
   return useQuery<NotificationListResponse>({
     queryKey: ["notifications", pageNumber] as QueryKey,
     queryFn: () => getNotifications(pageNumber),
-    staleTime:  1* 60 * 1000,
+    enabled: !!token,
+    staleTime: 60 * 1000,
     placeholderData: (previousData) => previousData,
-    refetchOnWindowFocus: false,
-    refetchInterval: 1000,
+    refetchOnWindowFocus: true,
+    refetchInterval: false,
   });
 };
 
 export const useNotificationCount = () => {
+  const token = getToken();
+
   return useQuery<NotificationCountResponse>({
     queryKey: ["notificationCount"] as QueryKey,
     queryFn: notificationCount,
-    staleTime: 60 * 1000, // cache is fresh for 1 min
-    refetchOnWindowFocus: false,
-    refetchInterval: 1000,
+    enabled: !!token,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
+    // If you want near-realtime badge updates, set this to e.g. 30_000 or 60_000.
+    refetchInterval: 60 * 1000,
   });
 };
 

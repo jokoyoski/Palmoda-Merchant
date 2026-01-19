@@ -32,7 +32,6 @@ export const messageCount = async () => {
    try {
       const token = localStorage.getItem("token");
     if (!token) {
-      console.log("No token found");
       return { data: { unread_count: 0 } };
     }
     const res = await axios.get(`${backendUrl}/message/unread-count`, {

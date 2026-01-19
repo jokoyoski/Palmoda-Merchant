@@ -225,6 +225,11 @@ const BrandProfilePage = () => {
       return;
     }
 
+    if (brandDescription.trim().length < 100) {
+      toast.error("Brand description must be at least 100 characters.");
+      return;
+    }
+
     // Check if there's pending KYC data that needs to be submitted
     const pendingKycData = localStorage.getItem('kyc_pending');
     if (!pendingKycData) {
@@ -333,6 +338,11 @@ const BrandProfilePage = () => {
       return;
     }
 
+    if (brandDescription.trim().length < 100) {
+      toast.error("Brand description must be at least 100 characters.");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await updateBrandDetails(
@@ -366,9 +376,10 @@ const BrandProfilePage = () => {
   };
 
   // Only require essential fields - social media handles are optional
+  const isBrandDescriptionValid = brandDescription.trim().length >= 100;
   const isFormValid =
     brandName.trim() !== "" &&
-    brandDescription.trim() !== "" &&
+    isBrandDescriptionValid &&
     logoBlackUrl !== "" &&
     logoWhiteUrl !== "" &&
     bannerUrl !== "";
@@ -439,6 +450,11 @@ const BrandProfilePage = () => {
             className={`w-full p-3 text-sm text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 resize-none h-32 
               ${isDisabled ? "cursor-not-allowed" : ""}`}
           />
+          {!isBrandDescriptionValid && brandDescription.trim().length > 0 && (
+            <p className="text-xs text-red-500">
+              Brand description must be at least 100 characters.
+            </p>
+          )}
           <p className="text-xs text-gray-500">
             Minimum 100 characters, maximum 500 characters
           </p>
@@ -605,10 +621,14 @@ const BrandProfilePage = () => {
             {brandExists && (
               <button
                 onClick={handleUpdate}
-                className="bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center"
-                disabled={loading || creating || isDisabled}
+                className={`bg-black text-white p-[5px] w-[120px] text-sm flex justify-center items-center ${
+                  loading || creating || isDisabled || !isFormValid
+                    ? "cursor-not-allowed opacity-60"
+                    : "cursor-pointer"
+                }`}
+                disabled={loading || creating || isDisabled || !isFormValid}
               >
-                {loading ? "Updating..." : "Edit"}
+                {loading ? "Updating..." : "Update"}
               </button>
             )}
           </div>

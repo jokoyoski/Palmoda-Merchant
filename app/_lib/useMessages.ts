@@ -6,6 +6,8 @@ import {
   readMessage,
 } from "./messages";
 
+const getToken = () => (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+
 export interface MessageListResponse {
   success: boolean;
   message: string;
@@ -27,23 +29,29 @@ export interface ReadMessageResponse {
 }
 
 export const useMessageList = () => {
+  const token = getToken();
+
   return useQuery<MessageListResponse>({
     queryKey: ["messages"] as QueryKey,
     queryFn: getMessages,
-    staleTime: 1 * 60 * 1000,
-     // cache is fresh for 5 minutes
-      refetchOnWindowFocus: false,
-     refetchInterval: 1000,
+    enabled: !!token,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchInterval: false,
   });
 };
 
 export const useMessageCount = () => {
+  const token = getToken();
+
   return useQuery<MessageCountResponse>({
     queryKey: ["messageCount"] as QueryKey,
     queryFn: messageCount,
-    staleTime: 60 * 1000, // cache is fresh for 1 min
-    refetchOnWindowFocus: false,
-    refetchInterval: 1000, // refetch every minute
+    enabled: !!token,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
+    // If you want near-realtime badge updates, set this to e.g. 30_000 or 60_000.
+    refetchInterval: 60 * 1000,
   });
 };
 

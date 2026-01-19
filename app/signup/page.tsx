@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 function Page() {
   const [holdBtn, setHoldBtn] = useState(true);
@@ -23,6 +25,24 @@ function Page() {
   const [step, setStep] = useState(1);
   const router = useRouter();
   const verificationBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  // Password validation state
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+  });
+
+  // Validate password on change
+  useEffect(() => {
+    setPasswordValidation({
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+    });
+  }, [password]);
 
   // Always clear signup state on mount - user should always start fresh
   useEffect(() => {
@@ -74,6 +94,13 @@ function Page() {
       !confirmPassword
     ) {
       toast.error("Please fill all fields");
+      return;
+    }
+
+    // Validate password requirements
+    if (!passwordValidation.minLength || !passwordValidation.hasUppercase ||
+        !passwordValidation.hasLowercase || !passwordValidation.hasNumber) {
+      toast.error("Password does not meet all requirements");
       return;
     }
 
@@ -131,7 +158,7 @@ function Page() {
           >
             <div>
               <label className="block text-sm mb-1 font-semibold">
-                Business Name
+                Business Name *
               </label>
               <input
                 type="text"
@@ -144,7 +171,7 @@ function Page() {
 
             <div>
               <label className="block text-sm font-semibold mb-1">
-                Contact Person Name
+                Contact Person Name *
               </label>
               <input
                 type="text"
@@ -157,7 +184,7 @@ function Page() {
 
             <div>
               <label className="block text-sm font-semibold mb-1">
-                Email Address
+                Email Address *
               </label>
               <input
                 type="email"
@@ -170,20 +197,20 @@ function Page() {
 
             <div>
               <label className="block text-sm font-semibold mb-1">
-                Phone Number
+                Phone Number *
               </label>
-              <input
-                type="tel"
-                placeholder="+1 (XXX) XXX-XXXX"
+              <PhoneInput
+                international
+                defaultCountry="NG"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                onChange={(value) => setPhoneNumber(value || "")}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black phone-input-custom"
               />
             </div>
 
             <div>
               <label className="block text-sm font-semibold mb-1">
-                Password
+                Password *
               </label>
               <div className="relative w-full">
                 <input
@@ -201,15 +228,27 @@ function Page() {
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Must contain at least 8 characters, including uppercase,
-                lowercase, and a number.
-              </p>
+              {password && (
+                <div className="mt-2 space-y-1">
+                  <p className={`text-xs ${passwordValidation.minLength ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordValidation.minLength ? '✓' : '✗'} At least 8 characters
+                  </p>
+                  <p className={`text-xs ${passwordValidation.hasUppercase ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordValidation.hasUppercase ? '✓' : '✗'} At least one uppercase letter
+                  </p>
+                  <p className={`text-xs ${passwordValidation.hasLowercase ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordValidation.hasLowercase ? '✓' : '✗'} At least one lowercase letter
+                  </p>
+                  <p className={`text-xs ${passwordValidation.hasNumber ? 'text-green-600' : 'text-red-600'}`}>
+                    {passwordValidation.hasNumber ? '✓' : '✗'} At least one number
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-semibold mb-1">
-                Confirm Password
+                Confirm Password *
               </label>
               <div className="w-full relative">
                 <input
