@@ -69,6 +69,8 @@ const BrandUploadBox: React.FC<BrandUploadBoxProps> = ({
           className="hidden"
           ref={inputRef}
           onChange={onFileChange}
+          accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+          disabled={isDisabled}
         />
       </div>
     </div>

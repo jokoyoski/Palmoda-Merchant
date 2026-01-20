@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { FaFileUpload } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaFilePdf, FaFileUpload } from "react-icons/fa";
 import { useAuth } from "../_lib/AuthContext";
 
 type DocumentStatus = "pending" | "approved" | "revoked" | undefined;
@@ -23,10 +23,28 @@ function UploadBox({
   status?: DocumentStatus;
 }) {
   const { user } = useAuth();
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   // Disable only when vendor is fully verified
   const isDisabled = isUploading || user?.is_verified;
   const isPdf = fileUrl?.endsWith(".pdf");
+  const isImage = !!fileUrl && !isPdf;
+
+  const openPdf = () => {
+    if (!fileUrl) return;
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const openPreview = () => {
+    if (!fileUrl) return;
+    if (isPdf) {
+      openPdf();
+      return;
+    }
+    if (isImage) {
+      setIsImagePreviewOpen(true);
+    }
+  };
 
   // Status badge styles
   const getStatusBadge = () => {
@@ -61,19 +79,36 @@ function UploadBox({
       {fileUrl ? (
         <div className="relative border-2 border-gray-300 p-2 rounded-md h-[180px] flex flex-col items-center justify-center bg-gray-50">
           {getStatusBadge()}
-          {isPdf ? (
-            <p className="text-center text-sm text-black font-semibold">PDF Uploaded</p>
-          ) : (
-            <img
-              src={fileUrl}
-              className="w-full mt-3.5 h-full object-contain rounded"
-              alt="Uploaded file"
-            />
-          )}
+
+          <div
+            className="w-full flex-1 flex items-center justify-center cursor-pointer overflow-hidden"
+            onClick={openPreview}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") openPreview();
+            }}
+          >
+            {isPdf ? (
+              <div className="flex flex-col items-center justify-center gap-2">
+                <FaFilePdf className="text-red-600" size={44} />
+                <p className="text-center text-sm text-black font-semibold">PDF Uploaded</p>
+              </div>
+            ) : (
+              <img
+                src={fileUrl}
+                className="max-w-full max-h-full object-contain rounded"
+                alt="Uploaded file"
+              />
+            )}
+          </div>
 
           <button
             className={`bg-black text-white mt-2 p-[5px] text-xs ${ isDisabled? "cursor-not-allowed" : ""} `}
-            onClick={onUploadClick}
+            onClick={(e) => {
+              e.stopPropagation();
+              onUploadClick();
+            }}
             disabled={isDisabled}
             type="button"
           >
@@ -106,6 +141,29 @@ function UploadBox({
         onChange={onFileChange}
         accept=".pdf,image/*"
       />
+
+      {isImagePreviewOpen && fileUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => setIsImagePreviewOpen(false)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setIsImagePreviewOpen(false);
+          }}
+        >
+          <div
+            className="bg-white p-3 rounded-md max-w-[95vw] max-h-[95vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={fileUrl}
+              alt="Preview"
+              className="max-w-[90vw] max-h-[90vh] object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

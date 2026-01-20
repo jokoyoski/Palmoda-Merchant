@@ -29,6 +29,7 @@ function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [username, setUserName] = useState("");
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { user, logout } = useAuth();
 
@@ -46,6 +47,10 @@ function Header() {
   useEffect(() => {
     setUserName(user?.contact_person_name || "");
   }, [user]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ❗ RETURN AFTER ALL HOOKS
   if (pathname.includes("signup") || pathname.includes("login") || pathname.includes("forgot-password")) {
@@ -81,62 +86,78 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
-                <Avatar
-                  icon={<CiUser size={20} />}
-                  classNames={{
-                    base: "bg-gray-200",
-                    icon: "text-black",
-                  }}
-                  size="sm"
-                />
-                <h2 className="font-semibold text-black text-[15px] hidden md:block">
-                  {username}
-                </h2>
-              </div>
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Profile Actions" variant="flat">
-              <DropdownSection showDivider>
-                <DropdownItem
-                  key="profile-info"
-                  className="h-14 gap-2"
-                  textValue="Profile Info"
-                  isReadOnly
-                >
-                  <p className="font-semibold">{user?.business_name}</p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
-                </DropdownItem>
-              </DropdownSection>
-              <DropdownSection showDivider>
-                <DropdownItem
-                  key="profile"
-                  startContent={<CiUser size={18} />}
-                  onPress={() => router.push("/profile")}
-                >
-                  View Profile
-                </DropdownItem>
-                <DropdownItem
-                  key="settings"
-                  startContent={<FiSettings size={16} />}
-                  onPress={() => router.push("/settings")}
-                >
-                  Settings
-                </DropdownItem>
-              </DropdownSection>
-              <DropdownSection>
-                <DropdownItem
-                  key="logout"
-                  color="danger"
-                  startContent={<FiLogOut size={16} />}
-                  onPress={logout}
-                >
-                  Logout
-                </DropdownItem>
-              </DropdownSection>
-            </DropdownMenu>
-          </Dropdown>
+          {mounted ? (
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                  <Avatar
+                    icon={<CiUser size={20} />}
+                    classNames={{
+                      base: "bg-gray-200",
+                      icon: "text-black",
+                    }}
+                    size="sm"
+                  />
+                  <h2 className="font-semibold text-black text-[15px] hidden md:block">
+                    {username}
+                  </h2>
+                </div>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Profile Actions" variant="flat">
+                <DropdownSection showDivider>
+                  <DropdownItem
+                    key="profile-info"
+                    className="h-14 gap-2"
+                    textValue="Profile Info"
+                    isReadOnly
+                  >
+                    <p className="font-semibold">{user?.business_name}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
+                  </DropdownItem>
+                </DropdownSection>
+                <DropdownSection showDivider>
+                  <DropdownItem
+                    key="profile"
+                    startContent={<CiUser size={18} />}
+                    onPress={() => router.push("/profile")}
+                  >
+                    View Profile
+                  </DropdownItem>
+                  <DropdownItem
+                    key="settings"
+                    startContent={<FiSettings size={16} />}
+                    onPress={() => router.push("/settings")}
+                  >
+                    Settings
+                  </DropdownItem>
+                </DropdownSection>
+                <DropdownSection>
+                  <DropdownItem
+                    key="logout"
+                    color="danger"
+                    startContent={<FiLogOut size={16} />}
+                    onPress={logout}
+                  >
+                    Logout
+                  </DropdownItem>
+                </DropdownSection>
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Avatar
+                icon={<CiUser size={20} />}
+                classNames={{
+                  base: "bg-gray-200",
+                  icon: "text-black",
+                }}
+                size="sm"
+              />
+              <h2 className="font-semibold text-black text-[15px] hidden md:block">
+                {username}
+              </h2>
+            </div>
+          )}
         </div>
       </header>
 

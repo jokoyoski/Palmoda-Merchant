@@ -108,6 +108,9 @@ export interface CategoryQueryParams {
     countries: {
       $in: string[];
     };
+    genders?: {
+      $in: string[];
+    };
   };
   sort_field: string;
   sort_direction: number;

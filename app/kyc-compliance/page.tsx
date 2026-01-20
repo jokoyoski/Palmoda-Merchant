@@ -19,6 +19,8 @@ import { COUNTRIES, COUNTRY_STATES } from "@/constants/countries";
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
 
+const developmentMode = process.env.NEXT_PUBLIC_DEVELOPMENT_MODE === "true";
+
 const uploadToCloudinary = async (file: File): Promise<string | null> => {
   try {
     if (file.size > 5 * 1024 * 1024) {
@@ -151,6 +153,12 @@ function Page() {
   useEffect(() => {
     const resolve = async () => {
       if (accountNumber.length === 10 && selectedBankCode) {
+        if (developmentMode) {
+          setAccountHolder(
+            user?.contact_person_name || user?.business_name || ""
+          );
+          return;
+        }
         try {
           const res = await resolveAccount(accountNumber, selectedBankCode);
           if (res.success) {
@@ -167,7 +175,7 @@ function Page() {
     };
 
     resolve();
-  }, [accountNumber, selectedBankCode]);
+  }, [accountNumber, selectedBankCode, user, developmentMode]);
 
   // Clear state when country changes
   useEffect(() => {

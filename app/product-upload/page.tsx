@@ -113,6 +113,19 @@ const resetForm = () => {
   setSelectedCountry("");
 };
 
+  useEffect(() => {
+    setSelectedCategory("");
+    setSelectedSubCategory("");
+
+    setQueryParams((prev) => ({
+      ...prev,
+      filter: {
+        ...prev.filter,
+        genders: gender ? { $in: [gender] } : undefined,
+      },
+    }));
+  }, [gender]);
+
   // Check if draft exists on mount
   useEffect(() => {
     const draft = localStorage.getItem("product_draft");
@@ -457,6 +470,31 @@ const resetForm = () => {
             </div>
           </div>
 
+          {/* gender radio inputs, male female, unisex */}
+          <div className="flex flex-col gap-1.5 mt-4">
+            <label
+              htmlFor="gender"
+              className="text-black font-semibold text-xs"
+            >
+              Gender *
+            </label>
+            <select
+              id="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
+            >
+              <option value="">
+                {genderLoading ? "Loading..." : "-- Select Gender --"}
+              </option>
+              {gendersArray?.map((gender) => (
+                <option key={gender._id} value={gender._id}>
+                  {gender.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-4">
             <div className="flex flex-col gap-1.5 mb-4">
               <label
@@ -472,10 +510,17 @@ const resetForm = () => {
                   setSelectedCategory(e.target.value);
                   setSelectedSubCategory(""); // Reset subcategory on category change
                 }}
-                className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                disabled={!gender}
+                className={`border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black ${
+                  !gender ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
               >
                 <option value="">
-                  {isLoading ? "Loading..." : "-- Select Category --"}
+                  {!gender
+                    ? "Select gender first"
+                    : isLoading
+                      ? "Loading..."
+                      : "-- Select Category --"}
                 </option>
                 {categoriesArray &&
                   categoriesArray.map((cat) => (
@@ -497,15 +542,19 @@ const resetForm = () => {
                 id="subcategory"
                 value={selectedSubCategory}
                 onChange={(e) => setSelectedSubCategory(e.target.value)}
-                disabled={!selectedCategory}
+                disabled={!gender || !selectedCategory}
                 className={`border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black ${
-                  !selectedCategory ? "bg-gray-100 cursor-not-allowed" : ""
+                  !gender || !selectedCategory ? "bg-gray-100 cursor-not-allowed" : ""
                 }`}
               >
                 <option value="">
-                  {subCategoryLoader
-                    ? "Loading..."
-                    : "-- Select Subcategory --"}
+                  {!gender
+                    ? "Select gender first"
+                    : !selectedCategory
+                      ? "Select category first"
+                      : subCategoryLoader
+                        ? "Loading..."
+                        : "-- Select Subcategory --"}
                 </option>
                 {subCategoriesArray?.map((sub) => (
                   <option key={sub._id} value={sub._id}>
@@ -514,31 +563,6 @@ const resetForm = () => {
                 ))}
               </select>
             </div>
-            {/* gender radio inputs, male female, unisex */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="gender"
-                className="text-black font-semibold text-xs"
-              >
-                Gender *
-              </label>
-              <select
-                id="gender"
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-                className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
-              >
-                <option value="">
-                  {genderLoading ? "Loading..." : "-- Select Gender --"}
-                </option>
-                {gendersArray?.map((gender) => (
-                  <option key={gender._id} value={gender._id}>
-                    {gender.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {/* Country Selector */}
             <div className="flex flex-col gap-1.5">
               <label

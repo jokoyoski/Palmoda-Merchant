@@ -196,10 +196,32 @@ const BrandProfilePage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const allowedMimeTypes = new Set(["image/jpeg", "image/png"]);
+    const allowedExtensions = new Set(["jpg", "jpeg", "png"]);
+    const extension = file.name.split(".").pop()?.toLowerCase();
+
+    const isAllowed = file.type
+      ? allowedMimeTypes.has(file.type)
+      : !!extension && allowedExtensions.has(extension);
+
+    if (!isAllowed) {
+      toast.error("Only JPG/JPEG/PNG images are allowed.");
+      e.target.value = "";
+      return;
+    }
+
     const toastId = toast.loading("Uploading images...");
 
     const url = await uploadToCloudinary(file);
-    if (!url) return;
+    if (!url) {
+      toast.update(toastId, {
+        render: "Upload failed. Please try again.",
+        type: "error",
+        isLoading: false,
+        autoClose: 2500,
+      });
+      return;
+    }
 
     if (type === "logoBlack") setLogoBlackUrl(url);
     if (type === "logoWhite") setLogoWhiteUrl(url);
