@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Notification } from "../_lib/type";
+import { formatLocalDate, formatLocalTime } from "../_lib/datetime";
 
 type Variant = "dashboard" | "page";
 
@@ -102,7 +103,7 @@ export default function LatestNotifications({
                   </div>
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     <span className={`text-xs ${notif.status === "unread" ? "text-white" : "text-gray-500"}`}>
-                      {new Date(notif.created_at).toLocaleDateString()}
+                      {formatLocalDate(notif.created_at)}
                     </span>
                     {showMarkAsRead && notif.status === "unread" && onMarkAsRead && (
                       <button
@@ -130,11 +131,8 @@ export default function LatestNotifications({
               <p className="text-sm font-semibold text-black">{notif.title}</p>
               <p className="text-xs text-gray-500">{notif.content}</p>
               <p className="text-[10px] text-gray-400 mt-1">
-                {new Date(notif.created_at).toLocaleDateString()} {" "}
-                {new Date(notif.created_at).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {formatLocalDate(notif.created_at)} {" "}
+                {formatLocalTime(notif.created_at)}
               </p>
             </div>
           );
