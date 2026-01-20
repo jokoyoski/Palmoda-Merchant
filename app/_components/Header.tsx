@@ -38,7 +38,7 @@ function Header() {
     { href: "/kyc-compliance", label: "KYC Compliance", icon: <FiFileText /> },
     { href: "/brand-profile", label: "Brand Profile", icon: <FiTag /> },
     { href: "/product-catalog", label: "Product Catalog", icon: <FiGrid /> },
-    { href: "/dashboard", label: "Dashboard", icon: <BsGraphUp /> },
+    { href: "/", label: "Dashboard", icon: <BsGraphUp /> },
     { href: "/orders", label: "Orders", icon: <FiShoppingCart /> },
     { href: "/payouts", label: "Payouts", icon: <FiDollarSign /> },
     { href: "/settings", label: "Settings", icon: <FiSettings /> },
