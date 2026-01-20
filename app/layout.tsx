@@ -1,9 +1,7 @@
 // app/layout.tsx
 import "../styles/globals.css";
 import type { Metadata } from "next";
-import Header from "./_components/Header";
-import Sidebar from "./_components/Sidebar";
-import { AuthProvider } from "./_lib/AuthContext";
+import AppShell from "./_components/AppShell";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -33,20 +31,7 @@ export default function RootLayout({
       <head />
       <body className="min-h-screen  text-black" suppressHydrationWarning>
        <Providers>
-        
-          {/* Fixed Header */}
-          <Header />
-
-          <div className="flex pt-[50px] h-[calc(100vh-50px)]">
-            {/* Sidebar - fixed height with independent scroll */}
-            <Sidebar />
-
-            {/* Main Content - scrollable separately */}
-            <main className="flex-1 min-h-screen overflow-y-auto">
-              {children}
-            </main>
-          </div>
-        
+          <AppShell>{children}</AppShell>
        </Providers>
         <ToastContainer position="top-right" autoClose={3000} />
       </body>
