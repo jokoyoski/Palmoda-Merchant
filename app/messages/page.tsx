@@ -4,13 +4,14 @@ import ProtectedRoute from "../_components/ProtectedRoute";
 import { useMessageCount, useMessageList, useReadMessage } from "../_lib/useMessages";
 import { MessageType } from "../_lib/type";
 import { Mail, MailOpen, Check } from "lucide-react";
+import { formatLocalDateTime } from "../_lib/datetime";
 
 function Page() {
   const { data, isLoading, isError, error } = useMessageList();
   const { data: countData } = useMessageCount();
   const readMessageMutation = useReadMessage();
 
-  // ✅ Track locally marked messages
+  // Track locally marked messages
   const [locallyReadMessages, setLocallyReadMessages] = useState<Set<string>>(new Set());
 
   const messages = data?.data || [];
@@ -19,7 +20,7 @@ function Page() {
   const handleMarkAsRead = (messageId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // ✅ Immediately mark as read locally for instant UI update
+    // Immediately mark as read locally for instant UI update
     setLocallyReadMessages(prev => new Set(prev).add(messageId));
     
     readMessageMutation.mutate(messageId);
@@ -70,7 +71,7 @@ function Page() {
           {/* Message List */}
           <div className="space-y-3">
             {messages.map((msg: MessageType) => {
-              // ✅ Check both server state and local state
+              // Check both server state and local state
               const isRead = msg.is_read || locallyReadMessages.has(msg._id);
               
               return (
@@ -95,7 +96,7 @@ function Page() {
                           )}
                         </div>
 
-                        {/* Mark as read button - ✅ now uses combined isRead state */}
+                        {/* Mark as read button - now uses combined isRead state */}
                         {!isRead && (
                           <button
                             onClick={(e) => handleMarkAsRead(msg._id, e)}
@@ -113,7 +114,7 @@ function Page() {
                       </p>
 
                       <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <span>{msg.created_at}</span>
+                        <span>{formatLocalDateTime(msg.created_at)}</span>
                         {msg.message_type && msg.message_type !== "text" && (
                           <>
                             <span>•</span>

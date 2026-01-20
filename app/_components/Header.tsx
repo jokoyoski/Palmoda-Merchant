@@ -1,9 +1,9 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { FiSearch, FiMenu, FiX, FiLogOut } from "react-icons/fi";
+import { FiMenu, FiX, FiLogOut } from "react-icons/fi";
 import { CiUser } from "react-icons/ci";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   FiUserPlus,
   FiFileText,
@@ -16,22 +16,28 @@ import {
 import { BsGraphUp } from "react-icons/bs";
 import { useAuth } from "../_lib/AuthContext";
 import { toast } from "react-toastify";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  DropdownSection,
-} from "@heroui/dropdown";
 import { Avatar } from "@heroui/avatar";
 
 function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [username, setUserName] = useState("");
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { user, logout } = useAuth();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const navItems = [
     // { href: "/signup", label: "Sign Up", icon: <FiUserPlus /> },
@@ -76,86 +82,74 @@ function Header() {
           </Link>
         </div>
 
-        <div className="hidden md:flex items-center bg-gray-100 rounded-full px-3 py-1 w-fit md:w-[400px] focus-within:ring-2 focus-within:ring-gray-300 transition">
-          <FiSearch className="text-gray-500 text-[18px]" />
-          <input
-            type="search"
-            placeholder="Search for brands, products and more"
-            className="bg-transparent outline-none text-[14px] text-gray-700 placeholder-gray-500 w-full px-2"
-          />
-        </div>
+        
+        <div className="flex items-center gap-4 relative" ref={dropdownRef}>
+          <div
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+          >
+            <Avatar
+              icon={<CiUser size={20} />}
+              classNames={{
+                base: "bg-gray-200",
+                icon: "text-black",
+              }}
+              size="sm"
+            />
+            <h2 className="font-semibold text-black text-[15px] hidden md:block">
+              {username}
+            </h2>
+          </div>
 
-        <div className="flex items-center gap-4">
-          {mounted ? (
-            <Dropdown placement="bottom-end">
-              <DropdownTrigger>
-                <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
-                  <Avatar
-                    icon={<CiUser size={20} />}
-                    classNames={{
-                      base: "bg-gray-200",
-                      icon: "text-black",
-                    }}
-                    size="sm"
-                  />
-                  <h2 className="font-semibold text-black text-[15px] hidden md:block">
-                    {username}
-                  </h2>
-                </div>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Profile Actions" variant="flat">
-                <DropdownSection showDivider>
-                  <DropdownItem
-                    key="profile-info"
-                    className="h-14 gap-2"
-                    textValue="Profile Info"
-                    isReadOnly
-                  >
-                    <p className="font-semibold">{user?.business_name}</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                  </DropdownItem>
-                </DropdownSection>
-                <DropdownSection showDivider>
-                  <DropdownItem
-                    key="profile"
-                    startContent={<CiUser size={18} />}
-                    onPress={() => router.push("/profile")}
-                  >
-                    View Profile
-                  </DropdownItem>
-                  <DropdownItem
-                    key="settings"
-                    startContent={<FiSettings size={16} />}
-                    onPress={() => router.push("/settings")}
-                  >
-                    Settings
-                  </DropdownItem>
-                </DropdownSection>
-                <DropdownSection>
-                  <DropdownItem
-                    key="logout"
-                    color="danger"
-                    startContent={<FiLogOut size={16} />}
-                    onPress={logout}
-                  >
-                    Logout
-                  </DropdownItem>
-                </DropdownSection>
-              </DropdownMenu>
-            </Dropdown>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Avatar
-                icon={<CiUser size={20} />}
-                classNames={{
-                  base: "bg-gray-200",
-                  icon: "text-black",
-                }}
-                size="sm"
-              />
-              <h2 className="font-semibold text-black text-[15px] hidden md:block">
-                {username}
-              </h2>
+          {/* Custom Dropdown Menu */}
+          {dropdownOpen && (
+            <div
+              className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1"
+              style={{ zIndex: 99999 }}
+            >
+              {/* Profile Info */}
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="font-semibold text-sm text-black">{user?.business_name}</p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
+              </div>
+
+              {/* Menu Items */}
+              <div className="py-1 border-b border-gray-100">
+                <button
+                  onClick={() => {
+                    router.push("/profile");
+                    setDropdownOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-black hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <CiUser size={18} />
+                  View Profile
+                </button>
+                <button
+                  onClick={() => {
+                    router.push("/settings");
+                    setDropdownOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-black hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <FiSettings size={16} />
+                  Settings
+                </button>
+              </div>
+
+              {/* Logout */}
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    logout();
+                    setDropdownOpen(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
+                >
+                  <FiLogOut size={16} />
+                  Logout
+                </button>
+              </div>
             </div>
           )}
         </div>

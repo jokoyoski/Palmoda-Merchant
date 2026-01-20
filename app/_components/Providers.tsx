@@ -2,10 +2,13 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HeroUIProvider } from "@heroui/system";
 import { AuthProvider } from "../_lib/AuthContext";
 import { ReactNode, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Providers({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -20,7 +23,9 @@ export default function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <HeroUIProvider navigate={router.push}>
+        <AuthProvider>{children}</AuthProvider>
+      </HeroUIProvider>
     </QueryClientProvider>
   );
 }

@@ -53,3 +53,26 @@
   height: 1rem;
   margin-right: 0.25rem;
 }
+
+/* Fix HeroUI dropdown z-index - target the overlay container */
+[data-overlay-container="true"] {
+  z-index: 99999 !important;
+  position: relative !important;
+}
+
+/* Target HeroUI popover/dropdown content */
+[data-slot="content"],
+[data-slot="base"],
+[role="listbox"],
+[role="menu"],
+[data-dismissable="true"],
+[data-placement] {
+  z-index: 99999 !important;
+}
+
+/* Target React Aria overlay */
+[data-react-aria-top-layer="true"],
+.react-aria-ModalOverlay,
+.react-aria-Popover {
+  z-index: 99999 !important;
+}

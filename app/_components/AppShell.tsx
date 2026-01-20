@@ -39,7 +39,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Header />
       <div className="flex pt-[50px] h-[calc(100vh-50px)]">
         <Sidebar />
-        <main className="flex-1 min-h-screen overflow-y-auto">{children}</main>
+        <main className="flex-1 min-h-screen overflow-y-auto relative z-0">{children}</main>
       </div>
     </>
   );
