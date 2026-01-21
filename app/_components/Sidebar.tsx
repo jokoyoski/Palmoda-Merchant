@@ -65,6 +65,9 @@ function Sidebar() {
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, Logout",
       cancelButtonText: "Cancel",
+      customClass: {
+        container: "!z-[100000]",
+      },
     });
 
     if (result.isConfirmed) {

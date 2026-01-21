@@ -65,7 +65,7 @@ function Header() {
 
   return (
     <>
-      <header className="flex fixed top-0 left-0 w-full items-center justify-between px-4 py-3 border-b border-b-gray-200 bg-white z-50">
+      <header className="flex fixed top-0 left-0 w-full items-center justify-between px-4 py-3 border-b border-b-gray-200 bg-white z-[10000]">
         <div className="flex items-center gap-3">
           <button
             className="md:hidden p-2"
@@ -104,7 +104,7 @@ function Header() {
           {/* Custom Dropdown Menu */}
           {dropdownOpen && (
             <div
-              className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1"
+              className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[10001]"
               style={{ zIndex: 99999 }}
             >
               {/* Profile Info */}

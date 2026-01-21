@@ -25,8 +25,8 @@ function UploadBox({
   const { user } = useAuth();
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
-  // Disable only when vendor is fully verified
-  const isDisabled = isUploading || user?.is_verified;
+  // Disable when uploading, vendor is fully verified, or document is approved
+  const isDisabled = isUploading || user?.is_verified || status === "approved";
   const isPdf = fileUrl?.endsWith(".pdf");
   const isImage = !!fileUrl && !isPdf;
 
