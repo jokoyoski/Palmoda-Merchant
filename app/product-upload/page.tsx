@@ -348,17 +348,49 @@ const resetForm = () => {
   };
 
   const handleCreateProduct = async () => {
-    if (
-      !productName ||
-      !selectedCategory ||
-      !selectedSubCategory ||
-      !gender ||
-      !selectedCountry ||
-      !description ||
-      !inventory ||
-      !price
-    ) {
-      toast.error("Please fill all required fields");
+    // Check each required field individually for better error messages
+    if (!productName) {
+      toast.error("Product Name is required");
+      return;
+    }
+    if (!selectedCategory) {
+      toast.error("Category is required");
+      return;
+    }
+    if (!selectedSubCategory) {
+      toast.error("Sub Category is required");
+      return;
+    }
+    if (!gender) {
+      toast.error("Gender is required");
+      return;
+    }
+    if (!selectedCountry) {
+      toast.error("Country is required");
+      return;
+    }
+    if (!description) {
+      toast.error("Product Description is required");
+      return;
+    }
+    if (!inventory || inventory <= 0) {
+      toast.error("Inventory/Stock quantity is required and must be greater than 0");
+      return;
+    }
+    if (!price) {
+      toast.error("Price is required");
+      return;
+    }
+    if (images.length === 0) {
+      toast.error("At least one product image is required");
+      return;
+    }
+    if (colors.length === 0) {
+      toast.error("At least one color must be selected");
+      return;
+    }
+    if (sizes.length === 0) {
+      toast.error("At least one size must be selected");
       return;
     }
 
@@ -380,40 +412,45 @@ const resetForm = () => {
 
     setLoading(true);
 
-    const productData = {
-      vendor_id: vendorId,
-      name: productName,
-      images,
-      cost_price: parseFloat(price),
-      description,
-      genders: [gender],
-      sizes,
-      look_after_me: careInstructions,
-      colors,
-      weight,
-      fabrics: [materials],
-      discounted_price: parseFloat(comparePrice),
-      countries: [selectedCountry],
-      quantity: inventory,
-      sub_categories: [selectedSubCategory],
-      categories: [selectedCategory],
-    };
+    try {
+      const productData = {
+        vendor_id: vendorId,
+        name: productName,
+        images,
+        cost_price: parseFloat(price),
+        description,
+        genders: [gender],
+        sizes,
+        look_after_me: careInstructions,
+        colors,
+        weight,
+        fabrics: [materials],
+        discounted_price: comparePrice ? parseFloat(comparePrice) : null,
+        countries: [selectedCountry],
+        quantity: inventory,
+        sub_categories: [selectedSubCategory],
+        categories: [selectedCategory],
+      };
 
-    const res = await createProduct(productData);
+      const res = await createProduct(productData);
 
-    if (res.success) {
-      toast.success("Product has been uploaded for review!");
-      // Clear draft after successful submission
-      localStorage.removeItem("product_draft");
-      setHasDraft(false);
-      resetForm();
-      // Reset form or redirect
-    } else {
-      toast.error(res.message);
-      console.log(res.message);
+      if (res.success) {
+        toast.success("Product has been uploaded for review!");
+        // Clear draft after successful submission
+        localStorage.removeItem("product_draft");
+        setHasDraft(false);
+        resetForm();
+        // Reset form or redirect
+      } else {
+        toast.error(res.message || "Failed to publish product");
+        console.log(res.message);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred while publishing product");
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -660,9 +697,13 @@ const resetForm = () => {
                   Price (NGN)*
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                    setPrice(value);
+                  }}
                   onBlur={() => setPrice(formatMoney(price))}
                   className="text-gray-500 p-1 text-sm border border-gray-300"
                 />
@@ -675,9 +716,13 @@ const resetForm = () => {
                   Discount Price (NGN)
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={comparePrice}
-                  onChange={(e) => setComparePrice(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                    setComparePrice(value);
+                  }}
                   onBlur={() => setComparePrice(formatMoney(comparePrice))}
                   className="text-gray-500 p-1 text-sm border border-gray-300"
                 />
@@ -727,9 +772,13 @@ const resetForm = () => {
                   Product Weight (KG)
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                    setWeight(value);
+                  }}
                   className="text-gray-500 p-1 text-sm border border-gray-300"
                 />
               </div>
@@ -869,7 +918,9 @@ const resetForm = () => {
               <button
                 onClick={handleCreateProduct}
                 disabled={loading}
-                className="bg-black text-white p-[5px] w-[120px] text-sm"
+                className={`text-white p-[5px] w-[120px] text-sm transition-opacity ${
+                  loading ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800"
+                }`}
               >
                 {loading ? "Publishing..." : "Publish Product"}
               </button>
