@@ -547,11 +547,14 @@ function page() {
               </p>
 
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength={11}
                 value={bvn}
                 onChange={(e) => {
-                  if (e.target.value.length <= 11) setBvn(e.target.value);
+                  const value = e.target.value.replace(/\D/g, '');
+                  if (value.length <= 11) setBvn(value);
                 }}
                 className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm outline-none"
                 placeholder="Enter 11-digit BVN"

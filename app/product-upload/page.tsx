@@ -15,6 +15,7 @@ import { useFetchCountries } from "../_lib/countries";
 import { Button } from "@heroui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
+import WalletActivationPrompt from "../_components/WalletActivationPrompt";
 
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
@@ -82,15 +83,15 @@ function page() {
   const [newColorCode, setNewColorCode] = useState("");
   const [addingColor, setAddingColor] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
+  const [showWalletPrompt, setShowWalletPrompt] = useState(false);
   const router = useRouter();
 
-  // Check if user has wallet activated - redirect to wallet activation
+  // Check if user has wallet activated - show prompt if not
   useEffect(() => {
     if (user && !user.is_wallet_activated) {
-      toast.info("Please activate your wallet to upload products");
-      router.push("/payouts?activate_wallet=true");
+      setShowWalletPrompt(true);
     }
-  }, [user, router]);
+  }, [user]);
 
   console.log(user);
 
@@ -916,6 +917,12 @@ const resetForm = () => {
           </div>
         </div>
       )}
+
+      {/* Wallet Activation Prompt */}
+      <WalletActivationPrompt
+        isOpen={showWalletPrompt}
+        onClose={() => setShowWalletPrompt(false)}
+      />
     </section>
   );
 }

@@ -29,7 +29,7 @@ import Swal from "sweetalert2"; // ✅ Import SweetAlert2
 
 function Sidebar() {
   const pathname = usePathname();
-  const { logout, user } = useAuth();
+  const { logout, user, loading: authLoading } = useAuth();
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { data: countData } = useNotificationCount();
@@ -86,7 +86,7 @@ function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-[230px] h-fit sticky left-0 
+      className="hidden md:flex flex-col w-[230px] min-h-screen sticky top-0 left-0
       bg-white border-r border-gray-200 p-5 overflow-y-auto"
     >
       <nav className="flex flex-col mt-5 text-[15px]">
@@ -100,11 +100,11 @@ function Sidebar() {
               : "Complete KYC to access Dashboard"
           }
           className={`flex hover:bg-gray-50 ${
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? ""
-              : "pointer-events-none cursor-not-allowed opacity-30"
+            !authLoading && (!user?.is_bank_information_verified ||
+            !user?.is_business_verified ||
+            !user?.is_identity_verified)
+              ? "pointer-events-none cursor-not-allowed opacity-30"
+              : ""
           } font-semibold items-center ${pathname === "/" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <BsGraphUp /> Dashboard
@@ -127,36 +127,27 @@ function Sidebar() {
         {(() => {
           const isKycComplete = user?.is_bank_information_verified && user?.is_business_verified && user?.is_identity_verified;
           const hasWallet = user?.is_wallet_activated;
-          const canUpload = isKycComplete && hasWallet;
-
-          const handleProductCatalogClick = (e: React.MouseEvent) => {
-            if (!isKycComplete) {
-              e.preventDefault();
-              toast.error("Please complete your KYC verification to upload products");
-              return;
-            }
-            if (!hasWallet) {
-              e.preventDefault();
-              toast.error("Please activate your wallet in Payouts to upload products");
-              return;
-            }
-          };
+          const canAccess = isKycComplete && hasWallet;
 
           return (
             <Link
               href="/product-upload"
-              onClick={handleProductCatalogClick}
+              onClick={(e) => {
+                if (!canAccess) {
+                  e.preventDefault();
+                }
+              }}
               title={
                 !isKycComplete
-                  ? "Complete KYC to upload products"
+                  ? "Complete KYC to access Product Catalog"
                   : !hasWallet
-                  ? "Activate wallet to upload products"
+                  ? "Please activate your wallet to access Product Catalog"
                   : "Upload new products"
               }
               className={`flex hover:bg-gray-50 ${
-                canUpload
-                  ? ""
-                  : "cursor-not-allowed opacity-50"
+                !authLoading && !canAccess
+                  ? "cursor-not-allowed opacity-50 pointer-events-none"
+                  : ""
               } font-semibold items-center ${pathname === "/product-upload" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
             >
               <FiGrid /> Product Catalog
@@ -185,15 +176,15 @@ function Sidebar() {
             user?.is_bank_information_verified &&
             user?.is_business_verified &&
             user?.is_identity_verified
-              ? "Upload new products"
-              : "Complete KYC to upload products"
+              ? "View Orders"
+              : "Complete KYC to access Orders"
           }
           className={`flex hover:bg-gray-50 ${
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? ""
-              : "pointer-events-none cursor-not-allowed opacity-30"
+            !authLoading && (!user?.is_bank_information_verified ||
+            !user?.is_business_verified ||
+            !user?.is_identity_verified)
+              ? "pointer-events-none cursor-not-allowed opacity-30"
+              : ""
           } font-semibold items-center ${pathname === "/orders" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FiShoppingCart /> Orders
@@ -226,15 +217,15 @@ function Sidebar() {
             user?.is_bank_information_verified &&
             user?.is_business_verified &&
             user?.is_identity_verified
-              ? "Upload new products"
-              : "Complete KYC to upload products"
+              ? "View Payouts"
+              : "Complete KYC to access Payouts"
           }
           className={`flex hover:bg-gray-50 ${
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? ""
-              : "pointer-events-none cursor-not-allowed opacity-30"
+            !authLoading && (!user?.is_bank_information_verified ||
+            !user?.is_business_verified ||
+            !user?.is_identity_verified)
+              ? "pointer-events-none cursor-not-allowed opacity-30"
+              : ""
           } font-semibold items-center ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FiDollarSign /> Payouts
@@ -246,15 +237,15 @@ function Sidebar() {
             user?.is_bank_information_verified &&
             user?.is_business_verified &&
             user?.is_identity_verified
-              ? "Upload new products"
-              : "Complete KYC to upload products"
+              ? "View Settings"
+              : "Complete KYC to access Settings"
           }
           className={`flex hover:bg-gray-50 ${
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? ""
-              : "pointer-events-none cursor-not-allowed opacity-30"
+            !authLoading && (!user?.is_bank_information_verified ||
+            !user?.is_business_verified ||
+            !user?.is_identity_verified)
+              ? "pointer-events-none cursor-not-allowed opacity-30"
+              : ""
           } font-semibold items-center ${pathname === "/settings" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FiSettings /> Settings

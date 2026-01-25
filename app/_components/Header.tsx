@@ -25,7 +25,7 @@ function Header() {
   const [username, setUserName] = useState("");
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -174,17 +174,11 @@ function Header() {
               if (item.href === "/product-catalog") {
                 const isKycComplete = user?.is_bank_information_verified && user?.is_business_verified && user?.is_identity_verified;
                 const hasWallet = user?.is_wallet_activated;
-                const canUpload = isKycComplete && hasWallet;
+                const canAccess = isKycComplete && hasWallet;
 
                 const handleClick = (e: React.MouseEvent) => {
-                  if (!isKycComplete) {
+                  if (!canAccess) {
                     e.preventDefault();
-                    toast.error("Please complete your KYC verification to upload products");
-                    return;
-                  }
-                  if (!hasWallet) {
-                    e.preventDefault();
-                    toast.error("Please activate your wallet in Payouts to upload products");
                     return;
                   }
                   setMobileMenuOpen(false);
@@ -194,8 +188,15 @@ function Header() {
                   <Link
                     key={item.href}
                     href="/product-upload"
-                    className={`flex items-center font-semibold gap-5 text-[15px] ${!canUpload ? "opacity-50" : ""}`}
+                    className={`flex items-center font-semibold gap-5 text-[15px] ${!authLoading && !canAccess ? "opacity-50 pointer-events-none" : ""}`}
                     onClick={handleClick}
+                    title={
+                      !isKycComplete
+                        ? "Complete KYC to access Product Catalog"
+                        : !hasWallet
+                        ? "Please activate your wallet to access Product Catalog"
+                        : "Upload new products"
+                    }
                   >
                     {item.icon}
                     {item.label}
