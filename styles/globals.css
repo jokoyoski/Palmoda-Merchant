@@ -6,6 +6,15 @@
   font-family: "Roboto Condensed", sans-serif;
 }
 
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+button[disabled] {
+  cursor: not-allowed;
+}
+
 /* styles/globals.css or wherever your global styles are */
 .swal-confirm-black {
   background-color: #000 !important;
