@@ -11,6 +11,7 @@ import {PayoutType} from "../../_lib/type"
 import {getTransactionById} from "../../_lib/transactions"
 import { getWallet } from '@/app/_lib/vendor';
 import { toast } from 'react-toastify';
+import BackButton from "@/app/_components/BackButton";
 
 
 const Skeleton = () => (
@@ -226,7 +227,10 @@ function page() {
   return (
     <section className="bg-gray-200  min-h-screen px-4 md:px-8 py-6 w-full">
       <div className='w-[500px] mx-auto bg-white rounded-[6px] px-4 py-3'>
-           <h1 className='text-sm text-black font-semibold'>Transaction Details – {transaction?.transaction_reference} </h1>
+           <div className="flex items-center gap-2">
+             <BackButton href="/payouts/history" label="Back to Transactions" />
+             <h1 className='text-sm text-black font-semibold'>Transaction Details – {transaction?.transaction_reference} </h1>
+           </div>
            <div className='flex flex-col justify-center text-center my-4'>
               <div className='flex items-center justify-center gap-2 mb-1'>
                 {transaction?.transaction_type === "credit" ? (

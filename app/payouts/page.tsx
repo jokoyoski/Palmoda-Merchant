@@ -9,6 +9,7 @@ import { getKycDetails, activateWallet, getWallet } from "../_lib/vendor";
 import { useAuth } from "../_lib/AuthContext";
 import { getTransactions, requestPayout } from "../_lib/transactions";
 import { TransactionType } from "../_lib/type";
+import BackButton from "../_components/BackButton";
 
 function page() {
   const { user, refreshUser } = useAuth();
@@ -191,13 +192,16 @@ function page() {
     <ProtectedRoute>
       <section className="bg-gray-100 min-h-screen px-4 md:px-8 py-6 w-full">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-black font-semibold text-lg">Withdraw Funds</h1>
-            <p className="text-xs text-gray-500">
-              Transfer your available balance to your registered bank account.
-            </p>
+          <div className="flex items-start gap-3">
+            <BackButton />
+            <div>
+              <h1 className="text-black font-semibold text-lg">Withdraw Funds</h1>
+              <p className="text-xs text-gray-500">
+                Transfer your available balance to your registered bank account.
+              </p>
+            </div>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
             {user?.is_wallet_activated ? (
               <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full">
                 Wallet Activated

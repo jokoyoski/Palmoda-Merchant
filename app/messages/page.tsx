@@ -5,6 +5,7 @@ import { useMessageCount, useMessageList, useReadMessage } from "../_lib/useMess
 import { MessageType } from "../_lib/type";
 import { Mail, MailOpen, Check } from "lucide-react";
 import { formatLocalDateTime } from "../_lib/datetime";
+import BackButton from "../_components/BackButton";
 
 function Page() {
   const { data, isLoading, isError, error } = useMessageList();
@@ -32,11 +33,14 @@ function Page() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-black font-bold text-xl mb-0.5">Messages</h1>
-              <p className="text-gray-500 text-sm">
-                {count > 0 ? `${count} unread message${count > 1 ? 's' : ''}` : 'All caught up!'}
-              </p>
+            <div className="flex items-start gap-3">
+              <BackButton />
+              <div>
+                <h1 className="text-black font-bold text-xl mb-0.5">Messages</h1>
+                <p className="text-gray-500 text-sm">
+                  {count > 0 ? `${count} unread message${count > 1 ? 's' : ''}` : 'All caught up!'}
+                </p>
+              </div>
             </div>
           </div>
 

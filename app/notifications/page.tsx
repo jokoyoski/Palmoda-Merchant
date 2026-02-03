@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import ProtectedRoute from "../_components/ProtectedRoute";
 import { useNotificationList, useNotificationCount, useReadNotification } from "../_lib/useNotifications";
 import LatestNotifications from "../_components/LatestNotifications";
+import BackButton from "../_components/BackButton";
 
 function Page() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,9 +36,14 @@ function Page() {
   return (
     <ProtectedRoute>
       <section className="bg-gray-100 min-h-screen px-4 md:px-8 py-6 w-full">
-        <h1 className="text-black font-semibold text-xl mb-4">
-          Notifications ({count})
-        </h1>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <BackButton />
+            <h1 className="text-black font-semibold text-xl">
+              Notifications ({count})
+            </h1>
+          </div>
+        </div>
 
         <LatestNotifications
           notifications={notifications}

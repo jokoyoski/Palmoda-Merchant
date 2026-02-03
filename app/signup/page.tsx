@@ -15,6 +15,8 @@ function Page() {
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [contactPersonName, setContactPersonName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -64,6 +66,8 @@ function Page() {
     if (
       businessName &&
       contactPersonName &&
+      firstName &&
+      lastName &&
       email &&
       phoneNumber &&
       password &&
@@ -76,6 +80,8 @@ function Page() {
   }, [
     businessName,
     contactPersonName,
+    firstName,
+    lastName,
     email,
     phoneNumber,
     password,
@@ -88,6 +94,8 @@ function Page() {
     if (
       !businessName ||
       !contactPersonName ||
+      !firstName ||
+      !lastName ||
       !email ||
       !phoneNumber ||
       !password ||
@@ -116,7 +124,9 @@ function Page() {
       email,
       phoneNumber,
       password,
-      confirmPassword
+      confirmPassword,
+      firstName,
+      lastName
     );
     setLoading(false);
 
@@ -178,6 +188,39 @@ function Page() {
                 placeholder="Full name"
                 value={contactPersonName}
                 onChange={(e) => setContactPersonName(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              />
+            </div>
+
+            {/* BVN Warning */}
+            <div className="bg-amber-50 border border-amber-300 rounded-md px-3 py-2">
+              <p className="text-amber-800 text-xs">
+                <span className="font-semibold">Important:</span> Your first name and last name must match exactly with your BVN (Bank Verification Number) details. This information will be used for wallet creation.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-1">
+                First Name *
+              </label>
+              <input
+                type="text"
+                placeholder="First name (as it appears on your BVN)"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-1">
+                Last Name *
+              </label>
+              <input
+                type="text"
+                placeholder="Last name (as it appears on your BVN)"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>

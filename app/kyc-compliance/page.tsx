@@ -14,6 +14,7 @@ import { useAuth } from "../_lib/AuthContext";
 import { useRouter } from "next/navigation";
 import { Bank } from "../_lib/type";
 import { COUNTRIES, COUNTRY_STATES } from "@/constants/countries";
+import BackButton from "../_components/BackButton";
 
 // Cloudinary config
 const cloudName = "jokoyoski";
@@ -439,11 +440,18 @@ function Page() {
     <ProtectedRoute>
       <section className="bg-gray-100 min-h-screen px-4  md:px-8 py-6 w-full">
         <div className="w-full md:w-[600px] lg:w-[750px] ">
-          <h1 className="text-black font-semibold text-xl">KYC Compliance</h1>
-          <p className="text-gray-500 text-[13px] my-2">
-            Complete the following requirements to verify your business and
-            start selling on PALMODA
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <BackButton />
+              <div>
+                <h1 className="text-black font-semibold text-xl">KYC Compliance</h1>
+                <p className="text-gray-500 text-[13px] my-2">
+                  Complete the following requirements to verify your business and
+                  start selling on PALMODA
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="border-2 border-gray-200 bg-white mt-5 p-4">
             <div className="flex justify-between mb-8 gap-2">
               <div>
@@ -483,7 +491,7 @@ function Page() {
               />
 
               <UploadBox
-                title="Bank Statement"
+                title="Utility Bill"
                 isUploading={imageUploading}
                 fileUrl={bankStatementUrl}
                 onUploadClick={() => bankInputRef.current?.click()}

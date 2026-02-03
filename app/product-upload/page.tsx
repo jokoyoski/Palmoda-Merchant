@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { CategoryQueryParams } from "@/types";
 import { useCategories } from "../_lib/categories";
-import { useSubCategories } from "../_lib/subcategories";
 import { useFetchGenders } from "../_lib/gender";
 import { useFetchSizes } from "../_lib/sizes";
 import { useFetchColors, addColor } from "../_lib/colors";
@@ -66,7 +65,7 @@ function page() {
   const [careInstructions, setCareInstructions] = useState("");
   const [materials, setMaterials] = useState("");
   const [price, setPrice] = useState("");
-  const [weight, setWeight] = useState("");
+  const [weight, setWeight] = useState<number>(0);
   const [comparePrice, setComparePrice] = useState("");
   const [inventory, setInventory] = useState<number>(0);
   const [images, setImages] = useState<string[]>([]);
@@ -103,6 +102,7 @@ const resetForm = () => {
   setCareInstructions("");
   setMaterials("");
   setPrice("");
+  setWeight(0);
   setComparePrice("");
   setInventory(0);
   setImages([]);
@@ -184,7 +184,7 @@ const resetForm = () => {
         setComparePrice(draftData.comparePrice || "");
         setInventory(draftData.inventory || 0);
         setImages(draftData.images || []);
-        setWeight(draftData.weight)
+        setWeight(typeof draftData.weight === "number" ? draftData.weight : Number(draftData.weight) || 0);
         setColors(draftData.colors || []);
         setSizes(draftData.sizes || []);
         setSelectedCategory(draftData.selectedCategory || "");
@@ -199,27 +199,6 @@ const resetForm = () => {
       console.error(err);
     }
   };
-
-  // Category and subcategory data
-  const categories: Record<string, string[]> = {
-    Clothing: ["T-Shirts", "Jeans", "Dresses", "Jackets", "Sweaters"],
-    Bags: ["Handbags", "ToteBags", "Backpacks", "Clutches"],
-    Footwear: ["Sneakers", "Sandals", "Boots", "Heels"],
-    Beauty: ["Makeup", "Skincare", "Fragrance"],
-  };
-
-  // Map gender labels to backend IDs
-  const genderOptions = [
-    { label: "Select Gender", value: "" }, // default placeholder
-    { label: "Male", value: "691b26cc3ef7db6e39a860d2" },
-    { label: "Female", value: "691b26bf3ef7db6e39a860d1" },
-    // Optionally, you can add Unisex if your backend supports it
-  ];
-
-  // Get the subcategories based on selected category
-  const subCategories = selectedCategory ? categories[selectedCategory] : [];
-
-  const availableColors: string[] = ["Black", "White", "Blue", "Red", "Green"];
 
   // ✅ fix #1: add proper event type
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,12 +243,10 @@ const resetForm = () => {
     error,
   } = useCategories(queryParams);
 
-  const {
-    data: subCategoriesArray = [],
-    isLoading: subCategoryLoader,
-    isError: subCategoryIsError,
-    error: subCategoryError,
-  } = useSubCategories();
+  const selectedCategoryObj = categoriesArray?.find(
+    (cat: any) => cat?._id === selectedCategory
+  );
+  const filteredSubCategories = selectedCategoryObj?.subcategories ?? [];
 
   const {
     data: gendersArray = [],
@@ -590,11 +567,11 @@ const resetForm = () => {
                     ? "Select gender first"
                     : !selectedCategory
                       ? "Select category first"
-                      : subCategoryLoader
+                      : isLoading
                         ? "Loading..."
                         : "-- Select Subcategory --"}
                 </option>
-                {subCategoriesArray?.map((sub) => (
+                {filteredSubCategories?.map((sub: any) => (
                   <option key={sub._id} value={sub._id}>
                     {sub.name}
                   </option>
@@ -772,12 +749,12 @@ const resetForm = () => {
                   Product Weight (KG)
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   inputMode="decimal"
-                  value={weight}
+                  value={weight || ""}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9.]/g, '');
-                    setWeight(value);
+                    const next = e.target.value === "" ? 0 : Number(e.target.value);
+                    setWeight(Number.isFinite(next) ? next : 0);
                   }}
                   className="text-gray-500 p-1 text-sm border border-gray-300"
                 />

@@ -43,7 +43,11 @@ const itemsPerPage = 4;
   const filteredProducts =
     filter === "All"
       ? products
-      : products.filter((p) => formatStatus(p.status) === filter);
+      : products.filter((p) => {
+          const status = formatStatus(p.status);
+          if (filter === "LIVE") return status === "LIVE" || status === "APPROVED";
+          return status === filter;
+        });
 
   const statuses = ["All", "LIVE", "PENDING", "APPROVED", "REJECTED"];
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FaShoppingBag } from "react-icons/fa";
 import { useOrdersList } from "../_lib/useOrders";
 import ProtectedRoute from "../_components/ProtectedRoute";
+import BackButton from "../_components/BackButton";
 
 function Page() {
   // FILTER STATES
@@ -96,11 +97,14 @@ function Page() {
     <ProtectedRoute>
       <section className="bg-white min-h-screen px-4 md:px-8 py-6 w-full">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-black font-semibold text-lg">Orders</h1>
-            <p className="text-xs text-gray-500">
-              View all your orders, order timeline, and order statuses.
-            </p>
+          <div className="flex items-start gap-3">
+            <BackButton />
+            <div>
+              <h1 className="text-black font-semibold text-lg">Orders</h1>
+              <p className="text-xs text-gray-500">
+                View all your orders, order timeline, and order statuses.
+              </p>
+            </div>
           </div>
           <div className="flex gap-2">
             {/* <Link

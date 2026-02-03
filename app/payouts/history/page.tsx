@@ -8,6 +8,7 @@ import { getTransactions } from "@/app/_lib/transactions";
 import { toast } from "react-toastify";
 import ProtectedRoute from "@/app/_components/ProtectedRoute";
 import { getWallet } from "@/app/_lib/vendor";
+import BackButton from "@/app/_components/BackButton";
 
 function Page() {
   // FILTER STATES
@@ -128,13 +129,16 @@ function Page() {
     <ProtectedRoute>
       <section className="bg-white min-h-screen px-4 md:px-8 py-6 w-full">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-black font-semibold text-lg">
-              Transactions
-            </h1>
-            <p className="text-xs text-gray-500">
-              View all your transactions, including credits and debits.
-            </p>
+          <div className="flex items-start gap-3">
+            <BackButton />
+            <div>
+              <h1 className="text-black font-semibold text-lg">
+                Transactions
+              </h1>
+              <p className="text-xs text-gray-500">
+                View all your transactions, including credits and debits.
+              </p>
+            </div>
           </div>
           <div className="flex gap-2">
             <Link

@@ -2,6 +2,8 @@ export interface Vendor {
   _id: string;
   business_name: string;
   contact_person_name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone_number: string;
   code: string;

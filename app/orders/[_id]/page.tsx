@@ -10,6 +10,7 @@ import { useFetchGenders } from "@/app/_lib/gender";
 import { useSubCategories } from "@/apis/wallets";
 import { useCategories } from "@/app/_lib/categories";
 import { CategoryQueryParams } from "@/types";
+import BackButton from "@/app/_components/BackButton";
 
 // Helper function for styling the status badge
 const getStatusColor = (status: string) => {
@@ -102,7 +103,10 @@ export default function OrderDetailsPage() {
   return (
     <ProtectedRoute>
       <section className="min-h-screen bg-gray-50 p-5 md:p-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Order: #{orderInfo.transaction_reference}</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <BackButton href="/orders" label="Back to Orders" />
+          <h1 className="text-3xl font-bold text-gray-900">Order: #{orderInfo.transaction_reference}</h1>
+        </div>
         <div className="flex items-center gap-3 mb-8">
           <span 
             className={`px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(orderInfo.status)}`}

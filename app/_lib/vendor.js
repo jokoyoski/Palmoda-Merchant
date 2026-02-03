@@ -7,7 +7,9 @@ export const vendorSignUp = async (
   email,
   phone_number,
   password,
-  confirm_password
+  confirm_password,
+  first_name,
+  last_name
 ) => {
   try {
     const res = await axios.post(`${backendUrl}/user/register-vendor`, {
@@ -17,6 +19,8 @@ export const vendorSignUp = async (
       phone_number,
       password,
       confirm_password,
+      first_name,
+      last_name,
     });
     return res.data;
   } catch (error) {
