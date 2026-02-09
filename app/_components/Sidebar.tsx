@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   FiFileText,
   FiTag,
   FiGrid,
   FiShoppingCart,
   FiDollarSign,
+  FiCreditCard,
   FiSettings,
   FiLogOut,
 } from "react-icons/fi";
@@ -26,12 +28,16 @@ import { toast } from "react-toastify";
 import { useNotificationCount } from "../_lib/useNotifications";
 import { useMessageCount } from "../_lib/useMessages";
 import Swal from "sweetalert2"; // ✅ Import SweetAlert2
+import { useRouter } from "next/navigation";
 
 function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { logout, user, loading: authLoading } = useAuth();
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<any>(null);
+  const [subscriptionStatusLoading, setSubscriptionStatusLoading] = useState(false);
   const { data: countData } = useNotificationCount();
   const { data: msgcountData } = useMessageCount();
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -53,6 +59,58 @@ function Sidebar() {
 
     setToken(storedToken);
   }, []);
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        setSubscriptionStatusLoading(true);
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const storedToken = token || localStorage.getItem("token");
+        if (!backendUrl || !storedToken) return;
+
+        const res = await axios.get(`${backendUrl}/vendor/subscription/status`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        });
+
+        if (res?.data?.success) {
+          setSubscriptionStatus(res.data.data);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setSubscriptionStatusLoading(false);
+      }
+    };
+
+    run();
+  }, [token]);
+
+  const isKycComplete = user?.is_bank_information_verified && user?.is_business_verified && user?.is_identity_verified;
+  const hasActiveSubscription = subscriptionStatus?.is_subscribed === true;
+  const subscriptionKnown = !subscriptionStatusLoading;
+  const canUseSubscriptionFeatures = subscriptionKnown && hasActiveSubscription;
+
+  const showSubscribePopup = async (featureLabel: string) => {
+    const result = await Swal.fire({
+      title: "Subscription required",
+      text: `You need an active subscription to access ${featureLabel}.`,
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#000000",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Subscribe now",
+      cancelButtonText: "Not now",
+      customClass: {
+        container: "!z-[100000]",
+      },
+    });
+
+    if (result.isConfirmed) {
+      router.push("/subscription");
+    }
+  };
 
   // ✅ Add logout confirmation handler
   const handleLogout = async () => {
@@ -125,28 +183,46 @@ function Sidebar() {
         </Link>
 
         {(() => {
-          const isKycComplete = user?.is_bank_information_verified && user?.is_business_verified && user?.is_identity_verified;
           const hasWallet = user?.is_wallet_activated;
-          const canAccess = isKycComplete && hasWallet;
+          const canAccess = isKycComplete && hasWallet && canUseSubscriptionFeatures;
+          const canAttemptSubscribePrompt = isKycComplete && hasWallet && subscriptionKnown && !hasActiveSubscription;
 
           return (
             <Link
               href="/product-upload"
               onClick={(e) => {
-                if (!canAccess) {
+                if (!isKycComplete || !hasWallet) {
                   e.preventDefault();
+                  return;
+                }
+
+                if (!subscriptionKnown) {
+                  e.preventDefault();
+                  return;
+                }
+
+                if (canAttemptSubscribePrompt) {
+                  e.preventDefault();
+                  void showSubscribePopup("Product Catalog");
+                  return;
                 }
               }}
               title={
                 !isKycComplete
                   ? "Complete KYC to access Product Catalog"
+                  : !subscriptionKnown
+                  ? "Checking subscription status..."
+                  : !hasActiveSubscription
+                  ? "Subscribe to access Product Catalog"
                   : !hasWallet
                   ? "Please activate your wallet to access Product Catalog"
                   : "Upload new products"
               }
               className={`flex hover:bg-gray-50 ${
-                !authLoading && !canAccess
+                !authLoading && (!isKycComplete || !hasWallet || !subscriptionKnown)
                   ? "cursor-not-allowed opacity-50 pointer-events-none"
+                  : !authLoading && !hasActiveSubscription
+                  ? "cursor-not-allowed opacity-50"
                   : ""
               } font-semibold items-center ${pathname === "/product-upload" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
             >
@@ -173,17 +249,36 @@ function Sidebar() {
         <Link
           href="/orders"
           title={
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? "View Orders"
-              : "Complete KYC to access Orders"
+            !isKycComplete
+              ? "Complete KYC to access Orders"
+              : !subscriptionKnown
+              ? "Checking subscription status..."
+              : !hasActiveSubscription
+              ? "Subscribe to access Orders"
+              : "View Orders"
           }
+          onClick={(e) => {
+            if (!isKycComplete) {
+              e.preventDefault();
+              return;
+            }
+
+            if (!subscriptionKnown) {
+              e.preventDefault();
+              return;
+            }
+
+            if (!hasActiveSubscription) {
+              e.preventDefault();
+              void showSubscribePopup("Orders");
+              return;
+            }
+          }}
           className={`flex hover:bg-gray-50 ${
-            !authLoading && (!user?.is_bank_information_verified ||
-            !user?.is_business_verified ||
-            !user?.is_identity_verified)
+            !authLoading && (!isKycComplete || !subscriptionKnown)
               ? "pointer-events-none cursor-not-allowed opacity-30"
+              : !authLoading && !hasActiveSubscription
+              ? "cursor-not-allowed opacity-30"
               : ""
           } font-semibold items-center ${pathname === "/orders" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
@@ -229,6 +324,31 @@ function Sidebar() {
           } font-semibold items-center ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FiDollarSign /> Payouts
+        </Link>
+
+        <Link
+          href="/subscription"
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "Manage subscription"
+              : "Complete KYC to access Subscription"
+          }
+          onClick={(e) => {
+            if (!user?.is_bank_information_verified || !user?.is_business_verified || !user?.is_identity_verified) {
+              e.preventDefault();
+            }
+          }}
+          className={`flex hover:bg-gray-50 ${
+            !authLoading && (!user?.is_bank_information_verified ||
+            !user?.is_business_verified ||
+            !user?.is_identity_verified)
+              ? "pointer-events-none cursor-not-allowed opacity-30"
+              : ""
+          } font-semibold items-center ${pathname === "/subscription" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+        >
+          <FiCreditCard /> Subscription
         </Link>
 
         <Link

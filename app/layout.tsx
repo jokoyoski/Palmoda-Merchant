@@ -33,7 +33,12 @@ export default function RootLayout({
        <Providers>
           <AppShell>{children}</AppShell>
        </Providers>
-        <ToastContainer position="top-right" autoClose={3000} />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          newestOnTop
+          style={{ zIndex: 999999 }}
+        />
       </body>
     </html>
   );
