@@ -3,17 +3,19 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const vendorSignUp = async (
   business_name,
-  contact_person_name,
+  first_name,
+  last_name,
   email,
   phone_number,
   password,
-  confirm_password,
-  first_name,
-  last_name
+  confirm_password
 ) => {
   try {
+    const contact_person_name = `${first_name} ${last_name}`.trim();
     const res = await axios.post(`${backendUrl}/user/register-vendor`, {
       business_name,
+      first_name,
+      last_name,
       contact_person_name,
       email,
       phone_number,
@@ -349,7 +351,7 @@ export const getOrderDetails = async (id) => {
   }
 };
 
-export const activateWallet = async (bvn) => {
+export const activateWallet = async () => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -361,7 +363,7 @@ export const activateWallet = async (bvn) => {
     }
     const res = await axios.post(
       `${backendUrl}/vendor/activate-wallet`,
-      { bvn },
+      {},
       {
         headers: {
           Authorization: `Bearer ${token}`,

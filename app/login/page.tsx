@@ -49,7 +49,7 @@ function Page() {
               type="email"
               onChange={(e) => setEmail(e.target.value)}
               value={email}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="Enter your email"
             />
           </div>
@@ -63,7 +63,7 @@ function Page() {
                 type={showPassword ? "text" : "password"}
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
                 placeholder="Enter your password"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-0">
@@ -79,8 +79,8 @@ function Page() {
           <button
             type="submit"
             disabled={loading} // disable button when loading
-            className={`w-full py-2 rounded-lg text-lg font-medium transition 
-              ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-black text-white hover:bg-gray-900"}`}
+            className={`w-full py-2 rounded-lg text-lg font-medium transition
+              ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-black text-white hover:bg-gray-900 cursor-pointer"}`}
           >
             {loading ? "Logging in..." : "Log In"}
           </button>

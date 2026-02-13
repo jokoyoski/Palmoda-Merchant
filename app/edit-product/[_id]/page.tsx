@@ -13,6 +13,7 @@ import { useFetchSizes } from "../../_lib/sizes";
 import { useFetchColors, addColor } from "../../_lib/colors";
 import { Button } from "@heroui/button";
 import { useParams, useRouter } from "next/navigation";
+import BackButton from "@/app/_components/BackButton";
 
 interface ProductType {
   _id: string;
@@ -324,13 +325,16 @@ function EditProductPage() {
     <section className="bg-gray-100 min-h-screen px-4 md:px-8 py-6 w-full">
       <div className="w-full md:w-[600px] lg:w-[750px]">
         <div className="flex justify-between">
-          <div>
+          <div className="flex items-start gap-3">
+            <BackButton />
+            <div>
             <h1 className="text-black font-semibold text-xl">
               Product Catalog Update
             </h1>
             <p className="text-gray-500 text-[13px] mb-2">
               Update your products to your inventory with detailed information
             </p>
+            </div>
           </div>
           <Link href="/">
             <button className="bg-black text-white px-3 py-2 text-xs rounded hover:bg-gray-800 transition">

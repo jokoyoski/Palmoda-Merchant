@@ -6,6 +6,7 @@ import { Product } from "../../_lib/type"
 import { fetchProducts } from '@/app/_lib/product';
 import { useParams } from 'next/navigation';
 import ProductComponent from '../Product';
+import BackButton from '@/app/_components/BackButton';
 
 function page() {
     const { user, logout } = useAuth();
@@ -65,9 +66,9 @@ function page() {
     <ProtectedRoute>
         <section className='bg-gray-100 min-h-screen px-4  md:px-8 py-6 w-full'>
         <div className='flex items-center justify-between'>
-                 <div>
+                 <div className='flex items-start gap-3'>
+                  <BackButton />
                   <h1 className='text-black font-bold text-xl'>Product Review</h1>
-                 
                  </div>
                  <div className='flex gap-3 items-center'>
                 {/* <button

@@ -65,7 +65,6 @@ function Page() {
   useEffect(() => {
     if (
       businessName &&
-      contactPersonName &&
       firstName &&
       lastName &&
       email &&
@@ -79,7 +78,6 @@ function Page() {
     }
   }, [
     businessName,
-    contactPersonName,
     firstName,
     lastName,
     email,
@@ -93,7 +91,6 @@ function Page() {
 
     if (
       !businessName ||
-      !contactPersonName ||
       !firstName ||
       !lastName ||
       !email ||
@@ -120,13 +117,12 @@ function Page() {
     setLoading(true);
     const res = await vendorSignUp(
       businessName,
-      contactPersonName,
+      firstName,
+      lastName,
       email,
       phoneNumber,
       password,
-      confirmPassword,
-      firstName,
-      lastName
+      confirmPassword
     );
     setLoading(false);
 
@@ -175,54 +171,36 @@ function Page() {
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder="Your business name"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                Contact Person Name *
-              </label>
-              <input
-                type="text"
-                placeholder="Full name"
-                value={contactPersonName}
-                onChange={(e) => setContactPersonName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-              />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold mb-1">
+                  First Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="First name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
+                />
+              </div>
 
-            {/* BVN Warning */}
-            <div className="bg-amber-50 border border-amber-300 rounded-md px-3 py-2">
-              <p className="text-amber-800 text-xs">
-                <span className="font-semibold">Important:</span> Your first name and last name must match exactly with your BVN (Bank Verification Number) details. This information will be used for wallet creation.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                First Name *
-              </label>
-              <input
-                type="text"
-                placeholder="First name (as it appears on your BVN)"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                Last Name *
-              </label>
-              <input
-                type="text"
-                placeholder="Last name (as it appears on your BVN)"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-              />
+              <div>
+                <label className="block text-sm font-semibold mb-1">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
+                />
+              </div>
             </div>
 
             <div>
@@ -234,7 +212,7 @@ function Page() {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
@@ -247,7 +225,7 @@ function Page() {
                 defaultCountry="NG"
                 value={phoneNumber}
                 onChange={(value) => setPhoneNumber(value || "")}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black phone-input-custom"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black phone-input-custom"
               />
             </div>
 
@@ -261,7 +239,7 @@ function Page() {
                   placeholder="Minimum 8 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-0">
                   <Button
@@ -299,7 +277,7 @@ function Page() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter password"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-0">
                   <Button
@@ -333,7 +311,7 @@ function Page() {
               className={`w-full text-[15px] font-medium py-2 rounded-md transition ${
                 loading || holdBtn
                   ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "bg-black hover:bg-gray-800 text-white"
+                  : "bg-black hover:bg-gray-800 text-white cursor-pointer"
               }`}
             >
               {loading ? "Creating Account..." : "CREATE ACCOUNT"}
@@ -382,7 +360,8 @@ function Page() {
               setConfirmPassword("");
               setEmail("");
               setBusinessName("");
-              setContactPersonName("");
+              setFirstName("");
+              setLastName("");
               setPhoneNumber("");
             }}
             className="text-right mt-4 text-xs"

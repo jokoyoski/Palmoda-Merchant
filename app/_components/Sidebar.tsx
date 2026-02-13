@@ -182,6 +182,27 @@ function Sidebar() {
           <FiTag /> Brand Profile
         </Link>
 
+        <Link
+          href="/subscriptions"
+          title={
+            user?.is_bank_information_verified &&
+            user?.is_business_verified &&
+            user?.is_identity_verified
+              ? "View Subscriptions"
+              : "Complete KYC to access Subscriptions"
+          }
+          className={`flex hover:bg-gray-50 ${
+            !authLoading &&
+            (!user?.is_bank_information_verified ||
+              !user?.is_business_verified ||
+              !user?.is_identity_verified)
+              ? "pointer-events-none cursor-not-allowed opacity-30"
+              : ""
+          } font-semibold items-center ${pathname === "/subscriptions" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+        >
+          <FiCreditCard /> Subscriptions
+        </Link>
+
         {(() => {
           const hasWallet = user?.is_wallet_activated;
           const canAccess = isKycComplete && hasWallet && canUseSubscriptionFeatures;

@@ -12,15 +12,12 @@ import PayazaCallbackResponse from "payaza-web-sdk/lib/PayazaCallbackData";
 import Swal from "sweetalert2";
 
 type PlanId = "monthly" | "annual";
-type PaymentMethodId = "card" | "bank";
 
 type SubscriptionAttempt = {
   subscriptionId: string;
   subscriptionReference: string;
   planId: PlanId;
   amount: number;
-  paymentMethod: PaymentMethodId;
-  autoPay: boolean;
   createdAt: number;
 };
 
@@ -33,7 +30,6 @@ export default function Page() {
   const searchParams = useSearchParams();
   const changePlan = searchParams?.get("changePlan") === "1";
   const preselectedPlan = searchParams?.get("plan") as PlanId | null;
-  const preselectedMethod = searchParams?.get("method") as PaymentMethodId | null;
   const { user } = useAuth();
 
   const [checkingStatus, setCheckingStatus] = useState(!changePlan);
@@ -49,13 +45,13 @@ export default function Page() {
       [
         {
           id: "monthly" as const,
-          price: 10000,
+          price: 100,
           cadence: "Billed monthly",
           highlight: false,
         },
         {
           id: "annual" as const,
-          price: 110000,
+          price: 200,
           cadence: "Billed annually",
           highlight: true,
           badge: "Best Value",
@@ -77,20 +73,12 @@ export default function Page() {
   );
 
   const [selectedPlan, setSelectedPlan] = useState<PlanId>("monthly");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>("card");
-  const [autoPay, setAutoPay] = useState(false);
 
   React.useEffect(() => {
     if (preselectedPlan === "monthly" || preselectedPlan === "annual") {
       setSelectedPlan(preselectedPlan);
     }
   }, [preselectedPlan]);
-
-  React.useEffect(() => {
-    if (preselectedMethod === "card" || preselectedMethod === "bank") {
-      setPaymentMethod(preselectedMethod);
-    }
-  }, [preselectedMethod]);
 
   React.useEffect(() => {
     if (!changePlan) return;
@@ -248,11 +236,7 @@ export default function Page() {
         },
       };
 
-      if (paymentMethod === "card") {
-        (checkoutConfig as unknown as Record<string, unknown>).channel = ["card"];
-      } else if (paymentMethod === "bank") {
-        (checkoutConfig as unknown as Record<string, unknown>).channel = ["bank_transfer"];
-      }
+      (checkoutConfig as unknown as Record<string, unknown>).channel = ["card"];
 
       const payazaCheckout = new PayazaCheckout(checkoutConfig);
 
@@ -374,7 +358,7 @@ export default function Page() {
       const payload = {
         subscription_type: selectedPlan === "annual" ? "annually" : selectedPlan,
         amount: plan.price,
-        auto_renew: autoPay,
+        auto_renew: true,
       };
 
       const res = await axios.post(`${backendUrl}/vendor/subscribe`, payload, {
@@ -427,8 +411,6 @@ export default function Page() {
           subscriptionReference,
           planId: selectedPlan,
           amount: plan.price,
-          paymentMethod,
-          autoPay,
           createdAt: Date.now(),
         };
         localStorage.setItem("merchant_last_subscription_attempt", JSON.stringify(attempt));
@@ -529,85 +511,6 @@ export default function Page() {
                 </button>
               );
             })}
-          </div>
-
-          <div className="mb-4">
-            <p className="text-gray-500 text-xs font-semibold tracking-wide">
-              PAYMENT METHOD
-            </p>
-          </div>
-
-          <div className="space-y-4 mb-8">
-            <button
-              type="button"
-              onClick={() => setPaymentMethod("card")}
-              className={`w-full flex items-center justify-between gap-3 rounded-xl border px-5 py-4 text-left ${
-                paymentMethod === "card" ? "border-gray-900" : "border-gray-200"
-              }`}
-              aria-label="Select card payment"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-gray-900">💳</span>
-                <p className="text-black font-semibold">Card Payment</p>
-              </div>
-              <span
-                className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                  paymentMethod === "card" ? "border-gray-900" : "border-gray-300"
-                }`}
-              >
-                {paymentMethod === "card" && (
-                  <span className="w-2.5 h-2.5 bg-gray-900 rounded-full" />
-                )}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              disabled
-              className={`w-full flex items-center justify-between gap-3 rounded-xl border px-5 py-4 text-left ${
-                "border-gray-200 opacity-50 cursor-not-allowed"
-              }`}
-              aria-label="Select bank transfer"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-gray-900">🏦</span>
-                <p className="text-black font-semibold">Bank Transfer</p>
-              </div>
-              <span
-                className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                  paymentMethod === "bank" ? "border-gray-900" : "border-gray-300"
-                }`}
-              >
-                {paymentMethod === "bank" && (
-                  <span className="w-2.5 h-2.5 bg-gray-900 rounded-full" />
-                )}
-              </span>
-            </button>
-
-            <div className="w-full rounded-xl bg-gray-50 px-5 py-4 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-black font-semibold">Enable Automatic Payments</p>
-                <p className="text-gray-500 text-sm">
-                  Your subscription will renew automatically
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setAutoPay((v) => !v)}
-                className={`relative w-12 h-7 rounded-full transition-colors overflow-hidden p-0.5 ${
-                  autoPay ? "bg-gray-900" : "bg-gray-300"
-                }`}
-                aria-label="Toggle automatic payments"
-                aria-pressed={autoPay}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                    autoPay ? "translate-x-[20px]" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
           </div>
 
           <div className="space-y-4">

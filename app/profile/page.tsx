@@ -3,6 +3,7 @@ import { useAuth } from "../_lib/AuthContext";
 import ProtectedRoute from "../_components/ProtectedRoute";
 import { CiUser, CiMail, CiPhone, CiShop } from "react-icons/ci";
 import { FiCheck, FiX } from "react-icons/fi";
+import BackButton from "../_components/BackButton";
 
 function ProfilePage() {
   const { user } = useAuth();
@@ -30,7 +31,10 @@ function ProfilePage() {
     <ProtectedRoute>
       <section className="bg-gray-100 min-h-screen px-4 md:px-8 py-6 w-full">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-black font-semibold text-2xl mb-6">Profile</h1>
+          <div className="flex items-start gap-3 mb-6">
+            <BackButton />
+            <h1 className="text-black font-semibold text-2xl">Profile</h1>
+          </div>
 
           {/* Profile Card */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">

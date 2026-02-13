@@ -15,6 +15,8 @@ import { Button } from "@heroui/button";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
 import WalletActivationPrompt from "../_components/WalletActivationPrompt";
+import BackButton from "../_components/BackButton";
+import { getVendorSubscriptions } from "../_lib/subscription";
 
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
@@ -92,7 +94,6 @@ function page() {
     }
   }, [user]);
 
-  console.log(user);
 
   // Add this function after your state declarations
 const resetForm = () => {
@@ -157,7 +158,6 @@ const resetForm = () => {
         weight,
         timestamp: new Date().toISOString(),
       };
-
       localStorage.setItem("product_draft", JSON.stringify(draftData));
       setHasDraft(true);
       toast.success("Draft saved successfully!");
@@ -330,6 +330,10 @@ const resetForm = () => {
       toast.error("Product Name is required");
       return;
     }
+    if (!materials) {
+      toast.error("Materials/Fabric is required");
+      return;
+    }
     if (!selectedCategory) {
       toast.error("Category is required");
       return;
@@ -387,6 +391,8 @@ const resetForm = () => {
       return;
     }
 
+
+
     setLoading(true);
 
     try {
@@ -430,17 +436,34 @@ const resetForm = () => {
     }
   };
 
+  const canPublish =
+    !!productName &&
+    !!materials &&
+    !!selectedCategory &&
+    !!selectedSubCategory &&
+    !!gender &&
+    !!selectedCountry &&
+    !!description &&
+    inventory > 0 &&
+    !!price &&
+    images.length > 0 &&
+    colors.length > 0 &&
+    sizes.length > 0;
+
   return (
     <section className="bg-gray-100 min-h-screen px-4  md:px-8 py-6 w-full">
       <div className="w-full md:w-[600px] lg:w-[750px] ">
         <div className="flex justify-between">
-          <div>
+          <div className="flex items-start gap-3">
+            <BackButton />
+            <div>
             <h1 className="text-black font-semibold text-xl">
               Product Catalog Upload
             </h1>
             <p className="text-gray-500 text-[13px] mb-2">
               Add new products to your inventory with detailed information
             </p>
+            </div>
           </div>
           <Link href="/">
             <button className="bg-black  text-white p-[5px] w-fit text-xs">
@@ -465,7 +488,7 @@ const resetForm = () => {
                 onChange={(e) => setProductName(e.target.value)}
                 placeholder="Enter  Product Name"
                 className="
-             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+             text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
               />
             </div>
             <div className="flex flex-col gap-1.5 w-full">
@@ -480,7 +503,7 @@ const resetForm = () => {
                 id=""
                 placeholder="Enter Unique Product Code"
                 className="
-             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+             text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
               />
             </div>
           </div>
@@ -497,7 +520,7 @@ const resetForm = () => {
               id="gender"
               value={gender}
               onChange={(e) => setGender(e.target.value)}
-              className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
+              className="border border-gray-300 text-sm text-black p-2 focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="">
                 {genderLoading ? "Loading..." : "-- Select Gender --"}
@@ -526,7 +549,7 @@ const resetForm = () => {
                   setSelectedSubCategory(""); // Reset subcategory on category change
                 }}
                 disabled={!gender}
-                className={`border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black ${
+                className={`border border-gray-300 text-sm text-black p-2 focus:outline-none focus:ring-2 focus:ring-black ${
                   !gender ? "bg-gray-100 cursor-not-allowed" : ""
                 }`}
               >
@@ -558,7 +581,7 @@ const resetForm = () => {
                 value={selectedSubCategory}
                 onChange={(e) => setSelectedSubCategory(e.target.value)}
                 disabled={!gender || !selectedCategory}
-                className={`border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black ${
+                className={`border border-gray-300 text-sm text-black p-2 focus:outline-none focus:ring-2 focus:ring-black ${
                   !gender || !selectedCategory ? "bg-gray-100 cursor-not-allowed" : ""
                 }`}
               >
@@ -590,7 +613,7 @@ const resetForm = () => {
                 id="country"
                 value={selectedCountry}
                 onChange={(e) => setSelectedCountry(e.target.value)}
-                className="border border-gray-300 text-sm text-gray-600 p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                className="border border-gray-300 text-sm text-black p-2 focus:outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="">
                   {countriesLoading ? "Loading..." : "-- Select Country --"}
@@ -638,7 +661,7 @@ const resetForm = () => {
                 onChange={(e) => setMaterials(e.target.value)}
                 placeholder="Cotton, Polyster, Silk etc."
                 className="
-             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+             text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
               />
             </div>
             <div className="flex flex-col gap-1.5 w-full">
@@ -656,7 +679,7 @@ const resetForm = () => {
                 onChange={(e) => setCareInstructions(e.target.value)}
                 placeholder="Machine wash cold, Dry clean only"
                 className="
-             text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+             text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
               />
             </div>
           </div>
@@ -682,7 +705,7 @@ const resetForm = () => {
                     setPrice(value);
                   }}
                   onBlur={() => setPrice(formatMoney(price))}
-                  className="text-gray-500 p-1 text-sm border border-gray-300"
+                  className="text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300"
                 />
               </div>
               <div className="flex flex-col gap-1.5 w-full">
@@ -701,7 +724,7 @@ const resetForm = () => {
                     setComparePrice(value);
                   }}
                   onBlur={() => setComparePrice(formatMoney(comparePrice))}
-                  className="text-gray-500 p-1 text-sm border border-gray-300"
+                  className="text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300"
                 />
               </div>
               <div className="flex flex-col gap-1.5 w-full">
@@ -735,7 +758,7 @@ const resetForm = () => {
                     }
                   }}
                   placeholder="0"
-                  className="text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
+                  className="text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0"
                 />
               </div>
 
@@ -756,7 +779,7 @@ const resetForm = () => {
                     const next = e.target.value === "" ? 0 : Number(e.target.value);
                     setWeight(Number.isFinite(next) ? next : 0);
                   }}
-                  className="text-gray-500 p-1 text-sm border border-gray-300"
+                  className="text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300"
                 />
               </div>
             </div>
@@ -892,15 +915,24 @@ const resetForm = () => {
               >
                 Preview Product
               </button>
-              <button
-                onClick={handleCreateProduct}
-                disabled={loading}
-                className={`text-white p-[5px] w-[120px] text-sm transition-opacity ${
-                  loading ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800"
-                }`}
-              >
-                {loading ? "Publishing..." : "Publish Product"}
-              </button>
+              <div className="flex flex-col items-end">
+                <button
+                  onClick={handleCreateProduct}
+                  disabled={loading || !canPublish}
+                  className={`text-white p-[5px] w-[120px] text-sm transition-opacity ${
+                    loading || !canPublish
+                      ? "bg-gray-400 cursor-not-allowed opacity-50"
+                      : "bg-black hover:bg-gray-800"
+                  }`}
+                >
+                  {loading ? "Publishing..." : "Publish Product"}
+                </button>
+                {!canPublish && (
+                  <p className="text-[10px] text-gray-500 mt-1 text-right w-[200px]">
+                    Fill all required fields to enable publishing.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -915,7 +947,7 @@ const resetForm = () => {
               placeholder="Color Name"
               value={newColorName}
               onChange={(e) => setNewColorName(e.target.value)}
-              className="border border-gray-300 w-full p-2 mb-2  rounded-sm"
+              className="border border-gray-300 w-full p-2 mb-2 rounded-sm text-black placeholder:text-gray-500"
             />
 
             <input
@@ -923,7 +955,7 @@ const resetForm = () => {
               placeholder="Color Hex Code (#000000)"
               value={newColorCode}
               onChange={(e) => setNewColorCode(e.target.value)}
-              className="border border-gray-300 w-full p-2 mb-4 rounded-sm"
+              className="border border-gray-300 w-full p-2 mb-4 rounded-sm text-black placeholder:text-gray-500"
             />
 
             <div className="flex justify-end gap-2">

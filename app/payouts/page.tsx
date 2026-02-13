@@ -29,8 +29,6 @@ function page() {
 
   const [amountError, setAmountError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showBvnModal, setShowBvnModal] = useState(false);
-  const [bvn, setBvn] = useState("");
   const [activating, setActivating] = useState(false);
   const [amount, setAmount] = useState(0);
   const [fee] = useState(0); // fixed fee for now
@@ -101,15 +99,10 @@ function page() {
   }, []);
 
   const handleActivate = async () => {
-    if (bvn.length !== 11) {
-      toast.error("BVN must be 11 digits.");
-      return;
-    }
-
     try {
       setActivating(true);
 
-      const res = await activateWallet(bvn);
+      const res = await activateWallet();
 
       if (!res.success) {
         toast.error(res.message || "Failed to activate wallet");
@@ -130,7 +123,6 @@ function page() {
       await refreshUser();
 
       toast.success("Wallet activated successfully");
-      setShowBvnModal(false); // Close modal on success
     } catch (error: any) {
       toast.error(error.message || "Failed to activate wallet");
     } finally {
@@ -208,10 +200,11 @@ function page() {
               </span>
             ) : (
               <button
-                onClick={() => setShowBvnModal(true)}
+                onClick={handleActivate}
+                disabled={activating}
                 className="bg-purple-600 text-white text-xs px-3 py-2 rounded-md"
               >
-                Activate Wallet (Add BVN)
+                {activating ? "Activating..." : "Activate Wallet"}
               </button>
             )}
           </div>
@@ -539,49 +532,6 @@ function page() {
           </div>
         </div>
 
-        {/* Modal */}
-        {showBvnModal && (
-          <div className="fixed inset-0 bg-white/20 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white rounded-md p-6 w-[90%] max-w-sm shadow-lg">
-              <h1 className="text-black font-semibold text-lg mb-2 text-center">
-                Activate Wallet
-              </h1>
-              <p className="text-gray-500 text-xs text-center mb-4">
-                Enter your BVN to activate your withdrawal wallet.
-              </p>
-
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={11}
-                value={bvn}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  if (value.length <= 11) setBvn(value);
-                }}
-                className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm outline-none"
-                placeholder="Enter 11-digit BVN"
-              />
-
-              <div className="flex justify-end gap-3 mt-5">
-                <button
-                  onClick={() => setShowBvnModal(false)}
-                  className="text-gray-600 text-xs"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={handleActivate}
-                  className="bg-black text-white text-xs px-4 py-2 rounded-md"
-                >
-                  {activating ? "Activating..." : "Submit"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </section>
     </ProtectedRoute>
   );

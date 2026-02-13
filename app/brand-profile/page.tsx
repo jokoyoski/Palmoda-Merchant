@@ -24,6 +24,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
 import ProtectedRoute from "../_components/ProtectedRoute";
+import BackButton from "../_components/BackButton";
 
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
@@ -411,36 +412,16 @@ const BrandProfilePage = () => {
     <ProtectedRoute>
       <section className="bg-white min-h-screen px-4 md:px-8 py-6 w-full">
       <div className="w-full md:w-[600px] lg:w-[750px]">
-        <h1 className="text-black font-semibold text-xl">
-          Brand Profile Setup
-        </h1>
+        <div className="flex items-start gap-3">
+          <BackButton />
+          <h1 className="text-black font-semibold text-xl">
+            Brand Profile Setup
+          </h1>
+        </div>
         <p className="text-gray-500 text-[13px] mt-2 mb-5">
           Create your brand's presence on PALMODA. This information will be
           visible to customers.
         </p>
-
-        {/* KYC Status Notice - only show if KYC is pending AND brand doesn't exist yet */}
-        {hasPendingKyc && !brandExists && (
-          <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
-            <p className="text-green-800 text-sm">
-              ✓ KYC details saved. Complete your brand profile and click Submit to finalize both.
-            </p>
-          </div>
-        )}
-
-        {!hasPendingKyc && !brandExists && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
-            <p className="text-yellow-800 text-sm">
-              ⚠ Please complete KYC first before setting up your brand profile.{" "}
-              <button
-                onClick={() => router.push("/kyc-compliance")}
-                className="underline font-semibold"
-              >
-                Go to KYC
-              </button>
-            </p>
-          </div>
-        )}
 
         <hr className="text-gray-200 mb-3.5" />
 
@@ -582,7 +563,7 @@ const BrandProfilePage = () => {
                   onChange={(e) => input.setter(e.target.value)}
                   placeholder={input.placeholder}
                   disabled={isDisabled}
-                  className={`pl-8 text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full
+                  className={`pl-8 text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300 focus:ring-0 w-full
                      ${isDisabled ? "cursor-not-allowed" : ""}
                   `}
                 />

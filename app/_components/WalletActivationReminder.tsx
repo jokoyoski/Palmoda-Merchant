@@ -86,7 +86,7 @@ export default function WalletActivationReminder() {
 
           <p className="text-gray-600 mb-4">
             Your KYC verification is complete! To start selling and receiving payments,
-            please activate your wallet by adding your BVN.
+            please activate your wallet.
           </p>
 
           <div className="bg-orange-50 border border-orange-200 rounded-md p-3 mb-6">

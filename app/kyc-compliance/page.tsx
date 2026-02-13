@@ -97,7 +97,6 @@ function Page() {
 
   const { user } = useAuth();
   const router = useRouter();
-  console.log(user);
   // Disable editing only when vendor is fully verified
   const isDisabled = user?.is_verified;
 
@@ -515,7 +514,7 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter Legal Business Name"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}
                     focus:ring-0`}
                   value={user?.business_name ?? ""}
@@ -562,7 +561,7 @@ function Page() {
                   id="registrationNumber"
                   placeholder="Enter 9-digit Business Registration Number"
                   maxLength={9}
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={registrationNumber}
@@ -585,7 +584,7 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter tax identification number"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={taxId}
@@ -609,7 +608,7 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Street Address"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={address1}
@@ -628,7 +627,7 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Apt, suite, unit, etc (optional)"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={address2}
@@ -644,7 +643,7 @@ function Page() {
                 </label>
                 <select
                   name="country"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={country}
@@ -668,7 +667,7 @@ function Page() {
                 {country && COUNTRY_STATES[country]?.length > 0 ? (
                   <select
                     name="state"
-                    className={`text-gray-500 p-1 text-sm border border-gray-300
+                    className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                       ${isDisabled ? "cursor-not-allowed" : ""}`}
                     disabled={isDisabled}
                     value={stateName}
@@ -686,7 +685,7 @@ function Page() {
                     type="text"
                     name="state"
                     placeholder="Enter State/Province"
-                    className={`text-gray-500 p-1 text-sm border border-gray-300
+                    className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                       ${isDisabled ? "cursor-not-allowed" : ""}`}
                     disabled={isDisabled || !country}
                     value={stateName}
@@ -706,7 +705,7 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter city"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={city}
@@ -725,7 +724,7 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter postal code"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={postalCode}
@@ -742,7 +741,7 @@ function Page() {
                 <input
                   type="text"
                   placeholder="Enter bank name"
-                  className="text-gray-500 p-1 text-sm border border-gray-300"
+                  className="text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300"
                   value={bankSearch}
                   onChange={(e) => {
                     setBankSearch(e.target.value);
@@ -787,7 +786,7 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter bank account number"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={accountNumber}
@@ -806,7 +805,7 @@ function Page() {
                   name=""
                   id=""
                   placeholder="Enter account holder's name"
-                  className={`text-gray-500 p-1 text-sm border border-gray-300
+                  className={`text-black placeholder:text-gray-500 p-1 text-sm border border-gray-300
                     ${isDisabled ? "cursor-not-allowed" : ""}`}
                   disabled={isDisabled}
                   value={accountHolder}
@@ -835,13 +834,13 @@ function Page() {
 
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
-                <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm">
+                <button className="bg-inherit border border-black text-black p-[5px] w-[120px] text-sm cursor-pointer">
                   Back
                 </button>
 
                 {/* Save Draft Button */}
                 <button
-                  className="bg-gray-200 border border-gray-300 text-black p-[5px] w-[120px] text-sm hover:bg-gray-300"
+                  className="bg-gray-200 border border-gray-300 text-black p-[5px] w-[120px] text-sm hover:bg-gray-300 cursor-pointer"
                   onClick={saveDraft}
                   type="button"
                   disabled={loading || isDisabled}
@@ -852,7 +851,7 @@ function Page() {
                 {/* Load Draft Button - only shows if draft exists */}
                 {hasDraft && (
                   <button
-                    className="bg-black text-white p-[5px] w-[120px] text-sm "
+                    className="bg-black text-white p-[5px] w-[120px] text-sm cursor-pointer"
                     onClick={loadDraft}
                     type="button"
                     disabled={loading || isDisabled}
@@ -866,7 +865,7 @@ function Page() {
               {kycExists ? (
                 <button
                   className={`p-[5px] w-[120px] text-sm text-white ${
-                    certified && !allKycApproved ? "bg-black" : "bg-gray-400 cursor-not-allowed"
+                    certified && !allKycApproved ? "bg-black cursor-pointer" : "bg-gray-400 cursor-not-allowed"
                   } ${isDisabled || allKycApproved ? "cursor-not-allowed" : ""} disabled:cursor-not-allowed`}
                   onClick={handleEdit}
                   type="button"
@@ -877,7 +876,7 @@ function Page() {
               ) : (
                 <button
                   className={`p-[5px] w-[120px] text-sm text-white ${
-                    certified ? "bg-black" : "bg-gray-400 cursor-not-allowed"
+                    certified ? "bg-black cursor-pointer" : "bg-gray-400 cursor-not-allowed"
                   } ${isDisabled ? "cursor-not-allowed" : ""} disabled:cursor-not-allowed`}
                   onClick={handleContinue}
                   type="button"
