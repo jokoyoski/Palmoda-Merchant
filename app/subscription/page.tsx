@@ -45,13 +45,13 @@ export default function Page() {
       [
         {
           id: "monthly" as const,
-          price: 100,
+          price: 15000,
           cadence: "Billed monthly",
           highlight: false,
         },
         {
           id: "annual" as const,
-          price: 200,
+          price: 120000,
           cadence: "Billed annually",
           highlight: true,
           badge: "Best Value",

@@ -47,9 +47,9 @@ function page() {
         if (res.success === false) {
           console.log(res.message);
         } else {
-          setWalletBankName(res.data.bank_name || "");
+          setWalletBankName("Palmoda");
           setWalletAccountName(res.data.account_name || "");
-          setWalletAccountNumber(res.data.account_number || "");
+          setWalletAccountNumber(res.data.account_reference || "");
           setAccountBalance(res.data.available_balance || 0);
           setLedgerBalance(res.data.ledger_balance || 0);
         }
@@ -112,9 +112,9 @@ function page() {
       // Refresh wallet details so UI updates
       const refreshed = await getWallet();
       if (refreshed.success) {
-        setWalletBankName(refreshed.data.bank_name || "");
+        setWalletBankName("Palmoda");
         setWalletAccountName(refreshed.data.account_name || "");
-        setWalletAccountNumber(refreshed.data.account_number || "");
+        setWalletAccountNumber(refreshed.data.account_reference || "");
         setAccountBalance(refreshed.data.available_balance || 0);
         setLedgerBalance(refreshed.data.ledger_balance || 0);
       }
