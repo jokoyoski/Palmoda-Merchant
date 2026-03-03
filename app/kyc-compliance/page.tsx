@@ -94,6 +94,10 @@ function Page() {
   const [bankResults, setBankResults] = useState<Bank[]>([]); // fetched banks
   const [showBankDropdown, setShowBankDropdown] = useState(false); // toggle dropdown
   const [selectedBankCode, setSelectedBankCode] = useState(""); // store bank code
+  const [bankPage, setBankPage] = useState(1);
+  const [banksHasMore, setBanksHasMore] = useState(false);
+  const [banksLoading, setBanksLoading] = useState(false);
+  const BANK_PAGE_SIZE = 100;
 
   const { user } = useAuth();
   const router = useRouter();
@@ -134,21 +138,84 @@ function Page() {
   useEffect(() => {
     if (!bankSearch) {
       setBankResults([]);
+      setBankPage(1);
+      setBanksHasMore(false);
       return;
     }
 
+    let isStale = false;
+
     const delayDebounce = setTimeout(async () => {
-      const res = await fetchBanks(bankSearch);
-      console.log(res);
-      if (res?.success) {
-        setBankResults(res.data?.banks || []);
-      } else {
-        setBankResults([]);
+      setBanksLoading(true);
+      try {
+        const res = await fetchBanks({
+          search: bankSearch,
+          page_number: 1,
+          page_size: BANK_PAGE_SIZE,
+        });
+
+        if (isStale) return;
+
+        console.log(res);
+        if (res?.success) {
+          setBankResults(res.data?.banks || []);
+          setBankPage(res.data?.page_number ?? 1);
+          setBanksHasMore(!!res.data?.has_more);
+        } else {
+          setBankResults([]);
+          setBankPage(1);
+          setBanksHasMore(false);
+        }
+      } finally {
+        if (!isStale) setBanksLoading(false);
       }
     }, 300); // debounce 300ms
 
-    return () => clearTimeout(delayDebounce);
+    return () => {
+      isStale = true;
+      clearTimeout(delayDebounce);
+    };
   }, [bankSearch]);
+
+  const loadMoreBanks = async () => {
+    if (!bankSearch || banksLoading || !banksHasMore) return;
+
+    const nextPage = bankPage + 1;
+    setBanksLoading(true);
+
+    try {
+      const res = await fetchBanks({
+        search: bankSearch,
+        page_number: nextPage,
+        page_size: BANK_PAGE_SIZE,
+      });
+
+      if (res?.success) {
+        const newBanks: Bank[] = res.data?.banks || [];
+        setBankResults((prev) => {
+          const map = new Map(prev.map((b) => [b._id, b]));
+          for (const b of newBanks) map.set(b._id, b);
+          return Array.from(map.values());
+        });
+        setBankPage(res.data?.page_number ?? nextPage);
+        setBanksHasMore(!!res.data?.has_more);
+      }
+    } finally {
+      setBanksLoading(false);
+    }
+  };
+
+  const handleBankDropdownScroll = async (
+    e: React.UIEvent<HTMLUListElement>
+  ) => {
+    const el = e.currentTarget;
+    const reachedBottom =
+      el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+
+    if (reachedBottom) {
+      await loadMoreBanks();
+    }
+  };
 
   useEffect(() => {
     const resolve = async () => {
@@ -754,7 +821,10 @@ function Page() {
                 />
                 {/* Dropdown */}
                 {showBankDropdown && bankResults.length > 0 && (
-                  <ul className="absolute top-full mt-1 bg-white border border-gray-300 w-full max-h-40 overflow-y-auto z-50 shadow-md">
+                  <ul
+                    className="absolute top-full mt-1 bg-white border border-gray-300 w-full max-h-40 overflow-y-auto z-50 shadow-md"
+                    onScroll={handleBankDropdownScroll}
+                  >
                     {bankResults.map((bank) => (
                       <li
                         key={bank._id}
@@ -770,6 +840,11 @@ function Page() {
                         {bank.bank_name}
                       </li>
                     ))}
+                    {banksLoading && (
+                      <li className="p-1 text-xs text-gray-500">
+                        Loading more banks...
+                      </li>
+                    )}
                   </ul>
                 )}
               </div>

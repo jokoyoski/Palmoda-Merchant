@@ -419,22 +419,71 @@ export const getWallet = async () => {
   }
 };
 
-export const fetchBanks = async (search) => {
+export const fetchBanks = async (options) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
       return { success: false, message: "No token found", data: null };
     }
 
+    const { search = "", page_number = 1, page_size = 100 } =
+      typeof options === "string" ? { search: options } : options || {};
+
     const res = await axios.get(`${backendUrl}/user/banks`, {
       // <-- notice the added slash
-      params: { search },
+      params: { search, page_number, page_size },
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    return res.data;
+    const payload = res.data;
+
+    const mapBank = (b) => {
+      const id = b?._id ?? b?.id ?? b?.code;
+      const name = b?.bank_name ?? b?.name;
+      const code = b?.bank_code ?? b?.code;
+
+      return {
+        _id: id != null ? String(id) : "",
+        bank_name: name != null ? String(name) : "",
+        bank_code: code != null ? String(code) : "",
+      };
+    };
+
+    let banks;
+
+    if (Array.isArray(payload?.data)) {
+      banks = payload.data.map(mapBank).filter((b) => b._id && b.bank_name);
+    } else if (Array.isArray(payload?.data?.banks)) {
+      banks = payload.data.banks.map(mapBank).filter((b) => b._id && b.bank_name);
+    } else if (Array.isArray(payload?.banks)) {
+      banks = payload.banks.map(mapBank).filter((b) => b._id && b.bank_name);
+    } else {
+      banks = [];
+    }
+
+    const normalizedData =
+      payload?.data && !Array.isArray(payload.data)
+        ? {
+            ...payload.data,
+            banks,
+            page_number: payload.data?.page_number ?? page_number,
+            page_size: payload.data?.page_size ?? page_size,
+            total_pages: payload.data?.total_pages,
+            total_items: payload.data?.total_items,
+            has_more: payload.data?.has_more ?? false,
+          }
+        : {
+            banks,
+            page_number,
+            page_size,
+            total_pages: 1,
+            total_items: banks.length,
+            has_more: false,
+          };
+
+    return { ...payload, data: normalizedData };
   } catch (error) {
     if (error.response?.data?.message) {
       return {
