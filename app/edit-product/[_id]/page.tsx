@@ -294,7 +294,7 @@ function EditProductPage() {
       cost_price: price,
       description,
       genders: [selectedGender], // ✅ Use selectedGender state
-      sizes,
+      sizes: sizes.length > 0 ? sizes : undefined,
       look_after_me: careInstructions,
       colors,
       fabrics: materials,

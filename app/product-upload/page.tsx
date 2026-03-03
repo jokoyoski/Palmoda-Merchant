@@ -370,10 +370,6 @@ const resetForm = () => {
       toast.error("At least one color must be selected");
       return;
     }
-    if (sizes.length === 0) {
-      toast.error("At least one size must be selected");
-      return;
-    }
 
     const vendorId = user?._id || user?.vendor_id;
     if (!vendorId) {
@@ -403,7 +399,7 @@ const resetForm = () => {
         cost_price: parseFloat(price),
         description,
         genders: [gender],
-        sizes,
+        sizes: sizes.length > 0 ? sizes : undefined,
         look_after_me: careInstructions,
         colors,
         weight,
@@ -447,8 +443,7 @@ const resetForm = () => {
     inventory > 0 &&
     !!price &&
     images.length > 0 &&
-    colors.length > 0 &&
-    sizes.length > 0;
+    colors.length > 0;
 
   return (
     <section className="bg-gray-100 min-h-screen px-4  md:px-8 py-6 w-full">
