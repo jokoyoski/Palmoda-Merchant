@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../_lib/AuthContext";
 import WalletActivationPrompt from "../_components/WalletActivationPrompt";
 import BackButton from "../_components/BackButton";
-import { getVendorSubscriptions } from "../_lib/subscription";
 
 const cloudName = "jokoyoski";
 const uploadPreset = "jokoyoski";
