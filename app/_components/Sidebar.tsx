@@ -56,8 +56,6 @@ function Sidebar() {
     setToken(storedToken);
   }, []);
 
-  const isKycComplete = user?.is_bank_information_verified && user?.is_business_verified && user?.is_identity_verified;
-
   // ✅ Add logout confirmation handler
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -96,20 +94,8 @@ function Sidebar() {
       <nav className="flex flex-col mt-5 text-[15px]">
         <Link
           href="/"
-          title={
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? "View Dashboard"
-              : "Complete KYC to access Dashboard"
-          }
-          className={`flex hover:bg-gray-50 ${
-            !authLoading && (!user?.is_bank_information_verified ||
-            !user?.is_business_verified ||
-            !user?.is_identity_verified)
-              ? "pointer-events-none cursor-not-allowed opacity-30"
-              : ""
-          } font-semibold items-center ${pathname === "/" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+          title="View Dashboard"
+          className={`flex hover:bg-gray-50 font-semibold items-center ${pathname === "/" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <BsGraphUp /> Dashboard
         </Link>
@@ -129,30 +115,11 @@ function Sidebar() {
         </Link>
 
         {(() => {
-          const hasWallet = user?.is_wallet_activated;
-          const canAccess = isKycComplete && hasWallet;
-
           return (
             <Link
               href="/product-upload"
-              onClick={(e) => {
-                if (!isKycComplete || !hasWallet) {
-                  e.preventDefault();
-                  return;
-                }
-              }}
-              title={
-                !isKycComplete
-                  ? "Complete KYC to access Product Catalog"
-                  : !hasWallet
-                  ? "Please activate your wallet to access Product Catalog"
-                  : "Upload new products"
-              }
-              className={`flex hover:bg-gray-50 ${
-                !authLoading && (!isKycComplete || !hasWallet)
-                  ? "cursor-not-allowed opacity-50 pointer-events-none"
-                  : ""
-              } font-semibold items-center ${pathname === "/product-upload" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+              title="Upload new products"
+              className={`flex hover:bg-gray-50 font-semibold items-center ${pathname === "/product-upload" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
             >
               <FiGrid /> Product Catalog
             </Link>
@@ -176,22 +143,8 @@ function Sidebar() {
 
         <Link
           href="/orders"
-          title={
-            !isKycComplete
-              ? "Complete KYC to access Orders"
-              : "View Orders"
-          }
-          onClick={(e) => {
-            if (!isKycComplete) {
-              e.preventDefault();
-              return;
-            }
-          }}
-          className={`flex hover:bg-gray-50 ${
-            !authLoading && !isKycComplete
-              ? "pointer-events-none cursor-not-allowed opacity-30"
-              : ""
-          } font-semibold items-center ${pathname === "/orders" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+          title="View Orders"
+          className={`flex hover:bg-gray-50 font-semibold items-center ${pathname === "/orders" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FiShoppingCart /> Orders
         </Link>
@@ -219,20 +172,8 @@ function Sidebar() {
 
         <Link
           href="/payouts"
-          title={
-            user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified
-              ? "View Payouts"
-              : "Complete KYC to access Payouts"
-          }
-          className={`flex hover:bg-gray-50 ${
-            !authLoading && (!user?.is_bank_information_verified ||
-            !user?.is_business_verified ||
-            !user?.is_identity_verified)
-              ? "pointer-events-none cursor-not-allowed opacity-30"
-              : ""
-          } font-semibold items-center ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
+          title="View Payouts"
+          className={`flex hover:bg-gray-50 font-semibold items-center ${pathname === "/payouts" ? "bg-gray-300" : ""} p-3 hover:bg-gray-100 transition-all duration-300 ease-in-out gap-3 text-black`}
         >
           <FiDollarSign /> Payouts
         </Link>

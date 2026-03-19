@@ -3,6 +3,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { FaArrowUp, FaArrowDown, FaEye, FaEyeSlash, FaWallet } from "react-icons/fa";
 import { CiBank } from "react-icons/ci";
+import { FiAlertCircle } from "react-icons/fi";
 import ProtectedRoute from "../_components/ProtectedRoute";
 import { toast } from "react-toastify";
 import { getKycDetails, activateWallet, getWallet } from "../_lib/vendor";
@@ -36,6 +37,11 @@ function page() {
   const [requesting, setRequesting] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [fetching, setFetching] = useState(false);
+
+  const isFullyVerified =
+    user?.is_bank_information_verified === true &&
+    user?.is_business_verified === true &&
+    user?.is_identity_verified === true;
 
   // Fetch Wallet Details
   useEffect(() => {
@@ -137,6 +143,11 @@ function page() {
   };
 
   const handlePayout = async () => {
+    if (!isFullyVerified) {
+      toast.error("Complete verification to withdraw");
+      return;
+    }
+
     if (!amount || Number(amount) <= 0) {
       toast.error("Enter a valid amount");
       return;
@@ -209,6 +220,29 @@ function page() {
             )}
           </div>
         </div>
+
+        {!isFullyVerified && (
+          <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-md p-4 flex items-start gap-3">
+            <div className="mt-0.5 text-yellow-700">
+              <FiAlertCircle className="text-lg" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-yellow-900">
+                Verification required
+              </p>
+              <p className="text-xs text-yellow-800 mt-1">
+                You're yet to be verified, so you won't be able to request payout.
+                Please complete your KYC verification to enable withdrawals.
+              </p>
+            </div>
+            <Link
+              href="/kyc-compliance"
+              className="shrink-0 text-xs font-semibold bg-yellow-700 text-white px-3 py-2 rounded-md hover:bg-yellow-800"
+            >
+              Complete verification
+            </Link>
+          </div>
+        )}
 
         {/* Balance Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -349,6 +383,7 @@ function page() {
                 <input
                   type="number"
                   value={amount}
+                  disabled={!isFullyVerified}
                   onChange={(e) => {
                     let val = e.target.value;
 
@@ -375,7 +410,9 @@ function page() {
                     setAmountError("");
                     setAmount(num);
                   }}
-                  className="text-gray-500 border border-gray-600 p-2 rounded-[5px] text-xs"
+                  className={`text-gray-500 border border-gray-600 p-2 rounded-[5px] text-xs ${
+                    !isFullyVerified ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 />
 
                 {amountError && (
@@ -386,21 +423,30 @@ function page() {
               <div className="flex gap-3 my-2.5">
                 <button
                   onClick={() => setAmount(accountBalance)}
-                  className="text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs"
+                  disabled={!isFullyVerified}
+                  className={`text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs ${
+                    !isFullyVerified ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   Withdraw Full Balance
                 </button>
 
                 <button
                   onClick={() => setAmount(accountBalance * 0.5)}
-                  className="text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs"
+                  disabled={!isFullyVerified}
+                  className={`text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs ${
+                    !isFullyVerified ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   Withdraw 50% of Balance
                 </button>
 
                 <button
                   onClick={() => setAmount(0)}
-                  className="text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs"
+                  disabled={!isFullyVerified}
+                  className={`text-gray-900 p-2 rounded-[5px] bg-gray-200 text-xs ${
+                    !isFullyVerified ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   Custom
                 </button>
@@ -449,7 +495,8 @@ function page() {
                   !amount ||
                   Number(amount) <= 0 ||
                   Number(amount) > accountBalance ||
-                  !user?.is_wallet_activated
+                  !user?.is_wallet_activated ||
+                  !isFullyVerified
                 }
                 onClick={handlePayout}
                 className="bg-gray-300 text-gray-900 p-2 text-xs rounded-[5px]"

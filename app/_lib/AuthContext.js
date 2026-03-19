@@ -115,11 +115,7 @@ export const AuthProvider = ({ children }) => {
     setToken(userData.token);
     setIsAuthenticated(true);
 
-    if (userData.is_identity_verified && userData.is_bank_information_verified && userData.is_business_verified) {
-      router.push("/");
-    } else {
-      router.push("/kyc-compliance");
-    }
+    router.push("/");
 
     toastWithLog("success", "Login successful!", "login");
   };

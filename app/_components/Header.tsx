@@ -172,31 +172,13 @@ function Header() {
             {navItems.map((item) => {
               // Special handling for Product Catalog
               if (item.href === "/product-catalog") {
-                const isKycComplete = user?.is_bank_information_verified && user?.is_business_verified && user?.is_identity_verified;
-                const hasWallet = user?.is_wallet_activated;
-                const canAccess = isKycComplete && hasWallet;
-
-                const handleClick = (e: React.MouseEvent) => {
-                  if (!canAccess) {
-                    e.preventDefault();
-                    return;
-                  }
-                  setMobileMenuOpen(false);
-                };
-
                 return (
                   <Link
                     key={item.href}
                     href="/product-upload"
-                    className={`flex items-center font-semibold gap-5 text-[15px] ${!authLoading && !canAccess ? "opacity-50 pointer-events-none" : ""}`}
-                    onClick={handleClick}
-                    title={
-                      !isKycComplete
-                        ? "Complete KYC to access Product Catalog"
-                        : !hasWallet
-                        ? "Please activate your wallet to access Product Catalog"
-                        : "Upload new products"
-                    }
+                    className="flex items-center font-semibold gap-5 text-[15px]"
+                    onClick={() => setMobileMenuOpen(false)}
+                    title="Upload new products"
                   >
                     {item.icon}
                     {item.label}

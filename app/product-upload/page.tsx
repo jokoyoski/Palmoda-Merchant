@@ -376,18 +376,6 @@ const resetForm = () => {
       return;
     }
 
-    const allDocsVerified =
-      user?.is_bank_information_verified === true &&
-      user?.is_business_verified === true &&
-      user?.is_identity_verified === true;
-
-    if (!allDocsVerified) {
-      toast.error("All vendor documents have to be verified");
-      return;
-    }
-
-
-
     setLoading(true);
 
     try {

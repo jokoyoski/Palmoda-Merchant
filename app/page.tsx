@@ -123,16 +123,11 @@ function page() {
             </p>
           </div>
 
-          {user?.is_bank_information_verified &&
-            user?.is_business_verified &&
-            user?.is_identity_verified &&
-            user?.is_wallet_activated && (
-              <Link href="/product-upload">
-                <button className="bg-black capitalize text-white p-[5px] w-fit text-xs">
-                  Upload new product
-                </button>
-              </Link>
-            )}
+          <Link href="/product-upload">
+            <button className="bg-black capitalize text-white p-[5px] w-fit text-xs">
+              Upload new product
+            </button>
+          </Link>
         </div>
         <DashboardGrid products={products} />
 
